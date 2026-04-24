@@ -1,17 +1,12 @@
 "use client";
 import Navbar from "@/components/navbar";
+import Loading from "@/components/ui/loading";
 import { useAuth } from "@/context/auth.context";
 
 export default function Home() {
   const { profile, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" />
-      </div>
-    );
-  }
+  if (isLoading) return <Loading />
 
   return (
     <main className="min-h-screen bg-gray-50">

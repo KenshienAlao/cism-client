@@ -21,6 +21,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
+    setIsLoading(true);
+  }
+
   const refreshUser = async () => {
     setIsLoading(true);
     try {

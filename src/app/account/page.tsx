@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { notifError, notifSuccess } from "@/lib/toast";
 import { useRef, useState } from "react";
+import Loding from "@/components/ui/loading";
 
 export default function Page() {
     const { profile, isLoading, logout, refreshUser } = useAuth();
@@ -47,13 +48,7 @@ export default function Page() {
         setIsUploadingAvatar(false);
     };
 
-    if (isLoading || isUploadingAvatar) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-white">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" />
-            </div>
-        );
-    }
+    if (isLoading || isUploadingAvatar || !profile) return <Loding />
 
     const handleDeleteAccount = () => {
         showConfirmation({
@@ -75,6 +70,9 @@ export default function Page() {
             router.push("/login");
         }
     };
+
+
+    if (isLoading || isUploadingAvatar || !profile) return <Loding />
 
     return (
         <main className="min-h-screen bg-white px-5 py-10 text-neutral-900 sm:px-12 sm:py-16">
