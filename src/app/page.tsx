@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth.context";
 export default function Home() {
   const { profile, isLoading } = useAuth();
 
-  if (isLoading) return <Loading />
+  if (isLoading || !profile) return <Loading />
 
   return (
     <main className="min-h-screen bg-gray-50">

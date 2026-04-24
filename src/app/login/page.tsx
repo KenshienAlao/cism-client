@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthService } from "@/service/auth.service";
 import { useAuth } from "@/context/auth.context";
@@ -11,10 +11,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
-  const { refreshUser } = useAuth();
+  const { profile, refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
   const router = useRouter();
+
+  useEffect(() => {
+    if (profile) {
+      router.push(ROUTES.HOME);
+    }
+  }, [profile, router]);
 
   const handleChange = (field: keyof LoginRequest) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>

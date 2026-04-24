@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
     LOGOUT: "/api/auth/logout",
     REGISTER: "/api/auth/register",
     VALIDATE_COOKIE: "/api/auth/validate-cookie",
+    REFRESH: "/api/auth/refresh",
     DELETE_ACCOUNT: "/api/auth/delete-account",
     UPLOAD_AVATAR: "/api/auth/avatar",
   },

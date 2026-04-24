@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthService } from "@/service/auth.service";
 import { LoginResponse } from "@/model/auth.model";
@@ -21,43 +21,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [prevPath, setPrevPath] = useState(pathname);
-  if (pathname !== prevPath) {
-    setPrevPath(pathname);
-    setIsLoading(true);
-  }
 
-  const refreshUser = async () => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const refreshUser = useCallback(async () => {
+    if (isRefreshing) return;
     setIsLoading(true);
+    setIsRefreshing(true);
     try {
-      const response = await AuthService.validateCookie();
-      if (!response.error) {
+      const response: any = await AuthService.validateCookie();
+
+      const isSuccess = !response.error && response.data;
+      const isAuthError = response.code === "UNAUTHENTICATED" || response.status === 401;
+
+      if (isSuccess) {
         setProfile(response.data);
       } else {
+        if (isAuthError) {
+          const refreshRes = await AuthService.refresh();
+          if (!refreshRes.error && refreshRes.data) {
+            setProfile(refreshRes.data);
+            setIsLoading(false);
+            setIsRefreshing(false);
+            return;
+          }
+        }
+
         setProfile(null);
         if (!PUBLIC_ROUTES.includes(pathname)) {
           router.push(ROUTES.LOGIN);
         }
       }
-    } catch {
+    } catch (error) {
       setProfile(null);
       if (!PUBLIC_ROUTES.includes(pathname)) {
         router.push(ROUTES.LOGIN);
       }
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, [pathname, router]);
 
   const logout = async () => {
-    await AuthService.logout();
-    setProfile(null);
-    router.push(ROUTES.LOGIN);
+    try {
+      await AuthService.logout();
+    } finally {
+      setProfile(null);
+      setIsLoading(false);
+      router.push(ROUTES.LOGIN);
+    }
   };
 
   useEffect(() => {
     refreshUser();
-  }, [pathname]);
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider value={{ profile, isLoading, logout, refreshUser }}>

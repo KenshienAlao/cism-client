@@ -42,6 +42,10 @@ export const AuthService = {
     return apiClient.get<LoginResponse>(API_ENDPOINTS.AUTH.VALIDATE_COOKIE);
   },
 
+  refresh(): Promise<ApiResponse<LoginResponse>> {
+    return apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.REFRESH, {});
+  },
+
   async uploadAvatar(file: File): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append("file", file);
