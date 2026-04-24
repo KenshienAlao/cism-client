@@ -56,14 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setProfile(null);
         if (!PUBLIC_ROUTES.includes(pathname)) {
-          notifError("Session expired. Please login again.");
           router.push(ROUTES.LOGIN);
         }
       }
     } catch (error) {
       setProfile(null);
       if (!PUBLIC_ROUTES.includes(pathname)) {
-        notifError("Session expired. Please login again.");
         router.push(ROUTES.LOGIN);
       }
     } finally {
