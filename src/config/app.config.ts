@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     REGISTER: "/api/auth/register",
     VALIDATE_COOKIE: "/api/auth/validate-cookie",
     DELETE_ACCOUNT: "/api/auth/delete-account",
+    UPLOAD_AVATAR: "/api/auth/avatar",
   },
   OTP: {
     SEND: "/api/resend/send-otp",

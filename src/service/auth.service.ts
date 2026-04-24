@@ -47,7 +47,7 @@ export const AuthService = {
     formData.append("file", file);
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/avatar`,
+      `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.AUTH.UPLOAD_AVATAR}`,
       {
         method: "PATCH",
         credentials: "include",
