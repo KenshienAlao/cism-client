@@ -2,13 +2,13 @@
 import { useAuth } from "@/context/auth.context";
 import { useConfirmation } from "@/context/confirmation.context";
 import { AuthService } from "@/service/auth.service";
-import { ArrowLeft, Camera, Shield, Mail, User, IdCard, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Shield, Mail, User, IdCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { notifError, notifSuccess } from "@/lib/toast";
 import { useRef, useState } from "react";
-import Loding from "@/components/ui/loading";
+import Loading from "@/components/ui/loading";
 
 export default function Page() {
     const { profile, isLoading, logout, refreshUser } = useAuth();
@@ -48,8 +48,6 @@ export default function Page() {
         setIsUploadingAvatar(false);
     };
 
-    if (isLoading || isUploadingAvatar || !profile) return <Loding />
-
     const handleDeleteAccount = () => {
         showConfirmation({
             title: "Account Deletion",
@@ -72,7 +70,7 @@ export default function Page() {
     };
 
 
-    if (isLoading || isUploadingAvatar || !profile) return <Loding />
+    if (isLoading || isUploadingAvatar || !profile) return <Loading />
 
     return (
         <main className="min-h-screen bg-white px-5 py-10 text-neutral-900 sm:px-12 sm:py-16">

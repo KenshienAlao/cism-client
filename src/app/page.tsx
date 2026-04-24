@@ -15,7 +15,6 @@ export default function Home() {
       </header>
 
       <div className="mx-auto max-w-6xl p-6 sm:p-10">
-
         Soon...
       </div>
     </main>

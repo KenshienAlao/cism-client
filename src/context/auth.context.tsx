@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { AuthService } from "@/service/auth.service";
 import { LoginResponse } from "@/model/auth.model";
 import { PUBLIC_ROUTES, ROUTES } from "@/config/app.config";
+import { notifError } from "@/lib/toast";
 
 interface AuthContextType {
   profile: LoginResponse | null;
@@ -21,6 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
+    setIsLoading(true);
+  }
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -49,12 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setProfile(null);
         if (!PUBLIC_ROUTES.includes(pathname)) {
+          notifError("Session expired. Please login again.");
           router.push(ROUTES.LOGIN);
         }
       }
     } catch (error) {
       setProfile(null);
       if (!PUBLIC_ROUTES.includes(pathname)) {
+        notifError("Session expired. Please login again.");
         router.push(ROUTES.LOGIN);
       }
     } finally {
