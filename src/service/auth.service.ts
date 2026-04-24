@@ -32,6 +32,7 @@ export const AuthService = {
     return apiClient.delete<void>(API_ENDPOINTS.AUTH.DELETE_ACCOUNT);
   },
 
+
   validateEmailAddress(
     entity: Readonly<OtpRequest>,
   ): Promise<ApiResponse<OtpResponse>> {
