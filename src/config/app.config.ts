@@ -40,4 +40,7 @@ export const API_ENDPOINTS = {
   OTP: {
     SEND: "/api/resend/send-otp",
   },
+  ITEM: {
+    GET_ALL: "/api/user/stall/get-all-item",  
+  }
 } as const;

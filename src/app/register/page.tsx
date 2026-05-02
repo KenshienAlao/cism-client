@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthService } from "@/service/auth.service";
+import { authService } from "@/service/auth.service";
 import { initOtpForm, initRegisterForm, OtpRequest, RegisterRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
 import { OTP, ROUTES, APP_NAME } from "@/config/app.config";
@@ -83,15 +83,10 @@ export default function RegisterPage() {
         const data = { ...otpData, email: form.email };
         setOtpData(data);
 
-        const response = await AuthService.validateEmailAddress(data);
+        const response = await authService.sendOtp(data);
 
-        if (response.error) {
-            notifError(response.error.message || "Failed to send code. Please try again.");
-            const retrySecs = response.error.data?.retryAfterSeconds;
-            if (retrySecs) {
-                saveOtpExpiry(retrySecs);
-                setCountdown(retrySecs);
-            }
+        if (!response.success) {
+            notifError(response.message || "Failed to send code. Please try again.");
         } else {
             notifSuccess("Confirmation code sent to your email.");
             saveOtpExpiry(OTP.EXPIRY_SECONDS);
@@ -113,10 +108,10 @@ export default function RegisterPage() {
 
         setIsLoading(true);
 
-        const response = await AuthService.register(form);
+        const response = await authService.register(form);
 
-        if (response.error) {
-            notifError(response.error.message);
+        if (!response.success) {
+            notifError(response.message);
         } else {
             notifSuccess("Account created successfully!");
             clearOtpStorage();

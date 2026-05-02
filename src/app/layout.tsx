@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@/context/auth.context";
+import QueryProvider from "@/provider/query-provider";
 import { ConfirmationProvider } from "@/context/confirmation.context";
 import Confirmation from "@/components/confirmation";
 
@@ -18,12 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased font-sans">
       <body className="min-h-full flex flex-col bg-white">
-        <AuthProvider>
+        <QueryProvider>
           <ConfirmationProvider>
             {children}
             <Confirmation />
           </ConfirmationProvider>
-        </AuthProvider>
+        </QueryProvider>
         <Toaster 
           position="top-center" 
           toastOptions={{

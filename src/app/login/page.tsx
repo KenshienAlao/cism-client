@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthService } from "@/service/auth.service";
-import { useAuth } from "@/context/auth.context";
+import { authService } from "@/service/auth.service";
+import { useAuth } from "@/hooks/use-auth";
 import { initLoginForm, LoginRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
 import { ROUTES, APP_NAME } from "@/config/app.config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LoginSchema } from "@/validation/auth.validation";
 
 export default function LoginPage() {
   const { profile, refreshUser } = useAuth();
@@ -30,11 +31,18 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const response = await AuthService.login(form);
-    if (response.error) {
-      notifError(response.error.message);
+    const valid = LoginSchema.safeParse(form);
+    if (!valid.success) {
+      notifError(valid.error.issues[0].message);
+      setIsLoading(false);
+      return;
+    }
+
+    const response = await authService.login(form);
+    if (!response.success) {
+      notifError(response.message);
     } else {
-      await refreshUser();
+      refreshUser();
       notifSuccess("Welcome back!");
       router.push(ROUTES.HOME);
     }

@@ -1,7 +1,7 @@
 "use client";
-import { useAuth } from "@/context/auth.context";
+import { useAuth } from "@/hooks/use-auth";
 import { useConfirmation } from "@/context/confirmation.context";
-import { AuthService } from "@/service/auth.service";
+import { authService } from "@/service/auth.service";
 import { ArrowLeft, Camera, Shield, Mail, User, IdCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,9 +36,9 @@ export default function Page() {
         setAvatarPreview(URL.createObjectURL(file));
         setIsUploadingAvatar(true);
 
-        const response = await AuthService.uploadAvatar(file);
-        if (response.error) {
-            notifError(response.error.message || "Failed to upload avatar");
+        const response = await authService.uploadAvatar(file);
+        if (!response.success) {
+            notifError(response.message || "Failed to upload avatar");
             setAvatarPreview(null);
         } else {
             notifSuccess("Avatar updated successfully!");
@@ -62,8 +62,8 @@ export default function Page() {
     };
 
     const confirmDelete = async () => {
-        const response = await AuthService.deleteAccount();
-        if (!response.error) {
+        const response = await authService.deleteAccount();
+        if (response.success) {
             logout();
             router.push("/login");
         }
@@ -78,7 +78,7 @@ export default function Page() {
                 <header className="mb-10 sm:mb-16">
                     <Link
                         href="/"
-                        className="group inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-neutral-400 uppercase transition-colors hover:text-neutral-900"
+                        className="group inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-neutral-400 uppercase transition-colors"
                     >
                         <ArrowLeft
                             size={14}
@@ -89,15 +89,15 @@ export default function Page() {
                 </header>
                 <section className="mb-12 flex items-center gap-5 sm:mb-24 sm:gap-8">
                     <div className="group relative shrink-0">
-                        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-3xl bg-neutral-50 text-base font-bold tracking-tighter text-neutral-900 uppercase ring-1 ring-neutral-100 transition-all group-hover:bg-neutral-100 sm:h-24 sm:w-24 sm:rounded-4xl sm:text-2xl">
-                            {avatarPreview || profile?.user.avatar ? (
+                        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-3xl bg-neutral-50 text-base font-bold tracking-tighter text-neutral-900 uppercase ring-1 ring-neutral-100 sm:h-24 sm:w-24 sm:rounded-4xl sm:text-2xl">
+                            {avatarPreview || profile?.user?.avatar ? (
                                 <img
-                                    src={avatarPreview ?? profile?.user.avatar}
+                                    src={avatarPreview ?? profile?.user?.avatar}
                                     alt="avatar"
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
-                                profile?.user.username.slice(0, 2)
+                                profile?.user?.username?.slice(0, 2)
                             )}
                         </div>
                         <input
@@ -111,17 +111,17 @@ export default function Page() {
                             type="button"
                             disabled={isUploadingAvatar}
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute -right-1 -bottom-1 rounded-full bg-white p-2 shadow-lg ring-1 ring-neutral-100 transition-transform hover:bg-neutral-900 hover:text-white active:scale-90 disabled:opacity-50 sm:p-2.5"
+                            className="absolute -right-1 -bottom-1 rounded-full bg-white p-2 shadow-lg ring-1 ring-neutral-100 disabled:opacity-50 sm:p-2.5"
                         >
                             <Camera size={12} />
                         </button>
                     </div>
                     <div className="min-w-0 flex-1">
                         <h1 className="truncate text-xl font-light tracking-tight text-neutral-900 sm:text-3xl">
-                            {profile?.user.username}
+                            {profile?.user?.username}
                         </h1>
                         <span className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-neutral-400 uppercase sm:text-[10px]">
-                            <User size={12} /> {profile?.user.role || "N/A"}
+                            <User size={12} /> {profile?.user?.role || "N/A"}
                         </span>
                     </div>
                 </section>
@@ -132,12 +132,12 @@ export default function Page() {
                             {[
                                 {
                                     label: "Student ID",
-                                    value: profile?.user.studentId,
+                                    value: profile?.user?.studentId,
                                     icon: <IdCard size={12} />,
                                 },
                                 {
                                     label: "Email",
-                                    value: profile?.user.email,
+                                    value: profile?.user?.email,
                                     icon: <Mail size={12} />,
                                 },
                             ].map((field, i) => (

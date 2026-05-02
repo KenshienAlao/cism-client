@@ -1,5 +1,5 @@
 import { Bell, Search } from "lucide-react";
-import { useAuth } from "@/context/auth.context";
+import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 
 
@@ -20,9 +20,13 @@ export default function Navbar({ placeholder }: { placeholder: string }) {
                     <Bell size={18} strokeWidth={1.5} />
                 </button>
                 <Link href="/account" className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-[10px] font-bold uppercase tracking-tighter text-neutral-900 ring-1 ring-neutral-200">
-                    {profile?.user.avatar ? <img src={profile.user.avatar} alt="avatar" className="h-full w-full object-cover" /> : profile?.user.username.slice(0, 2)}
+                    {profile?.user?.avatar ? (
+                        <img src={profile.user.avatar} alt="avatar" className="h-full w-full object-cover" />
+                    ) : (
+                        profile?.user?.username?.slice(0, 2) || "??"
+                    )}
                 </Link>
             </div>
         </div>
     );
-}
+}   
