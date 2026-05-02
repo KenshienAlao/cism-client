@@ -3,18 +3,11 @@ import { itemService } from "@/service/item.service";
 import { useQuery } from "@tanstack/react-query";
 import { Item } from "@/model/item.model";
 
-/**
- * ─── Query Keys ─────────────────────────────────────────────────────────────
- * Centralized keys for predictable cache management.
- */
 export const itemKeys = {
   all: ["items"] as const,
   lists: () => [...itemKeys.all, "list"] as const,
 };
 
-/**
- * ─── Hook Return Type ───────────────────────────────────────────────────────
- */
 interface UseItemReturn {
   items: StallItems[];
   meals: Item[];
@@ -26,11 +19,6 @@ interface UseItemReturn {
   refetch: () => void;
 }
 
-/**
- * ─── useItem Hook ───────────────────────────────────────────────────────────
- * A company-standard hook for fetching all stall items.
- * Handles data flattening, automatic retries, and cache management.
- */
 export function useItem(): UseItemReturn {
   const query = useQuery<StallItems[], Error>({
     queryKey: itemKeys.lists(),
@@ -39,7 +27,7 @@ export function useItem(): UseItemReturn {
       if (!res.success) throw new Error(res.message);
       return res.data;
     },
-    staleTime: 1000 * 60, // Consider data fresh for 1 minute
+    staleTime: 1000 * 60,
     retry: 1,
   });
 

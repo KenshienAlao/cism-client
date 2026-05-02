@@ -17,11 +17,7 @@ export default function LoginPage() {
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
   const router = useRouter();
 
-  useEffect(() => {
-    if (profile) {
-      router.push(ROUTES.HOME);
-    }
-  }, [profile, router]);
+
 
   const handleChange = (field: keyof LoginRequest) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>

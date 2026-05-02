@@ -13,9 +13,6 @@ export const authKeys = {
   profile: () => [...authKeys.all, "profile"] as const,
 };
 
-/**
- * ─── Hook Return Type ───────────────────────────────────────────────────────
- */
 interface UseAuthReturn {
   profile: LoginResponse | null;
   isLoading: boolean;
@@ -23,10 +20,6 @@ interface UseAuthReturn {
   refreshUser: () => void;
 }
 
-/**
- * ─── useAuth Hook ───────────────────────────────────────────────────────────
- * Manages authentication state, silent token refresh, and route protection.
- */
 export function useAuth(): UseAuthReturn {
   const router = useRouter();
   const pathname = usePathname();
@@ -39,13 +32,18 @@ export function useAuth(): UseAuthReturn {
       return res.success ? res.data : null;
     },
     retry: false,
-    staleTime: 1000 * 60 * 5, // Profile is considered fresh for 5 minutes
+    staleTime: 1000 * 60, // 1 minute
   });
 
-  // Automatically redirect unauthenticated users away from protected routes
   useEffect(() => {
-    if (!isLoading && !profile && !PUBLIC_ROUTES.includes(pathname)) {
-      router.push(ROUTES.LOGIN);
+    if (isLoading) return;
+
+    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+
+    if (!profile && !isPublicRoute) {
+      router.replace(ROUTES.LOGIN);
+    } else if (profile && isPublicRoute) {
+      router.replace(ROUTES.HOME);
     }
   }, [isLoading, profile, pathname, router]);
 

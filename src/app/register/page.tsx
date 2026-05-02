@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/service/auth.service";
+import { useAuth } from "@/hooks/use-auth";
 import { initOtpForm, initRegisterForm, OtpRequest, RegisterRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
 import { OTP, ROUTES, APP_NAME } from "@/config/app.config";
@@ -42,6 +43,7 @@ export default function RegisterPage() {
     const [form, setForm] = useState<RegisterRequest>(initRegisterForm);
     const [otpData, setOtpData] = useState<OtpRequest>(initOtpForm);
     const [countdown, setCountdown] = useState(0);
+    const { profile } = useAuth();
     const router = useRouter();
 
     const setField = (field: keyof RegisterRequest) =>

@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { ApiResponse } from "@/lib/api";
-import { API_ENDPOINTS } from "@/config/app.config";
+import { API_ENDPOINTS, PUBLIC_ROUTES, ROUTES } from "@/config/app.config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -31,12 +31,13 @@ const processQueue = (error: any, token: string | null = null) => {
 // Response Interceptor
 instance.interceptors.response.use(
   (response) => {
-    // Return standard ApiResponse format
+    const data = response.data;
+    // Return standard ApiResponse format, respecting the backend's success flag if it exists
     return {
-      data: response.data?.data ?? response.data,
-      message: response.data?.message,
+      data: data?.data ?? data,
+      message: data?.message,
       status: response.status,
-      success: true,
+      success: data?.success ?? true,
     } as any;
   },
   async (error: AxiosError) => {
@@ -44,8 +45,19 @@ instance.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // If 401 and not already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Endpoints that should not trigger a token refresh on 401
+    const skipRefreshEndpoints = [
+      API_ENDPOINTS.AUTH.LOGIN,
+      API_ENDPOINTS.AUTH.REFRESH,
+      API_ENDPOINTS.AUTH.REGISTER,
+    ];
+
+    const isSkipRefresh = skipRefreshEndpoints.some(endpoint => 
+      originalRequest.url === endpoint || originalRequest.url?.endsWith(endpoint)
+    );
+
+    // If 401 and not already retrying and not an auth endpoint
+    if (error.response?.status === 401 && !originalRequest._retry && !isSkipRefresh) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -63,7 +75,12 @@ instance.interceptors.response.use(
 
       try {
         // Attempt to refresh token (POST request)
-        await instance.post(API_ENDPOINTS.AUTH.REFRESH);
+        const res = await instance.post(API_ENDPOINTS.AUTH.REFRESH);
+
+        // Since the interceptor returns an object instead of throwing, check success
+        if (!(res as any).success) {
+          throw new Error("Refresh failed");
+        }
 
         isRefreshing = false;
         processQueue(null);
@@ -74,9 +91,9 @@ instance.interceptors.response.use(
         isRefreshing = false;
         processQueue(refreshError);
 
-        // If refresh fails, you could redirect to login here or let the component handle it
-        // window.location.href = "/login";
-
+        // If refresh fails, we let the components handle the 401 error.
+        // The useAuth hook will detect the null profile and redirect if necessary.
+        
         return Promise.resolve({
           data: null,
           status: 401,
