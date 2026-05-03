@@ -60,7 +60,6 @@ function ItemSearchContent() {
 
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
-            {/* Premium Header */}
             <header className="sticky top-0 z-50 bg-white border-b border-black/5">
                 <div className="max-w-7xl mx-auto px-4 md:px-6">
                     <div className="flex items-center gap-2 md:gap-4 h-14 md:h-20">
@@ -83,6 +82,8 @@ function ItemSearchContent() {
                 </div>
             </header>
 
+
+        test
             <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
                 <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                     <div className="space-y-0.5 md:space-y-1">
