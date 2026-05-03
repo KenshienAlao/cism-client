@@ -81,9 +81,6 @@ function ItemSearchContent() {
                     </div>
                 </div>
             </header>
-
-
-        test
             <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
                 <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                     <div className="space-y-0.5 md:space-y-1">
