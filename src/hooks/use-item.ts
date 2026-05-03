@@ -1,12 +1,11 @@
 import { Review, ReviewRequest } from "@/model/review.model";
 import { StallItems } from "@/model/stall.model";
 import { itemService } from "@/service/item.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notifError, notifSuccess } from "@/lib/toast";
+import { ApiResponse } from "@/lib/api";
 
-export const itemKeys = {
-  all: ["items"] as const,
-  lists: () => [...itemKeys.all, "list"] as const,
-};
+export const ITEM_QUERY_KEY = ["items"];
 
 interface UseItemReturn {
   items: StallItems[];
@@ -14,12 +13,13 @@ interface UseItemReturn {
   isFetching: boolean;
   error: Error | null;
   refetch: () => void;
-  createReview: (review: ReviewRequest) => Promise<Review>;
+  createReview: (review: ReviewRequest) => Promise<ApiResponse<Review>>;
 }
 
 export function useItem(): UseItemReturn {
+  const queryClient = useQueryClient();
   const query = useQuery<StallItems[], Error>({
-    queryKey: itemKeys.lists(),
+    queryKey: ITEM_QUERY_KEY,
     queryFn: async () => {
       const res = await itemService.getAllItems();
       if (!res.success) throw new Error(res.message);
@@ -32,12 +32,22 @@ export function useItem(): UseItemReturn {
   const data = query.data ?? [];
 
 
-  const createReview = async (review: ReviewRequest): Promise<Review> => {
-    console.log(review);
-    const res = await itemService.createReview(review);
-    if (!res.success) throw new Error(res.message);
-    return res.data as Review;
-  }
+  const createReviewMutation = useMutation({
+    mutationFn: async (review: ReviewRequest) => await itemService.createReview(review),
+    onSuccess: (res: ApiResponse<Review>) => {
+      if (res.success) {
+        console.log(res);
+        notifSuccess("Review submitted successfully!");
+        queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
+      } else {
+        notifError(res.message);
+      }
+    },
+    onError: (err: Error) => {
+      notifError(err.message || "Failed to submit review");
+    },
+  });
+
 
   return {
     items: data,
@@ -45,6 +55,6 @@ export function useItem(): UseItemReturn {
     isFetching: query.isFetching,
     error: query.error,
     refetch: () => query.refetch(),
-    createReview,
+    createReview: createReviewMutation.mutateAsync,
   };
 }

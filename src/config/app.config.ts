@@ -26,9 +26,13 @@ export const API_ENDPOINTS = {
   },
   ITEM: {
     GET_ALL: "/api/user/stall/get-all-item",
-    CREATE_REVIEW: "/api/user/stall/create-review",
+  },
+  REVIEW: {
+    CREATE: "/api/client/review/review-item"
   }
 } as const;
+
+
 
 export const VIEW_TYPE = {
   FEED: "feed",

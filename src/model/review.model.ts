@@ -2,9 +2,15 @@ export type Review = {
   id?: number;
   itemId?: number;
   userId?: number;
+  user?: {
+    clientName: string;
+    avatar: string;
+    role?: string;
+  };
   star: number;
   comment: string;
   createdAt?: string;
+  createAt?: string;
   updatedAt?: string;
 };
 

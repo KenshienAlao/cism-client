@@ -48,7 +48,7 @@ export function useAuth(): UseAuthReturn {
   }, [isLoading, profile, pathname, router]);
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginRequest) => authService.login(data),
+    mutationFn: async (data: LoginRequest) => await authService.login(data),
     onSuccess: (res) => {
       if (res.success && res.data) {
         queryClient.setQueryData(authKeys.profile(), res.data);
@@ -63,7 +63,7 @@ export function useAuth(): UseAuthReturn {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: authService.logout,
+    mutationFn: async () => await authService.logout(),
     onSettled: () => {
       queryClient.clear();
       router.push(ROUTES.LOGIN);

@@ -10,7 +10,7 @@ export const itemService = {
   },
 
   createReview(review: ReviewRequest): Promise<ApiResponse<Review>> {
-    return apiClient.post<Review>(API_ENDPOINTS.ITEM.CREATE_REVIEW, review);
+    return apiClient.post<Review>(API_ENDPOINTS.REVIEW.CREATE, review);
   }
 
 };
