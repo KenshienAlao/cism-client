@@ -183,8 +183,8 @@ export default function App() {
           subtitle="New items added today"
           items={freshDrops}
           emptyIcon={Coffee}
-          emptyTitle="Quiet in the kitchen"
-          emptyDescription="No new arrivals today. Check back later!"
+          emptyTitle="No fresh drops found"
+          emptyDescription="No items added today. Check back later!"
           onAddToCart={handleAddToCart}
         />
 
@@ -207,7 +207,7 @@ export default function App() {
             items={allFlattenedItems.filter(i => i.category === 'MEAL')}
             emptyIcon={Inbox}
             emptyTitle="No meals found"
-            emptyDescription="Check back later for more meals!"
+            emptyDescription="No meals available at the moment!"
             onAddToCart={handleAddToCart}
           />
         )}
@@ -220,7 +220,7 @@ export default function App() {
             items={allFlattenedItems.filter(i => i.category === 'DRINK')}
             emptyIcon={Inbox}
             emptyTitle="No drinks found"
-            emptyDescription="Check back later for more drinks!"
+            emptyDescription="No drinks available at the moment!"
             onAddToCart={handleAddToCart}
           />
         )}
@@ -233,7 +233,7 @@ export default function App() {
             items={allFlattenedItems.filter(i => i.category === 'SNACK')}
             emptyIcon={Inbox}
             emptyTitle="No snacks found"
-            emptyDescription="Check back later for more snacks!"
+            emptyDescription="No snacks available at the moment!"
             onAddToCart={handleAddToCart}
           />
         )}
@@ -246,7 +246,7 @@ export default function App() {
             items={allFlattenedItems.filter(i => i.category === 'SCHOOL_ITEM')}
             emptyIcon={Inbox}
             emptyTitle="No school items found"
-            emptyDescription="Check back later for more school items!"
+            emptyDescription="No school items available at the moment!"
             onAddToCart={handleAddToCart}
           />
         )}
