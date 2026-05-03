@@ -131,7 +131,7 @@ export default function RegisterPage() {
                     <p className="mt-1.5 text-sm text-neutral-500">Create a new account</p>
                 </div>
 
-                <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-neutral-200">
+                <div className="rounded-xl bg-card p-6 shadow-sm ring-1 ring-neutral-200">
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <fieldset disabled={isLoading} className="space-y-3">
                             <Input

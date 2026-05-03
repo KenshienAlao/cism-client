@@ -23,3 +23,7 @@ export const OtpSchema = z
     otp: z.string().trim().min(1, "OTP is required"),
   })
   .required();
+
+export type RegisterRequest = z.infer<typeof RegisterSchema>;
+export type LoginRequest = z.infer<typeof LoginSchema>;
+export type OtpRequest = z.infer<typeof OtpSchema>;

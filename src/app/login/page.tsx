@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/service/auth.service";
 import { useAuth } from "@/hooks/use-auth";
+import { LoadingScreen } from "@/components/loadingscreen";
 import { initLoginForm, LoginRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
 import { ROUTES, APP_NAME } from "@/config/app.config";
@@ -12,12 +13,13 @@ import { Button } from "@/components/ui/button";
 import { LoginSchema } from "@/validation/auth.validation";
 
 export default function LoginPage() {
-  const { profile, refreshUser } = useAuth();
+  const { profile, refreshUser, isLoading: isAuthLoading } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
   const router = useRouter();
 
-
+  if (isAuthLoading) return <LoadingScreen />;
 
   const handleChange = (field: keyof LoginRequest) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -47,14 +49,14 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-10">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-90">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{APP_NAME}</h1>
           <p className="mt-1.5 text-sm text-neutral-500">Log in to your account</p>
         </div>
 
-        <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-neutral-200">
+        <div className="meta-card rounded-[--radius]">
           <form onSubmit={handleSubmit} className="space-y-3">
             <fieldset disabled={isLoading} className="space-y-3">
               <Input

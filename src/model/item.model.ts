@@ -1,4 +1,5 @@
 export type Item = {
+  stallImage?: string | null;
   id?: number;
   stallId?: number;
   name: string;
@@ -9,6 +10,7 @@ export type Item = {
   previousSold?: number;
   createdAt?: string;
   updatedAt?: string;
+  category?: string;
 };
 
 export const initItem: Item = {

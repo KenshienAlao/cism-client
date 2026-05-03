@@ -1,12 +1,94 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-modern-black: #1a1a1a;
+  --color-modern-black-hover: #000000;
+  --color-modern-gray-light: #f4f4f4;
+  --color-modern-border: #e5e5e5;
+  --color-modern-orange: #f97316;
+  --color-modern-orange-hover: #ea580c;
+
+  --color-background: #ffffff;
+  --color-foreground: #111111;
+  --color-card: #ffffff;
+  --color-card-foreground: #111111;
+  --color-primary: var(--color-modern-orange);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-modern-gray-light);
+  --color-secondary-foreground: #767676;
+  --color-muted: #666666;
+  --color-muted-foreground: #666666;
+  --color-accent: #fff7ed;
+  --color-accent-foreground: var(--color-modern-orange);
+  --color-border: var(--color-modern-border);
+  --color-input: #ffffff;
+  --color-ring: var(--color-modern-orange);
+
+  --radius: 0.75rem;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-serif: var(--font-playfair), ui-serif, Georgia;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+  --color-card: #141414;
+  --color-card-foreground: #ededed;
+  --color-primary: #ededed;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #262626;
+  --color-secondary-foreground: #ededed;
+  --color-muted: #a1a1a1;
+  --color-muted-foreground: #a1a1a1;
+  --color-accent: #171717;
+  --color-accent-foreground: #ededed;
+  --color-border: #262626;
+  --color-input: #141414;
+  --color-ring: #ededed;
+}
+
+/* --- Utilities --- */
+
+@layer utilities {
+  .meta-card {
+    @apply bg-card border border-border p-5 sm:p-8 md:p-10 shadow-sm;
+  }
+
+  .meta-input {
+    @apply w-full border border-border bg-input px-4 py-4 text-[16px] text-black focus:border-primary focus:ring-2 focus:ring-gray-400 outline-none;
+  }
+
+  .meta-button {
+    @apply w-full bg-primary px-6 py-4 text-[16px] font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50;
+  }
+
+  .meta-button-secondary {
+    @apply inline-flex items-center justify-center bg-secondary px-6 py-3.5 text-[15px] font-semibold text-secondary-foreground transition-all hover:bg-accent active:scale-[0.98];
+  }
+
+  .glass-card {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .neo-shadow {
+    box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border selection:bg-primary selection:text-primary-foreground;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+
+  h1 {
+    @apply text-[36px] font-extrabold tracking-tight leading-tight text-foreground font-serif;
+  }
 }

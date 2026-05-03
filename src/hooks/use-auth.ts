@@ -5,9 +5,6 @@ import { authService } from "@/service/auth.service";
 import { LoginResponse } from "@/model/auth.model";
 import { PUBLIC_ROUTES, ROUTES } from "@/config/app.config";
 
-/**
- * ─── Query Keys ─────────────────────────────────────────────────────────────
- */
 export const authKeys = {
   all: ["auth"] as const,
   profile: () => [...authKeys.all, "profile"] as const,
@@ -32,7 +29,7 @@ export function useAuth(): UseAuthReturn {
       return res.success ? res.data : null;
     },
     retry: false,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60,
   });
 
   useEffect(() => {

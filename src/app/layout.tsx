@@ -4,6 +4,17 @@ import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/provider/query-provider";
 import { ConfirmationProvider } from "@/context/confirmation.context";
 import Confirmation from "@/components/confirmation";
+import { Inter, Playfair_Display } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
 
 export const metadata: Metadata = {
   title: "CISM Client",
@@ -16,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased font-sans">
-      <body className="min-h-full flex flex-col bg-white">
+    <html lang="en" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
           <ConfirmationProvider>
             {children}

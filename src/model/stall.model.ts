@@ -3,8 +3,13 @@ import { Review } from "./review.model";
 
 export type StallItems = {
   id: number;
-  meals: Item[];
-  snacks: Item[];
-  drinks: Item[];
+  name: string;
+  description: string;
+  image: string | null;
+  openAt: string;
+  closeAt: string;
+  role: string;
+  status: boolean;
   reviews: Review[];
+  items: Item[];
 };

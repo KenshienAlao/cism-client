@@ -29,7 +29,7 @@ export type LoginResponse = {
   user: {
     id: number;
     avatar: string;
-    username: string;
+    clientName: string;
     email: string;
     studentId: string;
     role: string | null;

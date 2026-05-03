@@ -30,7 +30,7 @@ export function Button({
   return (
     <button
       disabled={disabled || isLoading}
-      className={`inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium transition-all active:scale-[0.99] ${variantClass[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[--radius] transition-all active:scale-[0.99] ${variant === 'primary' ? 'meta-button' : variantClass[variant]} ${className}`}
       {...props}
     >
       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}

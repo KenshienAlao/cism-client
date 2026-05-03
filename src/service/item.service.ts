@@ -7,5 +7,5 @@ export const itemService = {
   getAllItems(): Promise<ApiResponse<StallItems[]>> {
     return apiClient.get<StallItems[]>(API_ENDPOINTS.ITEM.GET_ALL);
   },
-  
+
 };

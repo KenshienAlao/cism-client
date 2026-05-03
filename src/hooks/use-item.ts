@@ -1,7 +1,6 @@
 import { StallItems } from "@/model/stall.model";
 import { itemService } from "@/service/item.service";
 import { useQuery } from "@tanstack/react-query";
-import { Item } from "@/model/item.model";
 
 export const itemKeys = {
   all: ["items"] as const,
@@ -10,9 +9,6 @@ export const itemKeys = {
 
 interface UseItemReturn {
   items: StallItems[];
-  meals: Item[];
-  snacks: Item[];
-  drinks: Item[];
   isLoading: boolean;
   isFetching: boolean;
   error: Error | null;
@@ -35,9 +31,6 @@ export function useItem(): UseItemReturn {
 
   return {
     items: data,
-    meals: data.flatMap((stall) => stall.meals),
-    snacks: data.flatMap((stall) => stall.snacks),
-    drinks: data.flatMap((stall) => stall.drinks),
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error,

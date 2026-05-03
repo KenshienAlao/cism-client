@@ -8,6 +8,7 @@ import {
   RegisterResponse,
 } from "@/model/auth.model";
 import { API_ENDPOINTS } from "@/config/app.config";
+import { UpdateUserRequest } from "@/model/user.model";
 
 // ─── Auth Service ───────────────────────────────────────────────────────────
 
@@ -38,4 +39,7 @@ export const authService = {
     formData.append("file", file);
     return apiClient.patchForm<string>(API_ENDPOINTS.AUTH.UPLOAD_AVATAR, formData);
   },
+
+  updateProfile: (data: UpdateUserRequest) =>
+    apiClient.patch<void>(API_ENDPOINTS.AUTH.UPDATE_PROFILE, data),
 };
