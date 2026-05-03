@@ -10,8 +10,8 @@ import { OTP, ROUTES, APP_NAME } from "@/config/app.config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useOtp } from "@/hooks/use-otp";
 
-// ─── OTP Persistence Helpers ────────────────────────────────────────────────
 
 function saveOtpExpiry(seconds: number) {
     const expiry = Date.now() + seconds * 1000;
@@ -34,17 +34,14 @@ function formatCountdown(secs: number): string {
     return `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, "0")}`;
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingOtp, setIsLoadingOtp] = useState(false);
     const [isOtpSent, setIsOtpSent] = useState(false);
     const [form, setForm] = useState<RegisterRequest>(initRegisterForm);
-    const [otpData, setOtpData] = useState<OtpRequest>(initOtpForm);
     const [countdown, setCountdown] = useState(0);
-    const { profile } = useAuth();
     const router = useRouter();
+    const { sendOtp, isSendingOtp } = useOtp();
 
     const setField = (field: keyof RegisterRequest) =>
         (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -74,30 +71,19 @@ export default function RegisterPage() {
         return () => clearInterval(timer);
     }, [countdown]);
 
-    const handleSendOtp = async () => {
+    const handleSendOtp = () => {
         if (!form.email) {
             notifError("Please enter your email address.");
             return;
         }
-        setIsLoadingOtp(true);
-        setIsLoading(true);
 
-        const data = { ...otpData, email: form.email };
-        setOtpData(data);
-
-        const response = await authService.sendOtp(data);
-
-        if (!response.success) {
-            notifError(response.message || "Failed to send code. Please try again.");
-        } else {
-            notifSuccess("Confirmation code sent to your email.");
-            saveOtpExpiry(OTP.EXPIRY_SECONDS);
-            setCountdown(OTP.EXPIRY_SECONDS);
-        }
-
-        setIsOtpSent(true);
-        setIsLoadingOtp(false);
-        setIsLoading(false);
+        sendOtp(form.email, {
+            onSuccess: () => {
+                saveOtpExpiry(OTP.EXPIRY_SECONDS);
+                setCountdown(OTP.EXPIRY_SECONDS);
+                setIsOtpSent(true);
+            }
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -183,10 +169,10 @@ export default function RegisterPage() {
                                     type="button"
                                     variant="outline"
                                     onClick={handleSendOtp}
-                                    disabled={isLoadingOtp || (isOtpSent && countdown > 0)}
+                                    disabled={isSendingOtp || (isOtpSent && countdown > 0)}
                                     className="shrink-0 min-w-16 px-3"
                                 >
-                                    {isLoadingOtp ? (
+                                    {isSendingOtp ? (
                                         <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
                                     ) : countdown > 0 ? (
                                         formatCountdown(countdown)

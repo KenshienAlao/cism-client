@@ -2,7 +2,7 @@ import { CupSoda, Hamburger, School, Utensils } from 'lucide-react';
 import { useState } from 'react';
 
 const categories = [
-    { id: 'all', label: 'All', emoji: '🔥' },
+    { id: 'all', label: 'All', emoji: null },
     { id: 'meals', label: 'Meals', emoji: Utensils },
     { id: 'drinks', label: 'Drinks', emoji: CupSoda },
     { id: 'snacks', label: 'Snacks', emoji: Hamburger },
@@ -33,9 +33,7 @@ export function CategoryChips({ onCategoryChange }: CategoryChipsProps) {
                             : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                     >
-                        {typeof cat.emoji === 'string' ? (
-                            <span className="text-sm">{cat.emoji}</span>
-                        ) : (
+                        {cat.emoji && (
                             <cat.emoji className="w-4 h-4" />
                         )}
                         <span>{cat.label}</span>

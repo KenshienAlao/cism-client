@@ -18,8 +18,9 @@ export default function LoginPage() {
   if (isAuthLoading) return <LoadingScreen />;
 
   const handleChange = (field: keyof LoginRequest) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

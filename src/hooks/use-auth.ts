@@ -70,6 +70,7 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
+
   return {
     profile,
     isLoading,

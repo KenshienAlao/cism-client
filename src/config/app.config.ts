@@ -31,7 +31,7 @@ export const API_ENDPOINTS = {
     REFRESH: "/api/auth/refresh",
     DELETE_ACCOUNT: "/api/auth/delete-account",
     UPLOAD_AVATAR: "/api/auth/avatar",
-    UPDATE_PROFILE: "/api/auth/update-profile", 
+    UPDATE_PROFILE: "/api/auth/update-profile",
   },
   OTP: {
     SEND: "/api/resend/send-otp",
