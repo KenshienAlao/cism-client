@@ -1,12 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { authService } from "@/service/auth.service";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingScreen } from "@/components/loadingscreen";
 import { initLoginForm, LoginRequest } from "@/model/auth.model";
-import { notifError, notifSuccess } from "@/lib/toast";
+import { notifError } from "@/lib/toast";
 import { ROUTES, APP_NAME } from "@/config/app.config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
