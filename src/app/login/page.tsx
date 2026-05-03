@@ -13,11 +13,9 @@ import { Button } from "@/components/ui/button";
 import { LoginSchema } from "@/validation/auth.validation";
 
 export default function LoginPage() {
-  const { profile, refreshUser, isLoading: isAuthLoading } = useAuth();
+  const { login, isLoggingIn, isLoading: isAuthLoading } = useAuth();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
-  const router = useRouter();
 
   if (isAuthLoading) return <LoadingScreen />;
 
@@ -27,25 +25,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     const valid = LoginSchema.safeParse(form);
     if (!valid.success) {
       notifError(valid.error.issues[0].message);
-      setIsLoading(false);
       return;
     }
 
-    const response = await authService.login(form);
-    if (!response.success) {
-      notifError(response.message);
-    } else {
-      refreshUser();
-      notifSuccess("Welcome back!");
-      router.push(ROUTES.HOME);
-    }
-
-    setIsLoading(false);
+    login(form);
   };
 
   return (
@@ -58,7 +45,7 @@ export default function LoginPage() {
 
         <div className="meta-card rounded-[--radius]">
           <form onSubmit={handleSubmit} className="space-y-3">
-            <fieldset disabled={isLoading} className="space-y-3">
+            <fieldset disabled={isLoggingIn} className="space-y-3">
               <Input
                 type="email"
                 id="email"
@@ -87,7 +74,7 @@ export default function LoginPage() {
                 </span>
               </div>
 
-              <Button type="submit" isLoading={isLoading} className="w-full">
+              <Button type="submit" isLoading={isLoggingIn} className="w-full">
                 Log in
               </Button>
             </fieldset>
