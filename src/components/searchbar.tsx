@@ -25,7 +25,7 @@ export function SearchBar({ onSearch, placeholder = "Search stalls, food, drinks
         onSearch('');
     };
 
-    const initials = profile?.user?.username?.slice(0, 2).toUpperCase() ?? null;
+    const initials = profile?.user?.clientName?.slice(0, 2).toUpperCase() ?? null;
     const avatar = profile?.user?.avatar ?? null;
 
     return (

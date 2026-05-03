@@ -23,7 +23,7 @@ export default function Navbar({ placeholder }: { placeholder: string }) {
                     {profile?.user?.avatar ? (
                         <img src={profile.user.avatar} alt="avatar" className="h-full w-full object-cover" />
                     ) : (
-                        profile?.user?.username?.slice(0, 2) || "??"
+                        profile?.user?.clientName?.slice(0, 2) || "??"
                     )}
                 </Link>
             </div>
