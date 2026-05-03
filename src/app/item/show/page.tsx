@@ -70,14 +70,14 @@ function ItemDetailContent() {
             <ProductHeader />
             <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-8 md:py-16">
                 <ProductDetails itemDetails={itemDetails} />
-                <WriteReviewForm 
-                    stallId={itemDetails.stallId!} 
-                    itemId={itemDetails.id!} 
-                    onCreateReview={handleCreateReview} 
+                <WriteReviewForm
+                    stallId={itemDetails.stallId!}
+                    itemId={itemDetails.id!}
+                    onCreateReview={handleCreateReview}
                 />
-                <ProductRatings 
-                    reviews={itemDetails.reviews} 
-                    category={itemDetails.category} 
+                <ProductRatings
+                    reviews={itemDetails.reviews}
+                    category={itemDetails.category}
                 />
             </main>
         </div>

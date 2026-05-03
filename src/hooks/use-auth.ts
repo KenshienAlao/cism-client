@@ -3,8 +3,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { authService } from "@/service/auth.service";
 import { LoginRequest, LoginResponse } from "@/model/auth.model";
+import { UpdateUserRequest } from "@/model/user.model";
 import { PUBLIC_ROUTES, ROUTES } from "@/config/app.config";
-import { notifError } from "@/lib/toast";
+import { notifError, notifSuccess } from "@/lib/toast";
 
 export const authKeys = {
   all: ["auth"] as const,
@@ -18,6 +19,12 @@ interface UseAuthReturn {
   login: (data: LoginRequest) => void;
   logout: () => void;
   refreshUser: () => void;
+  updateProfile: (data: UpdateUserRequest) => Promise<any>;
+  isUpdatingProfile: boolean;
+  uploadAvatar: (file: File) => Promise<any>;
+  isUploadingAvatar: boolean;
+  deleteAccount: () => Promise<any>;
+  isDeletingAccount: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -70,6 +77,50 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: UpdateUserRequest) => await authService.updateProfile(data),
+    onSuccess: (res) => {
+      if (res.success) {
+        notifSuccess("Profile updated successfully!");
+        queryClient.invalidateQueries({ queryKey: authKeys.profile() });
+      } else {
+        notifError(res.message || "Failed to update profile");
+      }
+    },
+    onError: (error: any) => {
+      notifError(error.message || "Failed to update profile");
+    }
+  });
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async (file: File) => await authService.uploadAvatar(file),
+    onSuccess: (res) => {
+      if (res.success) {
+        notifSuccess("Avatar updated successfully!");
+        queryClient.invalidateQueries({ queryKey: authKeys.profile() });
+      } else {
+        notifError(res.message || "Failed to upload avatar");
+      }
+    },
+    onError: (error: any) => {
+      notifError(error.message || "Failed to upload avatar");
+    }
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => await authService.deleteAccount(),
+    onSuccess: (res) => {
+      if (res.success) {
+        logoutMutation.mutate();
+      } else {
+        notifError(res.message || "Failed to delete account");
+      }
+    },
+    onError: (error: any) => {
+      notifError(error.message || "Failed to delete account");
+    }
+  });
+
 
   return {
     profile,
@@ -78,5 +129,11 @@ export function useAuth(): UseAuthReturn {
     login: (data: LoginRequest) => loginMutation.mutate(data),
     logout: () => logoutMutation.mutate(),
     refreshUser: () => queryClient.invalidateQueries({ queryKey: authKeys.profile() }),
+    updateProfile: (data: UpdateUserRequest) => updateProfileMutation.mutateAsync(data),
+    isUpdatingProfile: updateProfileMutation.isPending,
+    uploadAvatar: (file: File) => uploadAvatarMutation.mutateAsync(file),
+    isUploadingAvatar: uploadAvatarMutation.isPending,
+    deleteAccount: () => deleteAccountMutation.mutateAsync(),
+    isDeletingAccount: deleteAccountMutation.isPending,
   };
 }

@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/provider/query-provider";
 import { ConfirmationProvider } from "@/context/confirmation.context";
 import Confirmation from "@/components/confirmation";
+import { GlobalCartDrawer } from "@/components/globalcartdrawer";
 import { Inter, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ConfirmationProvider>
             {children}
             <Confirmation />
+            <GlobalCartDrawer />
           </ConfirmationProvider>
         </QueryProvider>
         <Toaster 

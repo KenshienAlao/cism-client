@@ -13,6 +13,7 @@ import { HorizontalScrollSection } from "@/components/horizontalscrollsection";
 import { VIEW_TYPE } from "@/config/app.config";
 import { useItem } from "@/hooks/use-item";
 import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
 import { LoadingScreen } from "@/components/loadingscreen";
 import { Coffee, CookingPot, CupSoda, DollarSign, Hamburger, Inbox, Receipt, School, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
 import { useState, useCallback } from "react";
@@ -34,11 +35,15 @@ export default function App() {
 
   const { isLoading: isAuthLoading } = useAuth();
   const { items, isLoading, isFetching } = useItem()
+  const { cartItems, isCartOpen, setCartOpen, cartCount, updateQuantity, removeItem, addToCart } = useCart();
   const [view, setView] = useState<(typeof VIEW_TYPE)[keyof typeof VIEW_TYPE]>(VIEW_TYPE.FEED);
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+
+  const handleViewOrdersList = () => {
+    setView(VIEW_TYPE.ORDERS);
+  };
 
   if (isAuthLoading || isLoading || isFetching) return <LoadingScreen />;
 
@@ -144,8 +149,7 @@ export default function App() {
       />
 
 
-      {/* order */}
-      {/* <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 flex flex-col gap-3">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 flex flex-col gap-3">
         {orders.length > 0 && (
           <button
             onClick={handleViewOrdersList}
@@ -165,7 +169,7 @@ export default function App() {
             </span>
           )}
         </button>
-      </div> */}
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:px-6 space-y-8">
         <CategoryChips onCategoryChange={setSelectedCategory} />
@@ -257,17 +261,17 @@ export default function App() {
       </div>
 
 
-      {/* 
+      {/*       
       <CartDrawer
-        isOpen={cartOpen}
+        isOpen={isCartOpen}
         onClose={() => setCartOpen(false)}
-        items={cart}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onCheckout={handleCheckout}
-      />
+        items={cartItems}
+        onUpdateQuantity={(id, qty) => updateQuantity(id, qty)}
+        onRemoveItem={(id) => removeItem(id)}
+        onCheckout={() => { setCartOpen(false); 
+      /> */}
 
-      <CheckoutModal
+      {/* <CheckoutModal
         isOpen={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         items={cart.map(item => ({
@@ -278,9 +282,9 @@ export default function App() {
           stallName: item.stallName,
         }))}
         onConfirmOrder={handleConfirmOrder}
-      />
+      /> */}
 
-      {currentOrder && (
+      {/* {currentOrder && (
         <ReceiptModal
           isOpen={receiptOpen}
           onClose={() => setReceiptOpen(false)}
@@ -293,7 +297,7 @@ export default function App() {
           timestamp={currentOrder.timestamp}
           onViewOrder={() => handleViewOrder()}
         />
-      )} */}
+      )}  */}
     </div>
   );
 }

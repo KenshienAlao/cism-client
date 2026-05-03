@@ -1,8 +1,10 @@
 import { UtensilsCrossed, Star, Store, Package, MessageSquare, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
 
 export function ProductDetails({ itemDetails }: { itemDetails: any }) {
+    const { addToCart } = useCart();
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <div className="aspect-square bg-neutral-100 rounded-xl relative overflow-hidden border border-neutral-200">
@@ -50,7 +52,16 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                 </div>
 
                 <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                    <Button className="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 text-sm uppercase h-auto">
+                    <Button 
+                        onClick={() => addToCart({
+                            id: String(itemDetails.id),
+                            name: itemDetails.name,
+                            price: itemDetails.price,
+                            image: itemDetails.image as string,
+                            stallName: itemDetails.stallName
+                        })}
+                        className="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 text-sm uppercase h-auto"
+                    >
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart
                     </Button>

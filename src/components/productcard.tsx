@@ -2,6 +2,7 @@ import { ShoppingCart, Star } from 'lucide-react';
 import { useState } from 'react';
 import { ItemResponse } from '@/model/product.model';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ProductCardProps {
     item: ItemResponse;
@@ -22,8 +23,9 @@ export function ProductCard({
     const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div
-            className="bg-card rounded-[--radius] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-border"
+        <Link
+            href={`/item/show?id=${id}&q=${encodeURIComponent(name)}`}
+            className="block bg-card rounded-[--radius] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-border"
             style={{ transform: isHovered ? 'translateY(-4px)' : 'translateY(0)' }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -97,6 +99,7 @@ export function ProductCard({
                     {onPreOrder && stock === 0 && (
                         <button
                             onClick={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
                                 onPreOrder(id);
                             }}
@@ -107,6 +110,6 @@ export function ProductCard({
                     )}
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }

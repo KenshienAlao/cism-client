@@ -9,12 +9,14 @@ import { LoadingScreen } from "@/components/loadingscreen";
 import { EmptyState } from "@/components/emptystate";
 import { Inbox, ArrowLeft, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
+import { useCart } from "@/hooks/use-cart";
 
 function ItemSearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get('q') || '';
     const { items, isLoading } = useItem();
+    const { addToCart } = useCart();
 
     const allFlattenedItems = useMemo(() => {
         return items.flatMap(stall => {
@@ -101,7 +103,15 @@ function ItemSearchContent() {
                                     item={item as any}
                                     image={item.image as string}
                                     stallImage={stallImage}
-                                    onAddToCart={(id) => console.log('Add to cart', id)}
+                                    onAddToCart={() => {
+                                        addToCart({
+                                            id: String(item.id),
+                                            name: item.name,
+                                            price: item.price,
+                                            image: item.image as string,
+                                            stallName: item.stallName
+                                        });
+                                    }}
                                 />
                             </div>
                         ))}
