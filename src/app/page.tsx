@@ -15,7 +15,7 @@ import { useItem } from "@/hooks/use-item";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingScreen } from "@/components/loadingscreen";
 import { Coffee, CookingPot, CupSoda, DollarSign, Hamburger, Inbox, Receipt, School, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { EmptyState } from "@/components/emptystate";
 
 export default function App() {
@@ -36,15 +36,15 @@ export default function App() {
   const { items, isLoading, isFetching } = useItem()
   const [view, setView] = useState<(typeof VIEW_TYPE)[keyof typeof VIEW_TYPE]>(VIEW_TYPE.FEED);
   const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<any[]>([]);
 
   if (isAuthLoading || isLoading || isFetching) return <LoadingScreen />;
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearch(query);
-  }
+  }, []);
 
   const handleAddToCart = (id: string) => {
     setCartOpen(true);
@@ -121,9 +121,14 @@ export default function App() {
     business: 'SCHOOL_ITEM',
   };
 
-  const scopedItems = selectedCategory === 'all'
+  const scopedItems = (selectedCategory === 'all'
     ? allFlattenedItems
-    : allFlattenedItems.filter(i => i.category === categoryMap[selectedCategory]);
+    : allFlattenedItems.filter(i => i.category === categoryMap[selectedCategory]))
+    .filter(item =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.category?.toLowerCase().includes(search.toLowerCase()) ||
+      item.stallName?.toLowerCase().includes(search.toLowerCase())
+    );
 
   const trendingItems = scopedItems.filter(item => item.rating >= 4);
   const today = new Date().toDateString();
@@ -132,7 +137,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar items={allFlattenedItems} onSearch={handleSearch} />
 
 
       {/* order */}

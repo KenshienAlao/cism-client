@@ -34,13 +34,6 @@ export default function Page() {
         }
     }, [profile]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        })
-    }
-
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -72,7 +65,6 @@ export default function Page() {
 
     const handleUpdateProfile = async () => {
         setIsSaving(true);
-
         const valid = UpdateUserSchema.safeParse(form);
         if (!valid.success) {
             notifError(valid.error.issues[0].message);
