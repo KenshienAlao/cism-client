@@ -3,7 +3,6 @@ export type RegisterRequest = {
   studentId: string;
   email: string;
   password: string;
-  otp: string;
 };
 
 export type RegisterResponse = {
@@ -15,7 +14,6 @@ export const initRegisterForm: RegisterRequest = {
   studentId: "",
   email: "",
   password: "",
-  otp: "",
 };
 
 export type LoginRequest = {
@@ -40,18 +38,4 @@ export type LoginResponse = {
 export const initLoginForm: LoginRequest = {
   email: "",
   password: "",
-};
-
-export type OtpRequest = {
-  email: string;
-  otp: string;
-};
-
-export type OtpResponse = {
-  message: string;
-};
-
-export const initOtpForm: OtpRequest = {
-  email: "",
-  otp: "",
 };

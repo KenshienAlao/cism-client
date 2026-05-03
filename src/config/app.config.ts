@@ -13,15 +13,6 @@ export const ROUTES = {
 export const PUBLIC_ROUTES: string[] = [ROUTES.LOGIN, ROUTES.REGISTER];
 
 
-export const OTP = {
-  EXPIRY_SECONDS: 300,
-  STORAGE_KEYS: {
-    IS_SENT: "isOtpSent",
-    EXPIRY: "otpExpiry",
-  },
-} as const;
-
-
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: "/api/auth/login",
@@ -33,14 +24,11 @@ export const API_ENDPOINTS = {
     UPLOAD_AVATAR: "/api/auth/avatar",
     UPDATE_PROFILE: "/api/auth/update-profile",
   },
-  OTP: {
-    SEND: "/api/resend/send-otp",
-  },
   ITEM: {
     GET_ALL: "/api/user/stall/get-all-item",
+    CREATE_REVIEW: "/api/user/stall/create-review",
   }
 } as const;
-
 
 export const VIEW_TYPE = {
   FEED: "feed",

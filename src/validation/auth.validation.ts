@@ -6,7 +6,6 @@ export const RegisterSchema = z
     studentId: z.string().trim().optional(),
     email: z.email("Invalid format email").trim().min(1, "Email is required"),
     password: z.string().trim().min(1, "Password is required"),
-    otp: z.string().trim().min(1, "OTP is required"),
   })
   .required();
 
@@ -17,13 +16,5 @@ export const LoginSchema = z
   })
   .required();
 
-export const OtpSchema = z
-  .object({
-    email: z.email("Invalid format email").trim().min(1, "Email is required"),
-    otp: z.string().trim().min(1, "OTP is required"),
-  })
-  .required();
-
 export type RegisterRequest = z.infer<typeof RegisterSchema>;
 export type LoginRequest = z.infer<typeof LoginSchema>;
-export type OtpRequest = z.infer<typeof OtpSchema>;

@@ -137,7 +137,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <SearchBar items={allFlattenedItems} onSearch={handleSearch} />
+      <SearchBar
+        items={allFlattenedItems}
+        onSearch={handleSearch}
+        liveSearch={true}
+      />
 
 
       {/* order */}

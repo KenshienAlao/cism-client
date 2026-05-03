@@ -1,98 +1,25 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/service/auth.service";
-import { useAuth } from "@/hooks/use-auth";
-import { initOtpForm, initRegisterForm, OtpRequest, RegisterRequest } from "@/model/auth.model";
+import { initRegisterForm, RegisterRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
-import { OTP, ROUTES, APP_NAME } from "@/config/app.config";
+import { ROUTES, APP_NAME } from "@/config/app.config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useOtp } from "@/hooks/use-otp";
-
-
-function saveOtpExpiry(seconds: number) {
-    const expiry = Date.now() + seconds * 1000;
-    localStorage.setItem(OTP.STORAGE_KEYS.EXPIRY, expiry.toString());
-    localStorage.setItem(OTP.STORAGE_KEYS.IS_SENT, "true");
-}
-
-function clearOtpStorage() {
-    localStorage.removeItem(OTP.STORAGE_KEYS.IS_SENT);
-    localStorage.removeItem(OTP.STORAGE_KEYS.EXPIRY);
-}
-
-function getRemainingSeconds(): number {
-    const expiry = localStorage.getItem(OTP.STORAGE_KEYS.EXPIRY);
-    if (!expiry) return 0;
-    return Math.max(0, Math.round((parseInt(expiry) - Date.now()) / 1000));
-}
-
-function formatCountdown(secs: number): string {
-    return `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, "0")}`;
-}
-
 
 export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
-    const [isOtpSent, setIsOtpSent] = useState(false);
     const [form, setForm] = useState<RegisterRequest>(initRegisterForm);
-    const [countdown, setCountdown] = useState(0);
     const router = useRouter();
-    const { sendOtp, isSendingOtp } = useOtp();
 
     const setField = (field: keyof RegisterRequest) =>
         (e: React.ChangeEvent<HTMLInputElement>) =>
             setForm((prev) => ({ ...prev, [field]: e.target.value }));
-    useEffect(() => {
-        const wasSent = localStorage.getItem(OTP.STORAGE_KEYS.IS_SENT) === "true";
-        const remaining = getRemainingSeconds();
-
-        if (wasSent) setIsOtpSent(true);
-        if (remaining > 0) {
-            setCountdown(remaining);
-            setIsOtpSent(true);
-        }
-    }, []);
-    useEffect(() => {
-        if (countdown <= 0) return;
-        const timer = setInterval(() => {
-            setCountdown((prev) => {
-                const next = prev - 1;
-                if (next <= 0) {
-                    localStorage.removeItem(OTP.STORAGE_KEYS.EXPIRY);
-                    return 0;
-                }
-                return next;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [countdown]);
-
-    const handleSendOtp = () => {
-        if (!form.email) {
-            notifError("Please enter your email address.");
-            return;
-        }
-
-        sendOtp(form.email, {
-            onSuccess: () => {
-                saveOtpExpiry(OTP.EXPIRY_SECONDS);
-                setCountdown(OTP.EXPIRY_SECONDS);
-                setIsOtpSent(true);
-            }
-        });
-    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        if (!isOtpSent) {
-            notifError("Please verify your email address first.");
-            return;
-        }
 
         setIsLoading(true);
 
@@ -102,7 +29,6 @@ export default function RegisterPage() {
             notifError(response.message);
         } else {
             notifSuccess("Account created successfully!");
-            clearOtpStorage();
             router.push(ROUTES.LOGIN);
         }
 
@@ -142,6 +68,17 @@ export default function RegisterPage() {
                             />
 
                             <Input
+                                type="email"
+                                id="email"
+                                name="email"
+                                required
+                                autoComplete="email"
+                                value={form.email}
+                                onChange={setField("email")}
+                                placeholder="Email address"
+                            />
+
+                            <Input
                                 type="password"
                                 id="password"
                                 name="password"
@@ -151,59 +88,6 @@ export default function RegisterPage() {
                                 onChange={setField("password")}
                                 placeholder="New password"
                             />
-
-                            {/* Email + Send Code */}
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    required
-                                    autoComplete="email"
-                                    value={form.email}
-                                    onChange={setField("email")}
-                                    placeholder="Email address"
-                                    className="flex-1"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleSendOtp}
-                                    disabled={isSendingOtp || (isOtpSent && countdown > 0)}
-                                    className="shrink-0 min-w-16 px-3"
-                                >
-                                    {isSendingOtp ? (
-                                        <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
-                                    ) : countdown > 0 ? (
-                                        formatCountdown(countdown)
-                                    ) : isOtpSent ? (
-                                        "Resend"
-                                    ) : (
-                                        "Send code"
-                                    )}
-                                </Button>
-                            </div>
-
-                            {/* OTP Field */}
-                            {isOtpSent && (
-                                <div className="animate-in fade-in slide-in-from-top-1 duration-300">
-                                    <Input
-                                        type="text"
-                                        id="otp"
-                                        name="otp"
-                                        required
-                                        autoComplete="one-time-code"
-                                        inputMode="numeric"
-                                        value={form.otp}
-                                        onChange={setField("otp")}
-                                        placeholder="Enter 6-digit code"
-                                        className="text-center font-mono"
-                                    />
-                                    <p className="mt-1.5 px-1 text-[11px] text-neutral-500">
-                                        Check your email for a confirmation code.
-                                    </p>
-                                </div>
-                            )}
 
                             <Button type="submit" isLoading={isLoading} className="w-full">
                                 Sign up

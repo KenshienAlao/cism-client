@@ -2,8 +2,6 @@ import { apiClient } from "@/config/api.config";
 import {
   LoginRequest,
   LoginResponse,
-  OtpRequest,
-  OtpResponse,
   RegisterRequest,
   RegisterResponse,
 } from "@/model/auth.model";
@@ -30,9 +28,6 @@ export const authService = {
 
   refresh: () =>
     apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.REFRESH),
-
-  sendOtp: (data: OtpRequest) =>
-    apiClient.post<OtpResponse>(API_ENDPOINTS.OTP.SEND, data),
 
   uploadAvatar: (file: File) => {
     const formData = new FormData();

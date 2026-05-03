@@ -8,9 +8,10 @@ interface SearchBarProps {
     onSearch: (query: string) => void;
     items?: any[];
     placeholder?: string;
+    liveSearch?: boolean;
 }
 
-export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, food, drinks…" }: SearchBarProps) {
+export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, food, drinks…", liveSearch = false }: SearchBarProps) {
     const [query, setQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const { profile } = useAuth();
@@ -27,6 +28,9 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
         onSearch(query);
+        if (query.trim()) {
+            router.push(`/item?q=${encodeURIComponent(query.trim())}`);
+        }
         setIsFocused(false);
     };
 
@@ -36,17 +40,19 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
 
     const handleItemClick = (itemName: string, itemId: string) => {
         setQuery(itemName);
-        router.push(`/item/${itemId}`);
+        router.push(`/item/show?id=${itemId}${query ? `&q=${encodeURIComponent(query)}` : ''}`);
         setIsFocused(false);
     };
 
     useEffect(() => {
+        if (!liveSearch) return;
+
         const timer = setTimeout(() => {
             onSearch(query);
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [query, onSearch]);
+    }, [query, onSearch, liveSearch]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -62,11 +68,9 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
     const avatar = profile?.user?.avatar ?? null;
 
     return (
-        <header className="sticky top-0 z-50 header-glass">
+        <header className="sticky top-0 z-50 bg-white  border-b border-black/5">
             <div className="max-w-7xl mx-auto px-4 md:px-6">
-                <div className="flex items-center gap-3 h-16">
-
-                    {/* Brand mark */}
+                <div className="flex items-center gap-2 md:gap-4 h-14 md:h-20">
                     <Link
                         href="/"
                         className="flex items-center gap-2 shrink-0 select-none group"
@@ -76,13 +80,13 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
                     <div className="flex-1 relative" ref={dropdownRef}>
                         <form onSubmit={handleSubmit} className="w-full">
                             <div
-                                className={`relative flex items-center rounded-2xl transition-all duration-200 ${isFocused
-                                    ? 'bg-neutral-100 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/5'
-                                    : 'bg-neutral-100 hover:bg-neutral-200/70'
+                                className={`relative flex items-center rounded-xl border transition-colors ${isFocused
+                                    ? 'border-orange-500 bg-white'
+                                    : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100'
                                     }`}
                             >
                                 <Search
-                                    className={`absolute left-3.5 w-4 h-4 transition-colors duration-200 ${isFocused ? 'text-orange-500' : 'text-neutral-400'
+                                    className={`absolute left-3.5 w-4 h-4 transition-colors ${isFocused ? 'text-orange-500' : 'text-neutral-400'
                                         }`}
                                     strokeWidth={2.5}
                                 />
@@ -107,8 +111,6 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
                                 )}
                             </div>
                         </form>
-
-                        {/* Autocomplete Dropdown */}
                         {isFocused && query.trim() !== '' && (
                             <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-neutral-200 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="p-2">
@@ -155,8 +157,6 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
                             </div>
                         )}
                     </div>
-
-                    {/* Avatar / Account button */}
                     <Link
                         href="/account"
                         className="group relative shrink-0 focus:outline-none"

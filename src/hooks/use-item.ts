@@ -1,3 +1,4 @@
+import { Review, ReviewRequest } from "@/model/review.model";
 import { StallItems } from "@/model/stall.model";
 import { itemService } from "@/service/item.service";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ interface UseItemReturn {
   isFetching: boolean;
   error: Error | null;
   refetch: () => void;
+  createReview: (review: ReviewRequest) => Promise<Review>;
 }
 
 export function useItem(): UseItemReturn {
@@ -29,11 +31,20 @@ export function useItem(): UseItemReturn {
 
   const data = query.data ?? [];
 
+
+  const createReview = async (review: ReviewRequest): Promise<Review> => {
+    console.log(review);
+    const res = await itemService.createReview(review);
+    if (!res.success) throw new Error(res.message);
+    return res.data as Review;
+  }
+
   return {
     items: data,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error,
     refetch: () => query.refetch(),
+    createReview,
   };
 }
