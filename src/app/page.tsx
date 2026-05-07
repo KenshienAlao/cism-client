@@ -77,7 +77,7 @@ function HomeContent() {
   }, [schoolItems]);
 
   const trendingItems = useMemo(() =>
-    scopedItems.filter(item => item.rating >= 4 && item.reviewCount >= 2),
+    scopedItems.filter(item => item.rating >= 4 && item.reviewCount >= 10),
     [scopedItems]
   );
 

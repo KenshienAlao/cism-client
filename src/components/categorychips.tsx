@@ -1,4 +1,4 @@
-import { CupSoda, DollarSign, Hamburger, School, Sparkles, TrendingUp, Utensils } from 'lucide-react';
+import { ChevronDown, CupSoda, DollarSign, Hamburger, School, Sparkles, TrendingUp, Utensils } from 'lucide-react';
 import { useState } from 'react';
 
 const categories = [
@@ -25,24 +25,19 @@ export function CategoryChips({ onCategoryChange }: CategoryChipsProps) {
     };
 
     return (
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex gap-2 pb-2">
+        <div className="relative group max-w-[220px]">
+            <select
+                value={selected}
+                onChange={(e) => handleSelect(e.target.value)}
+                className="w-full appearance-none bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-[10px] font-bold uppercase text-neutral-500 outline-none hover:border-orange-500 transition-all cursor-pointer shadow-sm"
+            >
                 {categories.map((cat) => (
-                    <button
-                        key={cat.id}
-                        onClick={() => handleSelect(cat.id)}
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selected === cat.id
-                            ? 'bg-orange-500 text-white shadow-md'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                            }`}
-                    >
-                        {cat.emoji && (
-                            <cat.emoji className="w-4 h-4" />
-                        )}
-                        <span>{cat.label}</span>
-                    </button>
+                    <option key={cat.id} value={cat.id}>
+                        {cat.label.toUpperCase()}
+                    </option>
                 ))}
-            </div>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none group-hover:text-orange-500 transition-colors" />
         </div>
     );
 }
