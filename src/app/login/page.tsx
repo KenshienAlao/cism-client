@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { LoadingScreen } from "@/components/loadingscreen";
+import Loading from "@/components/ui/loading";
 import { initLoginForm, LoginRequest } from "@/model/auth.model";
 import { notifError } from "@/lib/toast";
 import { ROUTES, APP_NAME } from "@/config/app.config";
@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
 
-  if (isAuthLoading) return <LoadingScreen />;
+  if (isAuthLoading) return <Loading />;
 
   const handleChange = (field: keyof LoginRequest) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {

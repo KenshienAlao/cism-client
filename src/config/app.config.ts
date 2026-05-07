@@ -29,9 +29,15 @@ export const API_ENDPOINTS = {
   },
   REVIEW: {
     CREATE: "/api/client/review/review-item"
+  },
+  CART: {
+    GET_ALL: "/api/customer/cart/get-cart",
+    ADD: "/api/customer/cart/add-item-to-cart",
+    UPDATE: "/api/customer/cart/update-cart-item",
+    DELETE: "/api/customer/cart/delete-cart-item",
+    DELETE_ALL: "/api/customer/cart/delete-all-cart",
   }
 } as const;
-
 
 
 export const VIEW_TYPE = {
@@ -45,3 +51,10 @@ export const ROLES = {
   TEACHER: "FACULTY",
   STAFF: "STAFF",
 } as const;
+
+export const CATEGORY_MAP: Record<string, string> = {
+  meals: 'MEAL',
+  drinks: 'DRINK',
+  snacks: 'SNACK',
+  business: 'SCHOOL_ITEM',
+};

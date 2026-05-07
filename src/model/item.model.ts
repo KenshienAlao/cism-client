@@ -1,3 +1,11 @@
+export type ItemVariation = {
+  id: number;
+  name: string;
+  stock: number;
+  price: number;
+  image: string | null;
+};
+
 export type Item = {
   stallImage?: string | null;
   id?: number;
@@ -11,6 +19,7 @@ export type Item = {
   createdAt?: string;
   updatedAt?: string;
   category?: string;
+  variations?: ItemVariation[];
 };
 
 export const initItem: Item = {

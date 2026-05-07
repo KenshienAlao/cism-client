@@ -1,22 +1,16 @@
 'use client'
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useState, useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useItem } from "@/hooks/use-item";
-import { SearchBar } from "@/components/searchbar";
 import { ProductCard } from "@/components/productcard";
-import { LoadingScreen } from "@/components/loadingscreen";
-import { EmptyState } from "@/components/emptystate";
-import { Inbox, ArrowLeft, SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
-import { useCart } from "@/hooks/use-cart";
-
+import { Inbox, ArrowLeft } from "lucide-react";
+import Loading from "@/components/ui/loading";
 function ItemSearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get('q') || '';
     const { items, isLoading } = useItem();
-    const { addToCart } = useCart();
 
     const allFlattenedItems = useMemo(() => {
         return items.flatMap(stall => {
@@ -26,16 +20,26 @@ function ItemSearchContent() {
                     ? itemReviews.reduce((acc, r) => acc + r.star, 0) / itemReviews.length
                     : 0;
 
+                const variations = item.variations || [];
+                const displayPrice = variations.length > 0
+                    ? Math.min(...variations.map(v => v.price))
+                    : item.price;
+                const displayStock = variations.length > 0
+                    ? variations.reduce((acc, v) => acc + (Number(v.stock) || Number((v as any).stocks) || 0), 0)
+                    : (Number(item.stocks) || Number((item as any).stock) || 0);
+
                 const itemData = {
+                    ...item,
                     id: String(item.id),
+                    stallId: stall.id,
                     name: item.name,
-                    price: item.price,
+                    price: displayPrice,
                     image: item.image || "",
                     category: item.category,
                     stallName: stall.name,
                     rating: avgRating,
                     reviewCount: itemReviews.length,
-                    stock: item.stocks
+                    stock: displayStock
                 };
 
                 return {
@@ -56,31 +60,10 @@ function ItemSearchContent() {
         );
     }, [allFlattenedItems, query]);
 
-    if (isLoading) return <LoadingScreen />;
+    if (isLoading) return <Loading />;
 
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
-            <header className="sticky top-0 z-50 bg-white border-b border-black/5">
-                <div className="max-w-7xl mx-auto px-4 md:px-6">
-                    <div className="flex items-center gap-2 md:gap-4 h-14 md:h-20">
-                        <Link
-                            href="/"
-                            className="p-1.5 md:p-2 -ml-1 md:-ml-2 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-orange-500 transition-all active:scale-90"
-                            aria-label="Go back"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </Link>
-
-                        <div className="flex-1">
-                            <SearchBar
-                                onSearch={(q) => router.push(`/item?q=${encodeURIComponent(q)}`)}
-                                items={allFlattenedItems.map(f => f.item)}
-                                placeholder="Search..."
-                            />
-                        </div>
-                    </div>
-                </div>
-            </header>
             <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
                 <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                     <div className="space-y-0.5 md:space-y-1">
@@ -101,15 +84,6 @@ function ItemSearchContent() {
                                     item={item as any}
                                     image={item.image as string}
                                     stallImage={stallImage}
-                                    onAddToCart={() => {
-                                        addToCart({
-                                            id: String(item.id),
-                                            name: item.name,
-                                            price: item.price,
-                                            image: item.image as string,
-                                            stallName: item.stallName
-                                        });
-                                    }}
                                 />
                             </div>
                         ))}
@@ -136,7 +110,7 @@ function ItemSearchContent() {
 
 export default function Page() {
     return (
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={<Loading />}>
             <ItemSearchContent />
         </Suspense>
     );

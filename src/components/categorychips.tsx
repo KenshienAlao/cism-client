@@ -1,4 +1,4 @@
-import { CupSoda, Hamburger, School, Utensils } from 'lucide-react';
+import { CupSoda, DollarSign, Hamburger, School, Sparkles, TrendingUp, Utensils } from 'lucide-react';
 import { useState } from 'react';
 
 const categories = [
@@ -6,7 +6,10 @@ const categories = [
     { id: 'meals', label: 'Meals', emoji: Utensils },
     { id: 'drinks', label: 'Drinks', emoji: CupSoda },
     { id: 'snacks', label: 'Snacks', emoji: Hamburger },
-    { id: 'business', label: 'School Item', emoji: School }
+    { id: 'business', label: 'School Item', emoji: School },
+    { id: 'popular', label: 'Popular', emoji: TrendingUp },
+    { id: 'fresh', label: 'Fresh Drop', emoji: Sparkles },
+    { id: 'budget', label: 'Budget', emoji: DollarSign }
 ];
 
 interface CategoryChipsProps {

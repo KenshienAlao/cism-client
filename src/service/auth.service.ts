@@ -8,8 +8,6 @@ import {
 import { API_ENDPOINTS } from "@/config/app.config";
 import { UpdateUserRequest } from "@/model/user.model";
 
-// ─── Auth Service ───────────────────────────────────────────────────────────
-
 export const authService = {
   login: (data: LoginRequest) =>
     apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, data),

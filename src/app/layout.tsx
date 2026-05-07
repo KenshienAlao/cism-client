@@ -4,7 +4,6 @@ import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/provider/query-provider";
 import { ConfirmationProvider } from "@/context/confirmation.context";
 import Confirmation from "@/components/confirmation";
-import { GlobalCartDrawer } from "@/components/globalcartdrawer";
 import { Inter, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
@@ -22,6 +21,11 @@ export const metadata: Metadata = {
   description: "CISM Client",
 };
 
+import { CartProvider } from "@/context/cart.context";
+import { AppGlobalDrawer } from "@/components/app-global-drawer";
+import { SearchBar } from "@/components/searchbar";
+import { Suspense } from "react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,13 +36,18 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
           <ConfirmationProvider>
-            {children}
-            <Confirmation />
-            <GlobalCartDrawer />
+            <CartProvider>
+              <Suspense>
+                <SearchBar />
+              </Suspense>
+              {children}
+              <Confirmation />
+              <AppGlobalDrawer />
+            </CartProvider>
           </ConfirmationProvider>
         </QueryProvider>
-        <Toaster 
-          position="top-center" 
+        <Toaster
+          position="top-center"
           toastOptions={{
             duration: 3000,
             style: {
@@ -50,7 +59,7 @@ export default function RootLayout({
               letterSpacing: '0.1em',
               borderRadius: '16px',
             },
-          }} 
+          }}
         />
       </body>
     </html>

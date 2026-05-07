@@ -12,4 +12,5 @@ export type StallItems = {
   status: boolean;
   reviews: Review[];
   items: Item[];
+  createdAt: string;
 };

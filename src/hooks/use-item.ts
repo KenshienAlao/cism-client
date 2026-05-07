@@ -36,7 +36,6 @@ export function useItem(): UseItemReturn {
     mutationFn: async (review: ReviewRequest) => await itemService.createReview(review),
     onSuccess: (res: ApiResponse<Review>) => {
       if (res.success) {
-        console.log(res);
         notifSuccess("Review submitted successfully!");
         queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
       } else {

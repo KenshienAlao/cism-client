@@ -1,58 +1,164 @@
-import { Search, X, ShoppingBag, UtensilsCrossed } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+'use client';
+
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Search, X, ShoppingBag, UtensilsCrossed, Store, ArrowLeft, History } from 'lucide-react';
+import { useItem } from '@/hooks/use-item';
+import { useEnrichedItems } from '@/hooks/use-enriched-items';
 import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
+import { PUBLIC_ROUTES } from '@/config/app.config';
+
+// --- Types ---
+interface SearchResult {
+    id: string;
+    name: string;
+    type: 'product' | 'stall';
+    score: number;
+    metadata: any;
+}
 
 interface SearchBarProps {
-    onSearch: (query: string) => void;
-    items?: any[];
     placeholder?: string;
     liveSearch?: boolean;
 }
 
-export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, food, drinks…", liveSearch = false }: SearchBarProps) {
-    const [query, setQuery] = useState('');
-    const [isFocused, setIsFocused] = useState(false);
-    const { profile } = useAuth();
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
+const RECENT_SEARCHES_KEY = 'cism_recent_searches';
+const MAX_RECENT_SEARCHES = 5;
 
-    const filteredItems = query.trim() === ''
-        ? []
-        : items.filter(item =>
-            item.name.toLowerCase().includes(query.toLowerCase()) ||
-            item.category?.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 6);
+export function SearchBar({ placeholder = "Search for food, shops, or school supplies...", liveSearch = false }: SearchBarProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    // --- State ---
+    const [query, setQuery] = useState(searchParams.get('q') || '');
+    const [isFocused, setIsFocused] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
+    const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // --- Hooks ---
+    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+    const isHome = pathname === '/';
+    const { profile } = useAuth();
+    const { items: stalls = [] } = useItem();
+    const allItems = useEnrichedItems(stalls);
+
+    // --- Effects ---
+    useEffect(() => {
+        setQuery(searchParams.get('q') || '');
+    }, [searchParams]);
+
+    useEffect(() => {
+        const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+        if (stored) setRecentSearches(JSON.parse(stored));
+    }, []);
+
+    // --- Logic ---
+    const addToRecentSearches = useCallback((term: string) => {
+        if (!term.trim()) return;
+        setRecentSearches(prev => {
+            const filtered = prev.filter(s => s !== term);
+            const updated = [term, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
+    const calculateScore = useCallback((text: string, search: string, isStall = false) => {
+        if (!text || !search) return 0;
+        const t = text.toLowerCase();
+        const s = search.toLowerCase();
+        if (t === s) return 100;
+        if (t.startsWith(s)) return 90;
+        const words = t.split(/\s+/);
+        if (words.some(word => word.startsWith(s))) return 80;
+        if (isStall) {
+            const acronym = words.map(w => w[0]).join('');
+            if (acronym.startsWith(s)) return 85;
+        }
+        if (t.includes(s)) return 60;
+        return 0;
+    }, []);
+
+    const results = useMemo(() => {
+        const s = query.trim();
+        if (!s) return [];
+
+        const stallResults: SearchResult[] = stalls
+            .map(stall => ({
+                id: String(stall.id),
+                name: stall.name,
+                type: 'stall' as const,
+                score: calculateScore(stall.name, s, true),
+                metadata: stall
+            }))
+            .filter(r => r.score > 0);
+
+        const productResults: SearchResult[] = allItems
+            .map(item => ({
+                id: String(item.id),
+                name: item.name,
+                type: 'product' as const,
+                score: calculateScore(item.name, s) * 1.2,
+                metadata: item
+            }))
+            .filter(r => r.score > 0);
+
+        return [...stallResults, ...productResults]
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 6);
+    }, [query, stalls, allItems, calculateScore]);
+
+    // --- Handlers ---
+    const navigateToResult = useCallback((result: SearchResult) => {
+        addToRecentSearches(result.name);
+        if (result.type === 'stall') {
+            router.push(`/stall?name=${encodeURIComponent(result.name)}`);
+        } else {
+            const item = result.metadata;
+            const stallAccount = encodeURIComponent(item.stallName || '');
+            router.push(`/stall/item/show?a=${stallAccount}&id=${item.id}&q=${encodeURIComponent(item.name)}`);
+        }
+        setIsFocused(false);
+    }, [router, addToRecentSearches]);
 
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
-        onSearch(query);
-        if (query.trim()) {
-            router.push(`/item?q=${encodeURIComponent(query.trim())}`);
+        const trimmed = query.trim();
+        if (trimmed) {
+            addToRecentSearches(trimmed);
+            router.push(`/item?q=${encodeURIComponent(trimmed)}`);
+        } else {
+            router.push('/');
         }
         setIsFocused(false);
+        inputRef.current?.blur();
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (results.length === 0) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev > -1 ? prev - 1 : prev));
+        } else if (e.key === 'Enter' && activeIndex > -1) {
+            e.preventDefault();
+            navigateToResult(results[activeIndex]);
+        } else if (e.key === 'Escape') {
+            setIsFocused(false);
+        }
     };
 
     const handleClear = () => {
         setQuery('');
+        inputRef.current?.focus();
     };
-
-    const handleItemClick = (itemName: string, itemId: string) => {
-        setQuery(itemName);
-        router.push(`/item/show?id=${itemId}${query ? `&q=${encodeURIComponent(query)}` : ''}`);
-        setIsFocused(false);
-    };
-
-    useEffect(() => {
-        if (!liveSearch) return;
-
-        const timer = setTimeout(() => {
-            onSearch(query);
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [query, onSearch, liveSearch]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -64,39 +170,40 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    if (isPublicRoute) return null;
+
     const initials = profile?.user?.clientName?.slice(0, 2).toUpperCase() ?? null;
     const avatar = profile?.user?.avatar ?? null;
 
     return (
-        <header className="sticky top-0 z-50 bg-white  border-b border-black/5">
-            <div className="max-w-7xl mx-auto px-4 md:px-6">
-                <div className="flex items-center gap-2 md:gap-4 h-14 md:h-20">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-2 shrink-0 select-none group"
-                    />
+        <header className="sticky top-0 z-50 bg-white border-b border-black/5">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 my-2">
+                <div className="flex items-center gap-3 md:gap-6 h-16 md:h-24">
+                    {!isHome && (
+                        <button
+                            onClick={() => router.back()}
+                            className="p-2 bg-neutral-50 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-orange-500 transition-all active:scale-90 shrink-0"
+                            aria-label="Go back"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                    )}
 
-                    {/* Search */}
                     <div className="flex-1 relative" ref={dropdownRef}>
                         <form onSubmit={handleSubmit} className="w-full">
-                            <div
-                                className={`relative flex items-center rounded-xl border transition-colors ${isFocused
-                                    ? 'border-orange-500 bg-white'
-                                    : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100'
-                                    }`}
-                            >
-                                <Search
-                                    className={`absolute left-3.5 w-4 h-4 transition-colors ${isFocused ? 'text-orange-500' : 'text-neutral-400'
-                                        }`}
-                                    strokeWidth={2.5}
-                                />
+                            <div className={`relative flex items-center rounded-xl border transition-colors ${isFocused ? 'border-orange-500 bg-white' : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100'
+                                }`}>
+                                <Search className={`absolute left-3.5 w-4 h-4 transition-colors ${isFocused ? 'text-orange-500' : 'text-neutral-400'}`} strokeWidth={2.5} />
                                 <input
+                                    ref={inputRef}
                                     type="text"
                                     value={query}
                                     onChange={(e) => {
                                         setQuery(e.target.value);
+                                        setActiveIndex(-1);
                                     }}
                                     onFocus={() => setIsFocused(true)}
+                                    onKeyDown={handleKeyDown}
                                     placeholder={placeholder}
                                     className="w-full bg-transparent pl-10 pr-10 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 outline-none font-medium"
                                 />
@@ -111,76 +218,64 @@ export function SearchBar({ onSearch, items = [], placeholder = "Search stalls, 
                                 )}
                             </div>
                         </form>
-                        {isFocused && query.trim() !== '' && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-neutral-200 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                <div className="p-2">
-                                    <div className="px-3 py-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-                                        Suggestions
-                                    </div>
-                                    {filteredItems.length > 0 ? (
-                                        filteredItems.map((item, idx) => (
-                                            <button
-                                                key={item.id || idx}
-                                                onClick={() => handleItemClick(item.name, item.id)}
-                                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-neutral-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition-colors group text-left"
-                                            >
-                                                <div className="h-8 w-8 shrink-0 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden">
-                                                    {item.image ? (
-                                                        <img src={typeof item.image === 'string' ? item.image : ''} alt={item.name} className="h-full w-full object-cover" />
-                                                    ) : (
-                                                        <UtensilsCrossed className="w-4 h-4 text-neutral-400" />
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-semibold truncate">{item.name}</div>
-                                                    <div className="text-[11px] text-neutral-400 truncate">{item.category || 'General'}</div>
-                                                </div>
-                                                <div className="text-xs font-bold text-neutral-400 group-hover:text-orange-500">
-                                                    ₱{item.price}
-                                                </div>
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <div className="px-3 py-8 text-center">
-                                            <p className="text-sm text-neutral-500">No results found for "{query}"</p>
-                                        </div>
-                                    )}
 
-                                    <button
-                                        onClick={() => handleSubmit()}
-                                        className="w-full mt-1 px-3 py-2 text-xs font-bold text-orange-500 hover:bg-orange-50 rounded-xl transition-colors text-left flex items-center gap-2"
-                                    >
-                                        <Search className="w-3 h-3" />
-                                        Search all results for "{query}"
-                                    </button>
+                        {isFocused && query.trim() !== '' && (
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                                <div className="p-2 max-h-[70vh] overflow-y-auto">
+                                    {results.map((result, idx) => (
+                                        <button
+                                            key={`${result.type}-${result.id}`}
+                                            onClick={() => navigateToResult(result)}
+                                            onMouseEnter={() => setActiveIndex(idx)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-neutral-700 rounded-xl transition-colors text-left ${activeIndex === idx ? 'bg-orange-50 text-orange-600' : 'hover:bg-neutral-50'
+                                                }`}
+                                        >
+                                            <div className="h-8 w-8 shrink-0 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden">
+                                                {result.metadata.image ? (
+                                                    <img src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} className="h-full w-full object-cover" />
+                                                ) : (
+                                                    result.type === 'stall' ? <Store className="w-4 h-4 text-orange-500" /> : <UtensilsCrossed className="w-4 h-4 text-neutral-400" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-semibold truncate">{result.name}</div>
+                                                <div className="text-[11px] text-neutral-400 truncate flex items-center gap-1">
+                                                    {result.type === 'stall' ? <Store className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                                                    {result.type === 'stall' ? 'Shop' : result.metadata.stallName}
+                                                </div>
+                                            </div>
+                                            {result.type === 'product' && (
+                                                <div className="text-xs font-bold text-neutral-400">₱{result.metadata.price}</div>
+                                            )}
+                                        </button>
+                                    ))}
+
+                                    {query.trim() && (
+                                        <button
+                                            onClick={() => handleSubmit()}
+                                            className="w-full mt-1 px-3 py-2 text-xs font-bold text-orange-500 hover:bg-orange-50 rounded-xl transition-colors text-left flex items-center gap-2"
+                                        >
+                                            <Search className="w-3 h-3" /> Search all results for "{query}"
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
                     </div>
-                    <Link
-                        href="/account"
-                        className="group relative shrink-0 focus:outline-none"
-                        aria-label="Account"
-                    >
-                        <div className="relative h-9 w-9 rounded-xl overflow-hidden ring-2 ring-transparent group-hover:ring-orange-500/40 group-focus-visible:ring-orange-500/60 transition-all duration-200 shadow-md">
+
+                    <Link href="/account" className="group relative shrink-0">
+                        <div className="relative size-14 md:size-20 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden ring-4 ring-white group-hover:ring-orange-500/20 transition-all duration-300">
                             {avatar ? (
-                                <img
-                                    src={avatar}
-                                    alt="avatar"
-                                    className="h-full w-full object-cover"
-                                />
+                                <img src={avatar} alt="avatar" className="h-full w-full object-cover" />
                             ) : initials ? (
                                 <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-rose-500">
-                                    <span className="text-xs font-black text-white tracking-tight">
-                                        {initials}
-                                    </span>
+                                    <span className="text-sm md:text-xl font-black text-white tracking-tight">{initials}</span>
                                 </div>
                             ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-neutral-200 animate-pulse" />
+                                <div className="h-full w-full bg-neutral-200 animate-pulse" />
                             )}
                         </div>
                     </Link>
-
                 </div>
             </div>
         </header>

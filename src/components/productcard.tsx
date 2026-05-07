@@ -1,36 +1,36 @@
-import { ShoppingCart, Star } from 'lucide-react';
-import { useState } from 'react';
+import { Star, Plus, ShoppingCart } from 'lucide-react';
 import { ItemResponse } from '@/model/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Avatar } from './ui/avatar';
 
 interface ProductCardProps {
     item: ItemResponse;
     image: string;
     stallImage?: string | null;
-    onAddToCart: (id: string) => void;
-    onPreOrder?: (id: string) => void;
+    onAddToCart?: (id: string) => void;
 }
 
 export function ProductCard({
     item,
-    onAddToCart,
-    onPreOrder,
     image,
     stallImage,
+    onAddToCart
 }: ProductCardProps) {
     const { id, name, price, stallName, rating, reviewCount, stock } = item;
-    const [isHovered, setIsHovered] = useState(false);
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (onAddToCart) onAddToCart(String(id));
+    };
 
     return (
         <Link
-            href={`/item/show?id=${id}&q=${encodeURIComponent(name)}`}
-            className="block bg-card rounded-[--radius] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-border"
-            style={{ transform: isHovered ? 'translateY(-4px)' : 'translateY(0)' }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            href={`/stall/item/show?a=${encodeURIComponent(stallName || '')}&id=${id}&q=${encodeURIComponent(name)}`}
+            className="group block bg-card rounded-[--radius] overflow-hidden shadow-sm transition-all duration-300 cursor-pointer border border-border hover:shadow-md hover:border-primary/20"
         >
-            <div className="relative aspect-square overflow-hidden bg-neutral-100">
+            <div className="relative aspect-square overflow-hidden">
                 {image ? (
                     <Image
                         src={image}
@@ -69,21 +69,12 @@ export function ProductCard({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                    {stallImage ? (
-                        <Image
-                            src={stallImage}
-                            alt={stallName}
-                            width={16}
-                            height={16}
-                            className="rounded-full object-cover shrink-0 ring-1 ring-black/10"
-                        />
-                    ) : (
-                        <div className="h-4 w-4 rounded-full bg-gradient-to-br from-orange-400 to-rose-400 shrink-0 flex items-center justify-center">
-                            <span className="text-[7px] font-black text-white leading-none">
-                                {stallName?.slice(0, 1).toUpperCase()}
-                            </span>
-                        </div>
-                    )}
+                    <Avatar
+                        src={stallImage}
+                        name={stallName}
+                        size="xs"
+                        className="ring-1 ring-black/10"
+                    />
                     <p className="text-xs text-gray-500 truncate">{stallName}</p>
                 </div>
 
@@ -93,19 +84,14 @@ export function ProductCard({
                             Php {price.toFixed(2)}
                         </span>
                     </div>
-                </div>
 
-                <div className="flex gap-2 pt-1">
-                    {onPreOrder && stock === 0 && (
+                    {onAddToCart && (
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onPreOrder(id);
-                            }}
-                            className="flex-1 meta-button rounded-[--radius] py-2.5 px-3 text-sm"
+                            onClick={handleAddToCart}
+                            className="p-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all active:scale-95 shadow-sm"
+                            aria-label="Add to cart"
                         >
-                            Pre-order
+                            <Plus className="w-4 h-4" strokeWidth={3} />
                         </button>
                     )}
                 </div>

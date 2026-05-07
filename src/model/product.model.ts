@@ -1,4 +1,5 @@
 export type ItemResponse = {
+    stallId: number;
     id: string;
     image: string;
     name: string;
@@ -8,4 +9,7 @@ export type ItemResponse = {
     rating: number;
     reviewCount: number;
     stock: number;
+    stallRole?: string;
+    stallImage?: string | null;
+    createdAt?: string;
 };
