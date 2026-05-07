@@ -8,13 +8,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import Loading from "@/components/ui/loading";
 import { Coffee, CookingPot, CupSoda, DollarSign, Hamburger, Inbox, School, Sparkles, TrendingUp } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import Cart from "@/components/cart";
 import { useCartDrawer } from "@/context/cart.context";
 
 import { useSearchParams } from "next/navigation";
 
-export default function App() {
+function HomeContent() {
   const { isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
   const { items, isLoading, isFetching } = useItem()
@@ -242,6 +242,14 @@ export default function App() {
         />
       )}  */}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HomeContent />
+    </Suspense>
   );
 }
 
