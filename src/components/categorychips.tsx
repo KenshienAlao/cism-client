@@ -29,7 +29,7 @@ export function CategoryChips({ onCategoryChange }: CategoryChipsProps) {
             <select
                 value={selected}
                 onChange={(e) => handleSelect(e.target.value)}
-                className="w-full appearance-none bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-[10px] font-bold uppercase text-neutral-500 outline-none hover:border-orange-500 transition-all cursor-pointer shadow-sm"
+                className="w-full appearance-none bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-[10px] font-bold uppercase text-neutral-500 outline-none hover:border-orange-500 transition-all cursor-pointer"
             >
                 {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
