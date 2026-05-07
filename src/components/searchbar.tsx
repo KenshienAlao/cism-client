@@ -176,19 +176,19 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const avatar = profile?.user?.avatar ?? null;
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-black/5">
-            <div className="max-w-7xl mx-auto px-4 md:px-6 my-2">
-                <div className="flex items-center gap-3 md:gap-6 h-16 md:h-24">
-                    {!isHome && (
-                        <button
-                            onClick={() => router.back()}
-                            className="p-2 bg-neutral-50 rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-orange-500 transition-all active:scale-90 shrink-0"
-                            aria-label="Go back"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </button>
-                    )}
+        <header className="sticky top-0 z-50 bg-white border-b border-black/5 h-16 md:h-24 flex items-center overflow-hidden">
+            {!isHome && (
+                <button
+                    onClick={() => router.back()}
+                    className="absolute left-3 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 p-2 md:p-2.5 bg-neutral-50 rounded-xl md:rounded-2xl text-neutral-400 hover:bg-neutral-100 hover:text-orange-500 transition-all active:scale-90 shrink-0 z-10 shadow-sm border border-black/5"
+                    aria-label="Go back"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </button>
+            )}
 
+            <div className={`max-w-7xl mx-auto w-full px-4 md:px-6 transition-all duration-300 ${!isHome ? 'pl-14 sm:pl-16 md:pl-24' : ''}`}>
+                <div className="flex items-center gap-3 md:gap-6 h-full">
                     <div className="flex-1 relative" ref={dropdownRef}>
                         <form onSubmit={handleSubmit} className="w-full">
                             <div className={`relative flex items-center rounded-xl border transition-colors ${isFocused ? 'border-orange-500 bg-white' : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100'

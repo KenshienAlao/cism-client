@@ -1,9 +1,10 @@
-import { Star, MessageSquare } from 'lucide-react';
+import { Star, MessageSquare, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { Review } from "@/model/review.model";
 import { useState, useMemo } from 'react';
+import { formatDate } from '@/lib/utils/formatDate';
 
-export function ProductRatings({ reviews, category }: { reviews: Review[], category?: string }) {
+export function ProductRatings({ reviews }: { reviews: Review[], category?: string }) {
     const [selectedFilter, setSelectedFilter] = useState<'all' | 5 | 4 | 3 | 2 | 1>('all');
     const [showAllReviews, setShowAllReviews] = useState(false);
 
@@ -35,26 +36,23 @@ export function ProductRatings({ reviews, category }: { reviews: Review[], categ
         <section className="mt-6 bg-white rounded-xl border border-neutral-200 p-4 md:p-6 mb-12">
             <h2 className="text-lg font-bold text-neutral-900 mb-4 uppercase tracking-wider">Product Ratings</h2>
 
-            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 mb-6">
-                <div className="flex gap-2 pb-2">
+            <div className="relative group max-w-[220px] mb-8">
+                <select
+                    value={selectedFilter}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedFilter(val === 'all' ? 'all' : Number(val) as any);
+                        setShowAllReviews(false);
+                    }}
+                    className="w-full appearance-none bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 pr-10 text-[10px] font-bold uppercase text-neutral-500 outline-none"
+                >
                     {filterOptions.map((opt) => (
-                        <button
-                            key={opt.id}
-                            onClick={() => {
-                                setSelectedFilter(opt.id);
-                                setShowAllReviews(false);
-                            }}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedFilter === opt.id
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                                }`}
-                        >
-                            {opt.id !== 'all' && <Star className={`w-4 h-4 ${selectedFilter === opt.id ? 'fill-white text-white' : 'fill-orange-500 text-orange-500'}`} />}
-                            <span>{opt.label}</span>
-                            <span className={`ml-1 text-xs ${selectedFilter === opt.id ? 'text-white/80' : 'text-gray-400'}`}>({counts[opt.id]})</span>
-                        </button>
+                        <option key={opt.id} value={opt.id}>
+                            {opt.label.toUpperCase()} ({counts[opt.id]})
+                        </option>
                     ))}
-                </div>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
             </div>
 
             {filteredReviews.length > 0 ? (
@@ -73,7 +71,7 @@ export function ProductRatings({ reviews, category }: { reviews: Review[], categ
                                     <div className="flex items-center justify-between">
                                         <div className="text-sm font-medium text-neutral-900">{review.user?.clientName || (review.userId ? `User_${review.userId}` : 'Anonymous')}</div>
                                         <div className="text-xs text-neutral-400">
-                                            {review.createAt ? new Date(review.createAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                                            {formatDate(review.createdAt)}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-0.5 mt-0.5">
