@@ -15,15 +15,6 @@ export default function Page() {
 
     return (
         <main className="min-h-screen bg-[#F5F5F5] font-sans text-neutral-800">
-            <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white">
-                <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4">
-                    <Link href="/" className="flex items-center gap-2 text-sm text-neutral-800">
-                        <MoveLeft size={16} />
-                    </Link>
-                    <span className="text-sm text-neutral-800">My Account</span>
-                </div>
-            </header>
-
             <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
                 <AccountSidebar />
                 <div className="flex-1 space-y-6">

@@ -8,6 +8,7 @@ import { useItem } from '@/hooks/use-item';
 import { useEnrichedItems } from '@/hooks/use-enriched-items';
 import { useAuth } from '@/hooks/use-auth';
 import { PUBLIC_ROUTES } from '@/config/app.config';
+import Image from 'next/image';
 
 // --- Types ---
 interface SearchResult {
@@ -176,7 +177,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const avatar = profile?.user?.avatar ?? null;
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-black/5 h-16 md:h-24 flex items-center overflow-hidden">
+        <header className="sticky top-0 z-50 bg-white border-b border-black/5 h-16 md:h-24 flex items-center">
             {!isHome && (
                 <button
                     onClick={() => router.back()}
@@ -187,7 +188,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                 </button>
             )}
 
-            <div className={`max-w-7xl mx-auto w-full px-4 md:px-6 transition-all duration-300 ${!isHome ? 'pl-14 sm:pl-16 md:pl-24' : ''}`}>
+            <div className={`max-w-7xl mx-auto w-full px-4 md:px-6 h-full transition-all duration-300 ${!isHome ? 'pl-14 sm:pl-16 md:pl-24' : ''}`}>
                 <div className="flex items-center gap-3 md:gap-6 h-full">
                     <div className="flex-1 relative" ref={dropdownRef}>
                         <form onSubmit={handleSubmit} className="w-full">
@@ -230,9 +231,9 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                                             className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-neutral-700 rounded-xl transition-colors text-left ${activeIndex === idx ? 'bg-orange-50 text-orange-600' : 'hover:bg-neutral-50'
                                                 }`}
                                         >
-                                            <div className="h-8 w-8 shrink-0 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden">
+                                            <div className="h-8 w-8 shrink-0 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden relative">
                                                 {result.metadata.image ? (
-                                                    <img src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} className="h-full w-full object-cover" />
+                                                    <Image src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} fill className="h-full w-full object-cover" />
                                                 ) : (
                                                     result.type === 'stall' ? <Store className="w-4 h-4 text-orange-500" /> : <UtensilsCrossed className="w-4 h-4 text-neutral-400" />
                                                 )}
@@ -266,7 +267,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                     <Link href="/account" className="group relative shrink-0">
                         <div className="relative size-14 md:size-20 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden ring-4 ring-white group-hover:ring-orange-500/20 transition-all duration-300">
                             {avatar ? (
-                                <img src={avatar} alt="avatar" className="h-full w-full object-cover" />
+                                <Image src={avatar} alt="avatar" fill className="object-cover" />
                             ) : initials ? (
                                 <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-rose-500">
                                     <span className="text-sm md:text-xl font-black text-white tracking-tight">{initials}</span>
