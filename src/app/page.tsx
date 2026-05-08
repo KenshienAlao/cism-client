@@ -9,9 +9,6 @@ import { useCart } from "@/hooks/use-cart";
 import Loading from "@/components/ui/loading";
 import { Coffee, CookingPot, CupSoda, DollarSign, Hamburger, Inbox, School, Sparkles, TrendingUp } from "lucide-react";
 import { useState, useMemo, Suspense } from "react";
-import Cart from "@/components/cart";
-import { useCartDrawer } from "@/context/cart.context";
-
 import { useSearchParams } from "next/navigation";
 
 function HomeContent() {
@@ -20,15 +17,9 @@ function HomeContent() {
   const { items, isLoading, isFetching } = useItem()
   const allFlattenedItems = useEnrichedItems(items);
   const { cartCount, addToCart } = useCart();
-  const { openCart } = useCartDrawer();
   const [view, setView] = useState<(typeof VIEW_TYPE)[keyof typeof VIEW_TYPE]>(VIEW_TYPE.FEED);
   const search = searchParams.get('q') || "";
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [orders, setOrders] = useState<any[]>([]);
-
-  const handleViewOrdersList = () => {
-    setView(VIEW_TYPE.ORDERS);
-  };
 
   if (isAuthLoading || isLoading || isFetching) return <Loading />;
 
@@ -42,7 +33,6 @@ function HomeContent() {
       variationId: 0, // Default to no variation for direct add
       quantity: 1
     });
-    openCart();
   };
 
   const isSpecialCategory = ['all', 'popular', 'fresh', 'budget'].includes(selectedCategory);
@@ -58,9 +48,6 @@ function HomeContent() {
         item.category?.toUpperCase().includes(s) ||
         item.stallName?.toUpperCase().includes(s);
     });
-
-
-  console.log(items);
 
   const schoolItems = useMemo(() =>
     allFlattenedItems.filter(i => i.category !== 'MEAL' && i.category !== 'DRINK' && i.category !== 'SNACK'),
@@ -92,13 +79,7 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50/50">
-      <Cart
-        orders={orders}
-        handleViewOrdersList={handleViewOrdersList}
-        cartCount={cartCount}
-        setCartOpen={(isOpen) => isOpen ? openCart() : null}
-      />
+    <div className="min-h-screen bg-neutral-50/50 pb-32">
 
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 space-y-10">
         <CategoryChips onCategoryChange={setSelectedCategory} />
@@ -112,7 +93,6 @@ function HomeContent() {
             emptyIcon={TrendingUp}
             emptyTitle="Nothing trending yet"
             emptyDescription="No popular items found at the moment."
-            onAddToCart={handleAddToCart}
           />
 
         )}
@@ -126,7 +106,6 @@ function HomeContent() {
             emptyIcon={Coffee}
             emptyTitle="No fresh drops found"
             emptyDescription="No items added today. Check back later!"
-            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -139,7 +118,6 @@ function HomeContent() {
             emptyIcon={Inbox}
             emptyTitle="No budget picks found"
             emptyDescription="No items under Php 50 right now."
-            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -152,7 +130,6 @@ function HomeContent() {
             emptyIcon={Inbox}
             emptyTitle="No meals found"
             emptyDescription="No meals available at the moment!"
-            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -165,7 +142,6 @@ function HomeContent() {
             emptyIcon={Inbox}
             emptyTitle="No drinks found"
             emptyDescription="No drinks available at the moment!"
-            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -178,7 +154,6 @@ function HomeContent() {
             emptyIcon={Inbox}
             emptyTitle="No snacks found"
             emptyDescription="No snacks available at the moment!"
-            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -195,7 +170,6 @@ function HomeContent() {
                   emptyIcon={Inbox}
                   emptyTitle="No items found"
                   emptyDescription="Nothing available in this category."
-                  onAddToCart={handleAddToCart}
                 />
               ))}
             </div>
@@ -208,39 +182,10 @@ function HomeContent() {
               emptyIcon={Inbox}
               emptyTitle="No school items found"
               emptyDescription="No school items available at the moment!"
-              onAddToCart={handleAddToCart}
             />
           )
         )}
       </div>
-
-      {/* <CheckoutModal
-        isOpen={checkoutOpen}
-        onClose={() => setCheckoutOpen(false)}
-        items={cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          stallName: item.stallName,
-        }))}
-        onConfirmOrder={handleConfirmOrder}
-      /> */}
-
-      {/* {currentOrder && (
-        <ReceiptModal
-          isOpen={receiptOpen}
-          onClose={() => setReceiptOpen(false)}
-          orderId={currentOrder.orderId}
-          items={currentOrder.items}
-          total={currentOrder.total}
-          customerName={currentOrder.customerName}
-          paymentMethod={currentOrder.paymentMethod}
-          deliveryNote={currentOrder.deliveryNote}
-          timestamp={currentOrder.timestamp}
-          onViewOrder={() => handleViewOrder()}
-        />
-      )}  */}
     </div>
   );
 }
@@ -252,5 +197,3 @@ export default function App() {
     </Suspense>
   );
 }
-
-

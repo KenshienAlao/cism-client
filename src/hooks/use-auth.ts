@@ -79,31 +79,75 @@ export function useAuth(): UseAuthReturn {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UpdateUserRequest) => await authService.updateProfile(data),
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: authKeys.profile() });
+      const previous = queryClient.getQueryData<LoginResponse>(authKeys.profile());
+      if (previous) {
+        queryClient.setQueryData<LoginResponse>(authKeys.profile(), {
+          ...previous,
+          user: {
+            ...previous.user,
+            ...newData
+          }
+        });
+      }
+      return { previous };
+    },
     onSuccess: (res) => {
       if (res.success) {
         notifSuccess("Profile updated successfully!");
-        queryClient.invalidateQueries({ queryKey: authKeys.profile() });
       } else {
         notifError(res.message || "Failed to update profile");
       }
     },
-    onError: (error: any) => {
+    onError: (error: any, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(authKeys.profile(), context.previous);
+      }
       notifError(error.message || "Failed to update profile");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.profile() });
     }
   });
 
   const uploadAvatarMutation = useMutation({
     mutationFn: async (file: File) => await authService.uploadAvatar(file),
+    onMutate: async (file) => {
+      await queryClient.cancelQueries({ queryKey: authKeys.profile() });
+      const previous = queryClient.getQueryData<LoginResponse>(authKeys.profile());
+      const tempUrl = URL.createObjectURL(file);
+
+      if (previous) {
+        queryClient.setQueryData<LoginResponse>(authKeys.profile(), {
+          ...previous,
+          user: {
+            ...previous.user,
+            avatar: tempUrl
+          }
+        });
+      }
+      return { previous, tempUrl };
+    },
     onSuccess: (res) => {
       if (res.success) {
         notifSuccess("Avatar updated successfully!");
-        queryClient.invalidateQueries({ queryKey: authKeys.profile() });
       } else {
         notifError(res.message || "Failed to upload avatar");
       }
     },
-    onError: (error: any) => {
+    onError: (error: any, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(authKeys.profile(), context.previous);
+      }
       notifError(error.message || "Failed to upload avatar");
+    },
+    onSettled: (res, err, vars, context) => {
+      // Clean up the temporary URL
+      if (context?.tempUrl) {
+        URL.revokeObjectURL(context.tempUrl);
+      }
+      queryClient.invalidateQueries({ queryKey: authKeys.profile() });
     }
   });
 

@@ -21,9 +21,8 @@ export const metadata: Metadata = {
   description: "CISM Client",
 };
 
-import { CartProvider } from "@/context/cart.context";
-import { AppGlobalDrawer } from "@/components/app-global-drawer";
 import { SearchBar } from "@/components/searchbar";
+import { BottomNav } from "@/components/bottomnav";
 import { Suspense } from "react";
 
 export default function RootLayout({
@@ -36,14 +35,12 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
           <ConfirmationProvider>
-            <CartProvider>
-              <Suspense>
-                <SearchBar />
-              </Suspense>
-              {children}
-              <Confirmation />
-              <AppGlobalDrawer />
-            </CartProvider>
+            <Suspense>
+              <SearchBar />
+            </Suspense>
+            {children}
+            <BottomNav />
+            <Confirmation />
           </ConfirmationProvider>
         </QueryProvider>
         <Toaster
@@ -51,7 +48,7 @@ export default function RootLayout({
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#000',
+              background: '#f97316',
               color: '#fff',
               fontSize: '11px',
               fontWeight: 'bold',

@@ -17,7 +17,6 @@ interface HorizontalScrollSectionProps {
   emptyIcon: LucideIcon;
   emptyTitle: string;
   emptyDescription: string;
-  onAddToCart: (id: string) => void;
 }
 
 export function HorizontalScrollSection({
@@ -28,7 +27,6 @@ export function HorizontalScrollSection({
   emptyIcon,
   emptyTitle,
   emptyDescription,
-  onAddToCart,
 }: HorizontalScrollSectionProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -68,7 +66,6 @@ export function HorizontalScrollSection({
                 item={product as any}
                 image={product.image}
                 stallImage={product.stallImage}
-                onAddToCart={onAddToCart}
               />
             </div>
           ))}

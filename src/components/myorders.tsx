@@ -17,10 +17,11 @@ interface MyOrdersProps {
 }
 
 const STATUS_CONFIG = {
-    pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
-    preparing: { label: 'Preparing', color: 'bg-blue-100 text-blue-700' },
-    ready: { label: 'Ready', color: 'bg-purple-100 text-purple-700' },
-    completed: { label: 'Completed', color: 'bg-green-100 text-green-700' },
+    PENDING: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+    PREPARING: { label: 'Preparing', color: 'bg-blue-100 text-blue-700' },
+    READY: { label: 'Ready', color: 'bg-purple-100 text-purple-700' },
+    COMPLETED: { label: 'Completed', color: 'bg-green-100 text-green-700' },
+    CANCELLED: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
 };
 
 export function MyOrders({ orders, onBack, onViewOrder }: MyOrdersProps) {

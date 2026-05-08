@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo } from 'react';
-import { useItem } from "@/hooks/use-item";
+import { useItem, useItemDetail } from "@/hooks/use-item";
 import { ShoppingCart } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { ProductDetails } from "@/components/item/productdetails";
@@ -16,68 +16,10 @@ function StallItemDetailContent() {
 
     const id = searchParams.get('id');
     const stallAccount = searchParams.get('a'); // Stall Name
-    const query = searchParams.get('q'); // Item Name 
+    const queryName = searchParams.get('q'); // Item Name 
 
-    const { items, isLoading, createReview } = useItem();
-
-    const itemDetails = useMemo(() => {
-        if (!items.length) return null;
-
-        let foundItemData = null;
-
-        if (id) {
-            for (const stall of items) {
-                if (stallAccount && stall.name.toLowerCase() !== stallAccount.toLowerCase()) continue;
-
-                const item = stall.items.find(i => String(i.id) === id);
-                if (item) {
-                    foundItemData = { item, stall };
-                    break;
-                }
-            }
-        }
-
-        if (!foundItemData && stallAccount && query) {
-            const stall = items.find(s => s.name.toLowerCase() === stallAccount.toLowerCase());
-            if (stall) {
-                const item = stall.items.find(i => i.name.toLowerCase() === query.toLowerCase());
-                if (item) {
-                    foundItemData = { item, stall };
-                }
-            }
-        }
-
-        if (!foundItemData && id) {
-            for (const stall of items) {
-                const item = stall.items.find(i => String(i.id) === id);
-                if (item) {
-                    foundItemData = { item, stall };
-                    break;
-                }
-            }
-        }
-
-        if (foundItemData) {
-            const { item, stall } = foundItemData;
-            const itemReviews = stall.reviews.filter(r => r.itemId === item.id);
-            const avgRating = itemReviews.length > 0
-                ? itemReviews.reduce((acc, r) => acc + r.star, 0) / itemReviews.length
-                : 0;
-
-            return {
-                ...item,
-                stallId: stall.id,
-                stallName: stall.name,
-                stallImage: stall.image,
-                reviews: itemReviews,
-                rating: avgRating,
-                reviewCount: itemReviews.length,
-                category: item.category || 'Uncategorized'
-            };
-        }
-
-        return null;
-    }, [id, stallAccount, query, items]);
+    const { createReview } = useItem();
+    const { data: itemDetails, isLoading } = useItemDetail(id, stallAccount, queryName);
 
     const handleCreateReview = async (stallId: number, itemId: number, star: number, comment: string) => {
         await createReview({

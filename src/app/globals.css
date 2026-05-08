@@ -77,6 +77,18 @@
   .neo-shadow {
     box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
   }
+
+  .smart-card {
+    @apply rounded-2xl border border-black/5 overflow-hidden bg-white;
+  }
+
+  .smart-header {
+    @apply px-5 py-4 bg-neutral-50/50 flex items-center gap-3;
+  }
+
+  .smart-textarea {
+    @apply w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-xs text-black placeholder:text-neutral-300 outline-none focus:border-orange-300 transition-colors resize-none;
+  }
 }
 
 @layer base {

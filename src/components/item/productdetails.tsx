@@ -6,10 +6,12 @@ import { useState, useMemo, useEffect } from 'react';
 import { ItemVariation } from '@/model/item.model';
 import { Avatar } from '../ui/avatar';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function ProductDetails({ itemDetails }: { itemDetails: any }) {
-    const { addToCart, isMutating } = useCart();
+    const { cartItems, addToCart, isMutating } = useCart();
     const variations = useMemo(() => itemDetails.variations as ItemVariation[] || [], [itemDetails.variations]);
+    const router = useRouter();
 
     const [selectedVariation, setSelectedVariation] = useState<ItemVariation | null>(null);
 
@@ -29,13 +31,29 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
     const displayName = selectedVariation ? `${itemDetails.name} (${selectedVariation.name})` : itemDetails.name;
     const displayImage = (selectedVariation?.image || itemDetails.image) as string;
 
-    const handleAddToCart = () => {
-        addToCart({
+    const cartItem = cartItems.find(i =>
+        Number(i.itemId) === Number(itemDetails.id) &&
+        (selectedVariation ? Number(i.variationId) === Number(selectedVariation.id) : !i.variationId)
+    );
+    const isAtLimit = cartItem && cartItem.quantity >= displayStock;
+
+    const handleAddToCart = async () => {
+        await addToCart({
             stallId: Number(itemDetails.stallId),
             stallItemId: Number(itemDetails.id),
             variationId: selectedVariation ? Number(selectedVariation.id) : 0,
             quantity: 1
         });
+    };
+
+    const handleBuyNow = async () => {
+        await addToCart({
+            stallId: Number(itemDetails.stallId),
+            stallItemId: Number(itemDetails.id),
+            variationId: selectedVariation ? Number(selectedVariation.id) : 0,
+            quantity: 1
+        });
+        router.push('/checkout');
     };
 
     return (
@@ -115,18 +133,19 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                 <div className="pt-2 flex flex-col sm:flex-row gap-3">
                     <Button
                         onClick={handleAddToCart}
-                        disabled={displayStock === 0}
+                        disabled={displayStock === 0 || isAtLimit || isMutating}
                         className="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 text-sm uppercase h-auto disabled:bg-neutral-200 disabled:text-neutral-400"
                     >
                         {isMutating ? <Loader2 className="animate-spin h-4 w-4" /> : (
                             <>
                                 <ShoppingCart className="w-4 h-4" />
-                                {displayStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                {displayStock === 0 ? 'Out of Stock' : isAtLimit ? 'Max Reached' : 'Add to Cart'}
                             </>
                         )}
                     </Button>
                     <Button
-                        disabled={displayStock === 0}
+                        onClick={handleBuyNow}
+                        disabled={displayStock === 0 || isAtLimit || isMutating}
                         className="flex-1 bg-neutral-100 text-neutral-900 font-bold py-4 rounded-xl hover:bg-neutral-200 transition-colors text-sm uppercase h-auto disabled:opacity-50"
                     >
                         Buy now

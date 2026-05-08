@@ -8,10 +8,14 @@ export const ROUTES = {
   REGISTER: "/register",
   ACCOUNT: "/account",
   SEARCH: "/search",
+  NOTIFICATIONS: "/notifications",
+  ORDERS: "/orders",
+  ORDER_DETAILS: "/orders/[id]/track",
+  CART: "/cart",
 } as const;
 
 export const PUBLIC_ROUTES: string[] = [ROUTES.LOGIN, ROUTES.REGISTER];
-
+export const NO_NAV_ROUTES: string[] = [ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.ACCOUNT, ROUTES.NOTIFICATIONS, ROUTES.ORDERS, ROUTES.ORDER_DETAILS, ROUTES.CART];
 
 export const API_ENDPOINTS = {
   AUTH: {

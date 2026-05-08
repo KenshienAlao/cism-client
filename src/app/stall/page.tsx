@@ -7,7 +7,6 @@ import { useCart } from '@/hooks/use-cart';
 import { Avatar } from '@/components/ui/avatar';
 import { ProductGrid } from '@/components/productgrid';
 import { enrichStall } from '@/hooks/use-enriched-items';
-import { ProductHeader } from '@/components/item/productheader';
 import Loading from '@/components/ui/loading';
 import {
     Star,
@@ -22,10 +21,6 @@ import {
 } from 'lucide-react';
 
 
-import { useCartDrawer } from '@/context/cart.context';
-import { SearchBar } from '@/components/searchbar';
-import { useEnrichedItems } from '@/hooks/use-enriched-items';
-
 import { formatTime } from '@/lib/utils/formatTime';
 import { formatDate } from '@/lib/utils/formatDate';
 
@@ -34,9 +29,7 @@ function StallContent() {
     const router = useRouter();
     const stallName = searchParams.get('name');
     const { items: allStalls, isLoading } = useItem();
-    const allFlattenedItems = useEnrichedItems(allStalls);
     const { addToCart } = useCart();
-    const { openCart } = useCartDrawer();
     const search = searchParams.get('q') || "";
 
     const stall = useMemo(() => {
@@ -184,7 +177,6 @@ function StallContent() {
                             variationId: 0,
                             quantity: 1
                         });
-                        openCart();
                     }}
                 />
 

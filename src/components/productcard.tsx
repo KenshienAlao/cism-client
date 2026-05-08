@@ -15,15 +15,10 @@ export function ProductCard({
     item,
     image,
     stallImage,
-    onAddToCart
+    onAddToCart,
 }: ProductCardProps) {
     const { id, name, price, stallName, rating, reviewCount, stock } = item;
 
-    const handleAddToCart = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (onAddToCart) onAddToCart(String(id));
-    };
 
     return (
         <Link
@@ -85,15 +80,17 @@ export function ProductCard({
                         </span>
                     </div>
 
-                    {onAddToCart && (
-                        <button
-                            onClick={handleAddToCart}
-                            className="p-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all active:scale-95 shadow-sm"
-                            aria-label="Add to cart"
-                        >
-                            <Plus className="w-4 h-4" strokeWidth={3} />
-                        </button>
-                    )}
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onAddToCart?.(id.toString());
+                        }}
+                        disabled={stock === 0}
+                        className="bg-primary/10 hover:bg-primary text-primary hover:text-white p-2 rounded-full transition-all active:scale-90 disabled:opacity-50 disabled:bg-neutral-100 disabled:text-neutral-400"
+                    >
+                        <Plus className="w-5 h-5" />
+                    </button>
                 </div>
             </div>
         </Link>

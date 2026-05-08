@@ -7,7 +7,8 @@ import { Search, X, ShoppingBag, UtensilsCrossed, Store, ArrowLeft, History } fr
 import { useItem } from '@/hooks/use-item';
 import { useEnrichedItems } from '@/hooks/use-enriched-items';
 import { useAuth } from '@/hooks/use-auth';
-import { PUBLIC_ROUTES } from '@/config/app.config';
+import { NO_NAV_ROUTES, PUBLIC_ROUTES } from '@/config/app.config';
+import { isPathInRoutes } from '@/lib/utils/route';
 import Image from 'next/image';
 
 // --- Types ---
@@ -42,7 +43,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const inputRef = useRef<HTMLInputElement>(null);
 
     // --- Hooks ---
-    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+    const isNoNavRoute = useMemo(() => isPathInRoutes(pathname, NO_NAV_ROUTES as unknown as string[]), [pathname]);
     const isHome = pathname === '/';
     const { profile } = useAuth();
     const { items: stalls = [] } = useItem();
@@ -171,7 +172,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (isPublicRoute) return null;
+    if (isNoNavRoute) return null;
 
     const initials = profile?.user?.clientName?.slice(0, 2).toUpperCase() ?? null;
     const avatar = profile?.user?.avatar ?? null;

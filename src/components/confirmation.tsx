@@ -10,35 +10,35 @@ export default function Confirmation() {
     const isDanger = state.type === "danger";
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
             <div
-                className="absolute inset-0 bg-neutral-900/40 backdrop-blur-md transition-opacity"
+                className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity"
                 onClick={closeConfirmation}
             />
-            <div className="relative w-full max-w-75 overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl ring-1 ring-neutral-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-[320px] overflow-hidden rounded-[2rem] bg-white p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex flex-col items-center text-center">
-                    <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-[1.2rem] ${isDanger ? "bg-red-50 text-red-500" : "bg-neutral-50 text-neutral-900"}`}>
-                        <AlertCircle size={28} strokeWidth={1.5} />
+                    <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${isDanger ? "bg-rose-50 text-rose-500" : "bg-neutral-50 text-neutral-900"}`}>
+                        <AlertCircle size={24} strokeWidth={2} />
                     </div>
 
-                    <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-neutral-900">
-                        {state.title || "Confirm Transaction"}
+                    <h2 className="text-sm font-black text-neutral-900 tracking-tight">
+                        {state.title || "Confirm Action"}
                     </h2>
 
-                    <p className="mt-4 text-[10px] font-medium leading-relaxed tracking-tight text-neutral-400">
+                    <p className="mt-2 text-xs font-medium leading-relaxed text-neutral-500 px-2">
                         {state.message}
                     </p>
                 </div>
 
-                <div className="mt-10 flex flex-col gap-3">
+                <div className="mt-8 flex flex-col gap-2">
                     <button
                         onClick={() => {
                             state.onConfirm();
                             closeConfirmation();
                         }}
-                        className={`w-full rounded-2xl py-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${isDanger
-                            ? "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600"
-                            : "bg-neutral-900 text-white hover:bg-black shadow-xl shadow-neutral-900/10"
+                        className={`w-full rounded-xl py-3.5 text-[11px] font-black uppercase tracking-widest transition-all active:scale-[0.97] ${isDanger
+                            ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"
+                            : "bg-neutral-900 text-white hover:bg-neutral-800"
                             }`}
                     >
                         {state.confirmText || "Confirm"}
@@ -46,7 +46,7 @@ export default function Confirmation() {
 
                     <button
                         onClick={closeConfirmation}
-                        className="w-full rounded-2xl py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-300 transition-colors hover:text-neutral-900 active:scale-[0.99]"
+                        className="w-full rounded-xl py-3 text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-neutral-900 active:scale-[0.98]"
                     >
                         Cancel
                     </button>
