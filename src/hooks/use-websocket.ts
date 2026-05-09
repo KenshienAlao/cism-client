@@ -8,6 +8,7 @@ import { useAuth } from './use-auth';
 import { CART_QUERY_KEY } from './use-cart';
 import { MY_ORDERS_QUERY_KEY } from './use-order';
 import { ITEM_QUERY_KEY } from './use-item';
+import { CHAT_QUERY_KEY } from './use-chat';
 import { STATUS } from '@/config/track.config';
 import { Order } from '@/model/order.model';
 import { notifSuccess } from '@/lib/toast';
@@ -20,7 +21,6 @@ const getWsUrl = () => {
 
 const WS_URL = getWsUrl();
 
-// Track mutations in progress so we can skip duplicate toasts
 const pendingMutations = new Set<string>();
 
 export function trackMutation(key: string) {
@@ -95,7 +95,7 @@ export function useWebSocket() {
             reconnectDelay: 0,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,
-            debug: () => {},
+            debug: () => { },
             onConnect: () => {
                 reconnectAttempts.current = 0;
                 client.subscribe('/user/queue/orders', (message) => {
@@ -112,6 +112,56 @@ export function useWebSocket() {
 
                 client.subscribe('/topic/inventory', (message) => {
                     queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
+                });
+
+                client.subscribe('/user/queue/chat', (message) => {
+                    const chat = JSON.parse(message.body);
+
+                    if (chat.type === 'READ_RECEIPT') {
+                        queryClient.setQueryData<any[]>([...CHAT_QUERY_KEY, chat.stallId, chat.customerId], (prev) => {
+                            if (!prev) return prev;
+                            return prev.map(msg => ({ ...msg, isRead: true }));
+                        });
+                        queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
+                        return;
+                    }
+
+                    if (chat.type === 'MESSAGE_DELETED') {
+                        const delKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
+                        queryClient.setQueryData<any[]>(delKey, (prev) => {
+                            if (!prev) return prev;
+                            return prev.map(msg =>
+                                msg.id === chat.messageId
+                                    ? { ...msg, content: 'Message has been removed', isDeleted: true }
+                                    : msg
+                            );
+                        });
+                        queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
+                        return;
+                    }
+
+                    const queryKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
+                    queryClient.setQueryData<any[]>(queryKey, (prev) => {
+                        if (!prev) return [chat];
+                        // Check if we already have this message (by real ID or as an optimistic one)
+                        const alreadyExists = prev.some(m => m.id === chat.id);
+                        if (alreadyExists) return prev;
+                        // Replace any optimistic 'sending' message with matching content
+                        const hasOptimistic = prev.some(m => m.status === 'sending' && m.content === chat.content);
+                        if (hasOptimistic) {
+                            return prev.map(m => 
+                                (m.status === 'sending' && m.content === chat.content) 
+                                    ? { ...chat, status: 'sent' } 
+                                    : m
+                            );
+                        }
+                        return [...prev, chat];
+                    });
+                    queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
+                    // Toast only for messages from others
+                    if (profile?.user?.id !== chat.senderId) {
+                        notifSuccess(`New message from ${chat.senderName}`);
+                    }
                 });
             },
             onStompError: (frame) => {

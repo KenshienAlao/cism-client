@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode, useState } from "react";
 import { WebSocketListener } from "@/components/websocket-listener";
+import { ChatProvider } from "./chat-provider";
+import { GlobalChatbox } from "@/components/global-chatbox";
 
 export default function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -16,9 +18,12 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WebSocketListener />
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ChatProvider>
+        <WebSocketListener />
+        {children}
+        <GlobalChatbox />
+      </ChatProvider>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 }

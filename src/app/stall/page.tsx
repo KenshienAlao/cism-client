@@ -23,8 +23,10 @@ import {
 
 import { formatTime } from '@/lib/utils/formatTime';
 import { formatDate } from '@/lib/utils/formatDate';
+import { useGlobalChat } from '@/provider/chat-provider';
 
 function StallContent() {
+    const { openChat } = useGlobalChat();
     const searchParams = useSearchParams();
     const router = useRouter();
     const stallName = searchParams.get('name');
@@ -110,7 +112,10 @@ function StallContent() {
                                     <UserPlus className="w-3.5 h-3.5" />
                                     Follow
                                 </button>
-                                <button className="flex items-center gap-2 px-6 py-2.5 bg-white border border-neutral-200 text-neutral-700 text-xs font-bold rounded-xl hover:bg-neutral-50 transition-all uppercase tracking-widest">
+                                <button
+                                    onClick={() => openChat({ stallId: stall.id, stallName: stall.name, stallImage: stall.image })}
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-white border border-neutral-200 text-neutral-700 text-xs font-bold rounded-xl hover:bg-neutral-50 transition-all uppercase tracking-widest"
+                                >
                                     <MessageCircle className="w-3.5 h-3.5" />
                                     Chat
                                 </button>
