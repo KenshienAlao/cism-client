@@ -5,6 +5,64 @@ import { useGlobalChat } from '@/provider/chat-provider';
 import { useItem } from '@/hooks/use-item';
 import { X, Search, Inbox } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/config/api.config';
+
+function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, openChat: (chat: any) => void }) {
+    const isCustomer = thread.customerId === profile?.user?.id;
+    const name = isCustomer ? thread.stallName : thread.customerName;
+    const image = isCustomer ? thread.stallImage : thread.customerImage;
+
+    const { data: presence } = useQuery<any>({
+        queryKey: ['presence', isCustomer ? thread.stallId : thread.customerId, isCustomer ? 'STALL' : 'CLIENT'],
+        queryFn: async () => {
+            const type = isCustomer ? 'STALL' : 'CLIENT';
+            const id = isCustomer ? thread.stallId : thread.customerId;
+            const res = await apiClient.get<any>(`/api/v1/chat/presence/${type}/${id}`);
+            return res.data;
+        },
+        staleTime: Infinity,
+    });
+
+    return (
+        <button
+            onClick={() => openChat({
+                stallId: thread.stallId,
+                stallName: thread.stallName,
+                stallImage: thread.stallImage,
+                stallRole: thread.stallRole,
+                conversationId: thread.conversationId,
+                customerId: !isCustomer ? thread.customerId : undefined,
+                customerName: !isCustomer ? thread.customerName : undefined,
+                customerImage: !isCustomer ? thread.customerImage : undefined
+            })}
+            className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm"
+        >
+            <div className="relative flex-shrink-0">
+                <Avatar src={image} name={name} size="md" />
+                {presence?.isOnline && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm" />
+                )}
+            </div>
+            <div className="flex-1 overflow-hidden">
+                <div className="flex justify-between items-baseline mb-1">
+                    <h4 className="font-semibold text-sm text-gray-900 truncate">
+                        {name}
+                    </h4>
+                    <span className="text-[10px] text-gray-400 flex-shrink-0 ml-2">
+                        {new Date(thread.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </span>
+                </div>
+                <p className={`text-xs truncate ${thread.isUnread ? 'text-gray-900 font-bold' : 'text-gray-500'}`}>
+                    {thread.lastMessage}
+                </p>
+            </div>
+            {thread.isUnread && (
+                <div className="w-2.5 h-2.5 bg-orange-500 rounded-full flex-shrink-0"></div>
+            )}
+        </button>
+    );
+}
 
 export function InboxView() {
     const { profile } = useAuth();
@@ -55,35 +113,9 @@ export function InboxView() {
                             {filteredThreads.length > 0 && (
                                 <div className="px-2 py-1">
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2">Recent Conversations</span>
-                                    {filteredThreads.map((thread, idx) => {
-                                        const isCustomer = thread.customerId === profile?.user?.id;
-                                        const name = isCustomer ? thread.stallName : thread.customerName;
-                                        const image = isCustomer ? thread.stallImage : thread.customerImage;
-
-                                        return (
-                                            <button
-                                                key={`thread-search-${idx}`}
-                                                onClick={() => {
-                                                    setSearchQuery('');
-                                                    openChat({
-                                                        stallId: thread.stallId,
-                                                        stallName: thread.stallName,
-                                                        stallImage: thread.stallImage,
-                                                        customerId: !isCustomer ? thread.customerId : undefined,
-                                                        customerName: !isCustomer ? thread.customerName : undefined,
-                                                        customerImage: !isCustomer ? thread.customerImage : undefined
-                                                    });
-                                                }}
-                                                className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm mt-1"
-                                            >
-                                                <Avatar src={image} name={name} size="md" className="flex-shrink-0" />
-                                                <div className="flex-1 overflow-hidden">
-                                                    <h4 className="font-semibold text-sm text-gray-900 truncate">{name}</h4>
-                                                    <p className="text-xs text-gray-500 truncate">{thread.lastMessage}</p>
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
+                                    {filteredThreads.map((thread, idx) => (
+                                        <ThreadItem key={`thread-search-${idx}`} thread={thread} profile={profile} openChat={openChat} />
+                                    ))}
                                 </div>
                             )}
 
@@ -98,7 +130,8 @@ export function InboxView() {
                                                 openChat({
                                                     stallId: stall.id,
                                                     stallName: stall.name,
-                                                    stallImage: stall.image
+                                                    stallImage: stall.image,
+                                                    stallRole: stall.role
                                                 });
                                             }}
                                             className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm mt-1"
@@ -124,49 +157,9 @@ export function InboxView() {
                         <p>No conversations yet.</p>
                     </div>
                 ) : (
-                    threads.map((thread, idx) => {
-                        const isCustomer = thread.customerId === profile?.user?.id;
-                        const name = isCustomer ? thread.stallName : thread.customerName;
-                        const image = isCustomer ? thread.stallImage : thread.customerImage;
-
-                        return (
-                            <button
-                                key={idx}
-                                onClick={() => openChat({
-                                    stallId: thread.stallId,
-                                    stallName: thread.stallName,
-                                    stallImage: thread.stallImage,
-                                    customerId: !isCustomer ? thread.customerId : undefined,
-                                    customerName: !isCustomer ? thread.customerName : undefined,
-                                    customerImage: !isCustomer ? thread.customerImage : undefined
-                                })}
-                                className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm"
-                            >
-                                <Avatar
-                                    src={image}
-                                    name={name}
-                                    size="md"
-                                    className="flex-shrink-0"
-                                />
-                                <div className="flex-1 overflow-hidden">
-                                    <div className="flex justify-between items-baseline mb-1">
-                                        <h4 className="font-semibold text-sm text-gray-900 truncate">
-                                            {name}
-                                        </h4>
-                                        <span className="text-[10px] text-gray-400 flex-shrink-0 ml-2">
-                                            {new Date(thread.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                        </span>
-                                    </div>
-                                    <p className={`text-xs truncate ${thread.isUnread ? 'text-gray-900 font-bold' : 'text-gray-500'}`}>
-                                        {thread.lastMessage}
-                                    </p>
-                                </div>
-                                {thread.isUnread && (
-                                    <div className="w-2.5 h-2.5 bg-orange-500 rounded-full flex-shrink-0"></div>
-                                )}
-                            </button>
-                        );
-                    })
+                    threads.map((thread, idx) => (
+                        <ThreadItem key={idx} thread={thread} profile={profile} openChat={openChat} />
+                    ))
                 )}
             </div>
         </>

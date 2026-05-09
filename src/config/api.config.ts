@@ -9,6 +9,7 @@ const instance = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "X-App-Type": "client"
   },
 });
 

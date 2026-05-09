@@ -1,14 +1,19 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ActiveChat {
     stallId: number;
     stallName: string;
     stallImage?: string | null;
+    stallRole?: string;
     customerId?: number;
     customerName?: string;
     customerImage?: string | null;
+    conversationId?: string;
+    status?: 'active' | 'away' | 'offline';
+    lastActive?: string;
 }
 
 interface ChatContextType {
@@ -26,6 +31,16 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [activeChat, setActiveChat] = useState<ActiveChat | null>(null);
+    const { profile } = useAuth();
+    const prevUserId = useRef(profile?.user?.id);
+
+    useEffect(() => {
+        if (profile?.user?.id !== prevUserId.current) {
+            setActiveChat(null);
+            setIsOpen(false);
+            prevUserId.current = profile?.user?.id;
+        }
+    }, [profile?.user?.id]);
 
     const openChat = (chat: ActiveChat) => {
         setActiveChat(chat);

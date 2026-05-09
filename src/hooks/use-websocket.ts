@@ -40,6 +40,8 @@ export function useWebSocket() {
     const reconnectAttempts = useRef(0);
     const maxReconnectAttempts = 10;
 
+    const profileId = profile?.user?.id;
+
     const patchOrderInCache = useCallback((order: any) => {
         queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY, (prev) => {
             if (!prev) return prev;
@@ -82,7 +84,7 @@ export function useWebSocket() {
     }, []);
 
     useEffect(() => {
-        if (!profile) {
+        if (!profileId) {
             if (clientRef.current) {
                 clientRef.current.deactivate();
                 clientRef.current = null;
@@ -90,8 +92,10 @@ export function useWebSocket() {
             return;
         }
 
+        if (clientRef.current) return;
+
         const client = new Client({
-            webSocketFactory: () => new SockJS(WS_URL),
+            webSocketFactory: () => new SockJS(`${WS_URL}?appType=client`),
             reconnectDelay: 0,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,
@@ -114,21 +118,36 @@ export function useWebSocket() {
                     queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
                 });
 
+                // Presence tracking
+                client.subscribe('/topic/presence', (message) => {
+                    const presence = JSON.parse(message.body);
+                    // Update user/stall presence in cache
+                    queryClient.setQueryData(['presence', presence.id, presence.userType], presence);
+                });
+
                 client.subscribe('/user/queue/chat', (message) => {
                     const chat = JSON.parse(message.body);
 
                     if (chat.type === 'READ_RECEIPT') {
-                        queryClient.setQueryData<any[]>([...CHAT_QUERY_KEY, chat.stallId, chat.customerId], (prev) => {
+                      const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
+                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
                             if (!prev) return prev;
-                            return prev.map(msg => ({ ...msg, isRead: true }));
+                            return prev.map(msg => {
+                                if (chat.sentByStall) {
+                                    // Stall read the messages → mark messages sent by customer as read
+                                    return msg.sentByStall === false ? { ...msg, readByStall: true } : msg;
+                                } else {
+                                    // Customer read the messages → mark messages sent by stall as read
+                                    return msg.sentByStall === true ? { ...msg, readByCustomer: true } : msg;
+                                }
+                            });
                         });
-                        queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
                         return;
                     }
 
                     if (chat.type === 'MESSAGE_DELETED') {
-                        const delKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
-                        queryClient.setQueryData<any[]>(delKey, (prev) => {
+                        const baseKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
+                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
                             if (!prev) return prev;
                             return prev.map(msg =>
                                 msg.id === chat.messageId
@@ -136,17 +155,15 @@ export function useWebSocket() {
                                     : msg
                             );
                         });
-                        queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
                         return;
                     }
 
-                    const queryKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
-                    queryClient.setQueryData<any[]>(queryKey, (prev) => {
+                    // New message received via WebSocket
+                    const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
+                    queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
                         if (!prev) return [chat];
-                        // Check if we already have this message (by real ID or as an optimistic one)
                         const alreadyExists = prev.some(m => m.id === chat.id);
                         if (alreadyExists) return prev;
-                        // Replace any optimistic 'sending' message with matching content
                         const hasOptimistic = prev.some(m => m.status === 'sending' && m.content === chat.content);
                         if (hasOptimistic) {
                             return prev.map(m => 
@@ -157,9 +174,44 @@ export function useWebSocket() {
                         }
                         return [...prev, chat];
                     });
-                    queryClient.invalidateQueries({ queryKey: [...CHAT_QUERY_KEY, 'threads'] });
+                    // NOTE: No invalidateQueries here — it would trigger a refetch that overwrites
+                    // in-memory read state (readByStall/readByCustomer) with potentially stale DB data.
+
+                    // Update thread list directly in cache instead of invalidating
+                    queryClient.setQueryData<any[]>([...CHAT_QUERY_KEY, 'threads', profileId], (prev) => {
+                        if (!prev) return prev;
+                        const threadIdx = prev.findIndex(
+                            (t: any) => t.stallId === chat.stallId && t.customerId === chat.customerId
+                        );
+                        if (threadIdx >= 0) {
+                            const updated = [...prev];
+                            updated[threadIdx] = {
+                                ...updated[threadIdx],
+                                lastMessage: chat.content,
+                                lastMessageAt: chat.createdAt,
+                                isUnread: chat.sentByStall,
+                            };
+                            // Move to top
+                            const [thread] = updated.splice(threadIdx, 1);
+                            updated.unshift(thread);
+                            return updated;
+                        }
+                        // New thread — add to top
+                        return [{
+                            stallId: chat.stallId,
+                            stallName: chat.senderName,
+                            stallImage: null,
+                            customerId: chat.customerId,
+                            customerName: chat.customerName,
+                            customerImage: null,
+                            lastMessage: chat.content,
+                            lastMessageAt: chat.createdAt,
+                            isUnread: profileId !== chat.senderId,
+                        }, ...prev];
+                    });
+
                     // Toast only for messages from others
-                    if (profile?.user?.id !== chat.senderId) {
+                    if (chat.sentByStall) {
                         notifSuccess(`New message from ${chat.senderName}`);
                     }
                 });
@@ -168,7 +220,6 @@ export function useWebSocket() {
                 console.error('WS STOMP Error:', frame.headers['message']);
             },
             onWebSocketClose: () => {
-                // Exponential backoff reconnect
                 if (reconnectAttempts.current < maxReconnectAttempts) {
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
                     reconnectAttempts.current++;
@@ -190,7 +241,7 @@ export function useWebSocket() {
                 clientRef.current = null;
             }
         };
-    }, [profile, queryClient, patchOrderInCache, getToastMessage]);
+    }, [profileId, queryClient, patchOrderInCache, getToastMessage]);
 
     return clientRef.current;
 }

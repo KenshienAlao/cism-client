@@ -17,14 +17,14 @@ export function GlobalChatbox() {
     return (
         <>
             {isOpen ? (
-                <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-[10000] w-full h-[100dvh] md:w-96 md:h-[32rem] bg-white md:rounded-2xl shadow-2xl flex flex-col overflow-hidden border-0 md:border border-gray-100 animate-in slide-in-from-bottom-2 md:zoom-in-95 duration-200">
+                <div className="fixed inset-0 md:inset-auto md:bottom-0 md:right-4 z-[10000] w-full h-[100dvh] md:w-[700px] md:h-[800px] md:max-h-[85vh] shadow-2xl rounded-t-2xl flex flex-col overflow-hidden border-0 md:border border-gray-200/50 bg-white animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out">
                     {activeChat ? <ActiveChatView /> : <InboxView />}
                 </div>
             ) : (
                 <div className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-[9999]">
                     <button
                         onClick={toggleChat}
-                        className="relative bg-orange-500 text-white p-4 rounded-full shadow-2xl hover:bg-orange-600 hover:scale-105 transition-all duration-200 border-4 border-white"
+                        className="relative bg-orange-500 text-white p-4 rounded-full hover:bg-orange-600 hover:scale-105 transition-all duration-200 border-4 border-white"
                     >
                         <MessageCircle className="w-7 h-7" />
                         {threads.some(t => t.isUnread) && (

@@ -92,9 +92,9 @@ export default function CartPage() {
                 <p className="text-neutral-400 text-sm mb-10 max-w-xs">Looks like you haven't added anything to your cart yet.</p>
                 <button
                     onClick={() => router.push('/')}
-                    className="px-10 py-4 bg-neutral-900 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:bg-neutral-800 transition-all"
+                    className="px-10 py-4 bg-orange-500 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em]"
                 >
-                    Go Shopping
+                    Buy food now!
                 </button>
             </div>
         );
@@ -104,8 +104,8 @@ export default function CartPage() {
         <div className="min-h-screen bg-[#FDFDFD] pb-32">
             <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
                 <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <h1 className="text-lg font-black tracking-tight text-neutral-900">Shopping Cart</h1>
-                    <button 
+                    <h1 className="text-lg font-black tracking-tight text-neutral-900">My Cart</h1>
+                    <button
                         onClick={() => {
                             if (selectedIds.size === cartItems.length) setSelectedIds(new Set());
                             else setSelectedIds(new Set(cartItems.map(i => i.id)));
@@ -158,7 +158,7 @@ export default function CartPage() {
                                             <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
                                                 <div className="flex justify-between items-start gap-2">
                                                     <h3 className="text-sm font-bold text-neutral-900 truncate">{item.name}</h3>
-                                                    <button 
+                                                    <button
                                                         onClick={() => removeItem(item.id)}
                                                         className="text-neutral-300 hover:text-rose-500 transition-colors p-1"
                                                     >
@@ -168,9 +168,9 @@ export default function CartPage() {
 
                                                 <div className="flex items-center justify-between">
                                                     <p className="text-base font-black text-orange-500">₱{(item.price * qty).toFixed(2)}</p>
-                                                    
+
                                                     <div className="flex items-center gap-3 bg-neutral-50 p-1 rounded-xl border border-neutral-100">
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleUpdateQuantity(item.id, -1)}
                                                             className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-neutral-600 active:scale-90 transition-all disabled:opacity-50"
                                                         >
@@ -179,7 +179,7 @@ export default function CartPage() {
                                                         <span className={`w-4 text-center text-xs font-bold ${stagedQuantities[item.id] !== undefined ? 'text-orange-500' : 'text-neutral-900'}`}>
                                                             {qty}
                                                         </span>
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleUpdateQuantity(item.id, 1)}
                                                             disabled={qty >= maxStock}
                                                             className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-neutral-600 active:scale-90 transition-all disabled:opacity-50"
@@ -213,13 +213,13 @@ export default function CartPage() {
                     <div className="flex gap-3">
                         {hasChanges ? (
                             <>
-                                <button 
+                                <button
                                     onClick={() => setStagedQuantities({})}
                                     className="px-6 py-4 bg-neutral-100 text-neutral-500 font-black rounded-2xl uppercase text-[10px] tracking-widest hover:bg-neutral-200 transition-all"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleSaveChanges}
                                     disabled={isMutating}
                                     className="px-8 py-4 bg-orange-500 text-white font-black rounded-2xl uppercase text-[10px] tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all flex items-center gap-2"
@@ -228,7 +228,7 @@ export default function CartPage() {
                                 </button>
                             </>
                         ) : (
-                            <button 
+                            <button
                                 onClick={handleCheckout}
                                 disabled={selectedCount === 0 || isMutating}
                                 className="px-10 py-4 bg-orange-500 text-white font-black rounded-2xl uppercase text-[10px] tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-3"

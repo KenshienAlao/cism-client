@@ -38,6 +38,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const [isFocused, setIsFocused] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const [mounted, setMounted] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +51,10 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const allItems = useEnrichedItems(stalls);
 
     // --- Effects ---
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     useEffect(() => {
         setQuery(searchParams.get('q') || '');
     }, [searchParams]);
@@ -267,7 +272,9 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
 
                     <Link href="/account" className="group relative shrink-0">
                         <div className="relative size-14 md:size-20 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden ring-4 ring-white group-hover:ring-orange-500/20 transition-all duration-300">
-                            {avatar ? (
+                            {!mounted ? (
+                                <div className="h-full w-full bg-neutral-200 animate-pulse" />
+                            ) : avatar ? (
                                 <Image src={avatar} alt="avatar" fill className="object-cover" />
                             ) : initials ? (
                                 <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-rose-500">
