@@ -32,9 +32,9 @@ export default function OrdersPage() {
                 <p className="text-neutral-400 text-sm mb-10 max-w-xs">You haven't placed any orders yet. Start exploring the market!</p>
                 <Link
                     href="/"
-                    className="px-10 py-4 bg-neutral-900 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em] transition-all"
+                    className="px-10 py-4 bg-orange-500 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em] transition-all"
                 >
-                    Go Shopping
+                    Go Buy
                 </Link>
             </div>
         );

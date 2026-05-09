@@ -9,7 +9,10 @@ const instance = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
-    "X-App-Type": "client"
+    "X-App-Type": "client",
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
   },
 });
 

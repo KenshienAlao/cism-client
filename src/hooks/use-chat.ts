@@ -59,7 +59,8 @@ export const useChatHistory = (stallId?: number, customerId?: number, conversati
             let url = `/api/v1/chat/stall/${stallId || 0}`;
             const params = new URLSearchParams();
             if (customerId) params.append('customerId', customerId.toString());
-            if (conversationId) params.append('conversationId', conversationId);
+            if (conversationId && conversationId !== 'undefined' && conversationId !== 'null') params.append('conversationId', conversationId);
+            params.append('_t', Date.now().toString()); // Cache-buster
 
             const res = await apiClient.get<ChatMessage[]>(`${url}?${params.toString()}`);
             if (!res.success) throw new Error(res.message);
@@ -76,7 +77,7 @@ export const useChatThreads = () => {
     return useQuery<ChatThread[]>({
         queryKey: [...CHAT_QUERY_KEY, 'threads', profile?.user?.id],
         queryFn: async () => {
-            const res = await apiClient.get<ChatThread[]>('/api/v1/chat/threads');
+            const res = await apiClient.get<ChatThread[]>(`/api/v1/chat/threads?_t=${Date.now()}`);
             if (!res.success) throw new Error(res.message);
             return res.data;
         },

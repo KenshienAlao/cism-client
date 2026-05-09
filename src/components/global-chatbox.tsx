@@ -6,18 +6,25 @@ import { useGlobalChat } from '@/provider/chat-provider';
 import { MessageCircle } from 'lucide-react';
 import { ActiveChatView } from './chat/active-chat-view';
 import { InboxView } from './chat/inbox-view';
+import { usePathname } from 'next/navigation';
 
 export function GlobalChatbox() {
     const { profile } = useAuth();
     const { isOpen, toggleChat, activeChat } = useGlobalChat();
     const { data: threads = [] } = useChatThreads();
+    const pathname = usePathname();
 
-    if (!profile) return null;
+    const hideOnRoutesChatbox = [
+        "/login",
+        "/register",
+    ]
+
+    if (!profile || hideOnRoutesChatbox.includes(pathname)) return null;
 
     return (
         <>
             {isOpen ? (
-                <div className="fixed inset-0 md:inset-auto md:bottom-0 md:right-4 z-[10000] w-full h-[100dvh] md:w-[700px] md:h-[800px] md:max-h-[85vh] shadow-2xl rounded-t-2xl flex flex-col overflow-hidden border-0 md:border border-gray-200/50 bg-white animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out">
+                <div className="fixed inset-0 md:inset-auto md:bottom-0 md:right-4 z-[10000] w-full h-[100dvh] md:w-[700px] md:h-[800px] md:max-h-[85vh] shadow-2xl md:rounded-t-2xl flex flex-col overflow-hidden border-0 md:border border-gray-200/50 bg-white animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out">
                     {activeChat ? <ActiveChatView /> : <InboxView />}
                 </div>
             ) : (
