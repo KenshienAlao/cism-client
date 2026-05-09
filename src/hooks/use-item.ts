@@ -34,33 +34,7 @@ export function useItem(): UseItemReturn {
 
   const createReviewMutation = useMutation({
     mutationFn: async (review: ReviewRequest) => await itemService.createReview(review),
-    onMutate: async (newReview) => {
-      await queryClient.cancelQueries({ queryKey: ITEM_QUERY_KEY });
-      const previousItems = queryClient.getQueryData<StallItems[]>(ITEM_QUERY_KEY);
 
-      if (previousItems) {
-        queryClient.setQueryData<StallItems[]>(ITEM_QUERY_KEY,
-          previousItems.map(stall => {
-            const hasItem = stall.items.some(i => i.id === newReview.itemId);
-            if (!hasItem) return stall;
-            return {
-              ...stall,
-              reviews: [
-                ...stall.reviews,
-                {
-                  id: Date.now(),
-                  ...newReview,
-                  createdAt: new Date().toISOString(),
-                  userName: 'You', // Placeholder
-                  userAvatar: '' // Placeholder
-                } as any
-              ]
-            };
-          })
-        );
-      }
-      return { previousItems };
-    },
     onSuccess: (res: ApiResponse<Review>) => {
       if (res.success) {
         notifSuccess("Review submitted successfully!");
@@ -68,10 +42,7 @@ export function useItem(): UseItemReturn {
         notifError(res.message);
       }
     },
-    onError: (err: Error, __, context) => {
-      if (context?.previousItems) {
-        queryClient.setQueryData(ITEM_QUERY_KEY, context.previousItems);
-      }
+    onError: (err: Error) => {
       notifError(err.message || "Failed to submit review");
     },
     onSettled: () => {

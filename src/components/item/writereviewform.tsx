@@ -5,16 +5,17 @@ import { createReviewSchema } from "@/validation/item.validation";
 import { notifError } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 
-export function WriteReviewForm({ 
-    stallId, 
-    itemId, 
-    onCreateReview 
-}: { 
-    stallId: number; 
-    itemId: number; 
-    onCreateReview: (stallId: number, itemId: number, star: number, comment: string) => Promise<void> 
+export function WriteReviewForm({
+    stallId,
+    itemId,
+    onCreateReview
+}: {
+    stallId: number;
+    itemId: number;
+    onCreateReview: (stallId: number, itemId: number, star: number, comment: string) => Promise<void>
 }) {
     const [reviewForm, setReviewForm] = useState<Review>(initReview);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
         const valid = createReviewSchema.safeParse(reviewForm);
@@ -22,8 +23,13 @@ export function WriteReviewForm({
             notifError(valid.error.issues[0].message);
             return;
         }
-        await onCreateReview(stallId, itemId, reviewForm.star, reviewForm.comment);
-        setReviewForm(initReview);
+        setIsSubmitting(true);
+        try {
+            await onCreateReview(stallId, itemId, reviewForm.star, reviewForm.comment);
+            setReviewForm(initReview);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -59,10 +65,10 @@ export function WriteReviewForm({
                 <div className="flex justify-end">
                     <Button
                         onClick={handleSubmit}
-                        disabled={reviewForm.star === 0 || !reviewForm.comment?.trim()}
+                        disabled={reviewForm.star === 0 || !reviewForm.comment?.trim() || isSubmitting}
                         className="bg-orange-500 text-white font-bold py-3 px-8 rounded-xl hover:bg-orange-600 transition-colors text-sm uppercase disabled:opacity-50 disabled:cursor-not-allowed h-auto"
                     >
-                        Submit
+                        {isSubmitting ? 'Submitting...' : 'Submit'}
                     </Button>
                 </div>
             </div>

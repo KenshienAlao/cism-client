@@ -1,4 +1,4 @@
-import { Star, Plus, ShoppingCart } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { ItemResponse } from '@/model/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,14 +8,12 @@ interface ProductCardProps {
     item: ItemResponse;
     image: string;
     stallImage?: string | null;
-    onAddToCart?: (id: string) => void;
 }
 
 export function ProductCard({
     item,
     image,
     stallImage,
-    onAddToCart,
 }: ProductCardProps) {
     const { id, name, price, stallName, rating, reviewCount, stock } = item;
 
@@ -79,18 +77,6 @@ export function ProductCard({
                             Php {price.toFixed(2)}
                         </span>
                     </div>
-
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onAddToCart?.(id.toString());
-                        }}
-                        disabled={stock === 0}
-                        className="bg-primary/10 hover:bg-primary text-primary hover:text-white p-2 rounded-full transition-all active:scale-90 disabled:opacity-50 disabled:bg-neutral-100 disabled:text-neutral-400"
-                    >
-                        <Plus className="w-5 h-5" />
-                    </button>
                 </div>
             </div>
         </Link>
