@@ -49,7 +49,7 @@ CISM is a multi-platform ecosystem designed to streamline canteen operations:
 - **Notifications** - Real-time push notifications for order updates, status changes, and new messages
 - **Live Chat** - Real-time messaging system for direct communication between customers and stall owners
 - **Ratings & Reviews** - Share feedback and rate products to help other students discover the best finds
-- **Account Management** - Manage user profile, delivery addresses, and personal settings
+- **Account Management** - Manage user profile and personal settings
 
 ## How It Works
 
