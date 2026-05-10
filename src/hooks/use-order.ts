@@ -27,26 +27,24 @@ export function useOrder() {
     });
 
     const cancelOrder = useMutation({
-        mutationFn: (orderId: string) => orderService.cancelOrder(orderId),
-        onMutate: async (orderId) => {
-            trackMutation(`order-${orderId}-CANCELLED`);
+        mutationFn: ({ id, reason }: { id: string, reason?: string }) => orderService.cancelOrder(id, reason),
+        onMutate: async ({ id }) => {
+            trackMutation(`order-${id}-CANCELLED`);
 
             await queryClient.cancelQueries({ queryKey: MY_ORDERS_QUERY_KEY });
             const previousOrders = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY);
             if (previousOrders) {
                 queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY,
-                    previousOrders.map(o => o.id === orderId ? { ...o, status: 'CANCELLED' } : o)
+                    previousOrders.map(o => o.id === id ? { ...o, status: 'CANCELLED' } : o)
                 );
             }
             return { previousOrders };
         },
-        onSuccess: (_, orderId) => {
-            const stallName = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY)
-                ?.find(o => o.id === orderId)?.stallName;
-            // notifSuccess(stallName ? `Order from ${stallName} cancelled` : 'Order cancelled');
+        onSuccess: (_, { id }) => {
+            // Success logic
         },
-        onError: (error: any, orderId, context) => {
-            clearMutation(`order-${orderId}-CANCELLED`);
+        onError: (error: any, { id }, context) => {
+            clearMutation(`order-${id}-CANCELLED`);
             if (context?.previousOrders) {
                 queryClient.setQueryData(MY_ORDERS_QUERY_KEY, context.previousOrders);
             }
@@ -151,18 +149,6 @@ export function useOrder() {
         }
     });
 
-    const handleCancelOrder = (orderId: string) => {
-        showConfirmation({
-            title: "Cancel Order",
-            message: "Are you sure you want to cancel this order? This action cannot be undone.",
-            confirmText: "Yes, Cancel",
-            type: "danger",
-            onConfirm: () => {
-                cancelOrder.mutate(orderId);
-            }
-        });
-    };
-
     const handleDeleteOrder = (orderId: string) => {
         showConfirmation({
             title: "Delete Order",
@@ -187,7 +173,6 @@ export function useOrder() {
         useMyOrders,
         useTrackOrder,
         updateStatus,
-        handleCancelOrder,
         handleDeleteOrder,
         getFilteredOrders
     };

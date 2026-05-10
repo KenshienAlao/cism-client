@@ -24,6 +24,7 @@ export interface Order {
     createdAt: string;
     stallId: number;
     cancelReason?: string;
+    cancelledBy?: 'CUSTOMER' | 'STALL';
     deletedByCustomer: boolean;
     deletedByStall: boolean;
 }

@@ -38,7 +38,7 @@ export function BottomNav() {
     if (hideOnRoutes.includes(pathname)) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[999] bg-white border-t border-neutral-100 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-neutral-100 pb-safe">
             <nav className="max-w-md mx-auto h-16 md:h-18 flex items-center justify-around px-2">
                 {navItems.map((item: any) => {
                     const isActive = pathname === item.href;

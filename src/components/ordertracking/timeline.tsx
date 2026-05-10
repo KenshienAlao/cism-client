@@ -18,7 +18,9 @@ export default function Timeline({ order, currentStatusIndex }: TimelineProps) {
                         </div>
                         <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-widest">Order Cancelled</h3>
                         <p className="text-[11px] font-medium text-neutral-400 mt-2 max-w-[240px] leading-relaxed">
-                            This order was rejected by the stall. See the reason below in the details section.
+                            {order.cancelledBy === 'CUSTOMER'
+                                ? "This order was cancelled by you."
+                                : "This order was cancelled by the stall. See the reason below in the details."}
                         </p>
                     </div>
                 ) : (

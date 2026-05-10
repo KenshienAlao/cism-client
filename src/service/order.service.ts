@@ -12,8 +12,9 @@ export const orderService = {
         return apiClient.get<Order[]>(ORDER_API_ENDPOINTS.CUSTOMER.GET_MY_ORDERS);
     },
 
-    cancelOrder(id: string): Promise<ApiResponse<Order>> {
-        return apiClient.post<Order>(ORDER_API_ENDPOINTS.CUSTOMER.CANCEL_ORDER(id));
+    cancelOrder(id: string, reason?: string): Promise<ApiResponse<Order>> {
+        const url = reason ? `${ORDER_API_ENDPOINTS.CUSTOMER.CANCEL_ORDER(id)}?reason=${encodeURIComponent(reason)}` : ORDER_API_ENDPOINTS.CUSTOMER.CANCEL_ORDER(id);
+        return apiClient.post<Order>(url);
     },
 
     receiveOrder(id: string): Promise<ApiResponse<Order>> {

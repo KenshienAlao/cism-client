@@ -14,12 +14,15 @@ import Emptytab from '@/components/orders/empty-tab';
 const TABS = ['PENDING', 'PREPARING', 'READY', 'COMPLETED', 'CANCELLED'] as const;
 type TabType = typeof TABS[number];
 
+import { CancelReasonModal } from '@/components/orders/cancel-reason-modal';
+
 export default function OrdersPage() {
-    const { useMyOrders, receiveOrder, deleteOrder, handleCancelOrder, handleDeleteOrder } = useOrder();
+    const { useMyOrders, receiveOrder, deleteOrder, cancelOrder, handleDeleteOrder } = useOrder();
     const { createReview } = useItem();
     const { data: orders, isLoading } = useMyOrders();
     const [activeTab, setActiveTab] = useState<TabType>('PENDING');
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
     const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
 
     const filteredOrders = useMemo(() =>
@@ -54,9 +57,19 @@ export default function OrdersPage() {
         }
     };
 
+    const handleConfirmCancel = async (reason: string) => {
+        if (!orderToCancel) return;
+        try {
+            await cancelOrder.mutateAsync({ id: orderToCancel, reason });
+            setOrderToCancel(null);
+        } catch (error) {
+            // Error handled by mutation
+        }
+    };
+
     return (
         <div className="min-h-screen bg-neutral-50 pb-32">
-            <header className="sticky top-0 z-40 bg-white border-b border-neutral-100 overflow-x-auto scrollbar-hide">
+            <header className="sticky top-0 z-40">
                 <Tabs
                     TABS={TABS}
                     activeTab={activeTab}
@@ -65,13 +78,13 @@ export default function OrdersPage() {
                 />
             </header>
 
-            <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+            <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-6">
                 {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                         <OrderCard
                             key={order.id}
                             order={order}
-                            onCancel={handleCancelOrder}
+                            onCancel={() => setOrderToCancel(order.id)}
                             onReceive={(id: string) => receiveOrder.mutate(id)}
                             onDelete={handleDeleteOrder}
                             onReview={setSelectedOrder}
@@ -88,6 +101,13 @@ export default function OrdersPage() {
                 orderId={selectedOrder?.orderCode}
                 onSubmitReview={handleReviewSubmit}
                 isSubmitting={isSubmittingReview}
+            />
+
+            <CancelReasonModal
+                isOpen={!!orderToCancel}
+                onClose={() => setOrderToCancel(null)}
+                onConfirm={handleConfirmCancel}
+                isPending={cancelOrder.isPending}
             />
         </div>
     );

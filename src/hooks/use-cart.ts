@@ -112,65 +112,13 @@ export function useCart() {
 
   const addMutation = useMutation({
     mutationFn: (item: CartRequest) => cartService.addToCart(item),
-    onMutate: async (newItem) => {
-      await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
-      const previous = queryClient.getQueryData<CartResponse[]>(CART_QUERY_KEY);
-
-      if (previous) {
-        const existing = previous.find(i =>
-          Number(i.itemId) === Number(newItem.stallItemId) &&
-          (newItem.variationId ? Number(i.variationId) === Number(newItem.variationId) : !i.variationId)
-        );
-
-        if (existing) {
-          queryClient.setQueryData<CartResponse[]>(CART_QUERY_KEY,
-            previous.map(i => i.id === existing.id ? { ...i, quantity: i.quantity + newItem.quantity } : i)
-          );
-        } else {
-          let enrichedTempItem: any = {
-            id: Date.now(),
-            itemId: newItem.stallItemId,
-            variationId: newItem.variationId,
-            quantity: newItem.quantity,
-            price: 0,
-            image: '',
-            itemName: 'Adding...'
-          };
-
-          for (const stall of allStalls) {
-            const catalogItem = stall.items.find(i => Number(i.id) === Number(newItem.stallItemId));
-            if (catalogItem) {
-              enrichedTempItem.itemName = catalogItem.name;
-              enrichedTempItem.price = catalogItem.price;
-              enrichedTempItem.image = catalogItem.image;
-
-              if (newItem.variationId) {
-                const variation = catalogItem.variations?.find(v => Number(v.id) === Number(newItem.variationId));
-                if (variation) {
-                  enrichedTempItem.price = variation.price;
-                  if (variation.image) enrichedTempItem.image = variation.image;
-                  if (variation.name && variation.name.toLowerCase() !== 'default') {
-                    enrichedTempItem.itemName = `${catalogItem.name} (${variation.name})`;
-                  }
-                }
-              }
-              break;
-            }
-          }
-
-          queryClient.setQueryData<CartResponse[]>(CART_QUERY_KEY, [...previous, enrichedTempItem]);
-        }
-      }
-      return { previous };
-    },
     onSuccess: (res) => {
       notifSuccess(res.message || "Added to cart");
     },
-    onError: (err: any, _, context) => {
-      if (context?.previous) queryClient.setQueryData(CART_QUERY_KEY, context.previous);
+    onError: (err: any) => {
       notifError(err.message || "Failed to add");
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY })
+    onSettled: () => queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY }),
   });
 
   const updateMutation = useOptimisticMutation(

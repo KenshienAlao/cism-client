@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { X, CheckCircle2, Copy, ArrowRight } from 'lucide-react';
 import { Order } from '@/model/order.model';
 import { notifSuccess } from '@/lib/toast';
@@ -13,6 +14,15 @@ interface ReceiptModalProps {
 
 export function ReceiptModal({ isOpen, onClose, orders }: ReceiptModalProps) {
     const router = useRouter();
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [isOpen]);
 
     if (!isOpen || !orders || !Array.isArray(orders) || orders.length === 0) return null;
 
@@ -32,88 +42,84 @@ export function ReceiptModal({ isOpen, onClose, orders }: ReceiptModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
             {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-300"
-                onClick={onClose}
-            />
+            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
-            {/* Modal Manifest */}
-            <div className="relative w-full max-w-sm bg-white border border-neutral-200 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
-                {/* Close Button */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-neutral-300 active:text-neutral-900 z-10 transition-colors"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+            {/* Modal */}
+            <div className="relative w-full md:max-w-md bg-white border border-neutral-200">
 
-                <div className="p-8 md:p-10 text-center">
-                    {/* Status Identification */}
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 border border-emerald-100 mb-6">
-                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                {/* Header */}
+                <div className="px-5 md:px-8 py-4 md:py-5 border-b border-neutral-200 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+                        <h2 className="text-xs md:text-sm font-black text-neutral-900 uppercase tracking-[0.2em]">
+                            Order Confirmed
+                        </h2>
                     </div>
+                    <button onClick={onClose} className="text-neutral-400 p-1">
+                        <X className="w-4 h-4 md:w-5 md:h-5" />
+                    </button>
+                </div>
 
-                    <h2 className="text-2xl font-black text-neutral-900 tracking-tighter uppercase mb-2">Order Confirmed</h2>
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.3em] mb-10">Transaction Proof Generated</p>
-
-                    {/* Receipt Identification */}
-                    <div className="bg-neutral-50 border border-neutral-200 p-8 mb-8 relative">
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-3 block">Receipt Code</span>
-                        <div className="flex items-center justify-center gap-4">
-                            <span className="text-3xl font-black text-neutral-900 font-mono tracking-tight">
-                                {mainReceipt}
-                            </span>
-                            <button
-                                onClick={() => copyToClipboard(mainReceipt)}
-                                className="p-2.5 bg-white border border-neutral-200 text-neutral-400 active:bg-neutral-900 active:text-white transition-colors"
-                            >
-                                <Copy className="w-4 h-4" />
-                            </button>
-                        </div>
-                        {orders.length > 1 && (
-                            <p className="text-[9px] font-bold text-neutral-300 uppercase tracking-widest mt-4">
-                                Consolidated Multi-Stall Manifest
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Detail Manifest */}
-                    <div className="space-y-4 mb-10 bg-neutral-50/50 p-6 border border-neutral-100 text-left">
-                        <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Settlement</span>
-                            <span className="text-xs font-black text-neutral-900 uppercase tracking-tight">{paymentMethod}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Logistics</span>
-                            <span className="text-xs font-black text-neutral-900 uppercase tracking-tight">{deliveryMethod}</span>
-                        </div>
-                        <div className="pt-4 mt-2 border-t border-neutral-100 flex justify-between items-end">
-                            <span className="text-[11px] font-black text-neutral-900 uppercase tracking-[0.2em]">Total</span>
-                            <span className="text-2xl font-black text-neutral-900 tracking-tighter">₱{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="space-y-3">
+                {/* Receipt code block */}
+                <div className="px-5 md:px-8 py-6 md:py-8 border-b border-neutral-200 bg-neutral-50">
+                    <p className="text-[9px] md:text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] mb-2">
+                        Receipt Code
+                    </p>
+                    <div className="flex items-center justify-between gap-4">
+                        <span className="text-2xl md:text-4xl font-black text-neutral-900 font-mono tracking-tight">
+                            {mainReceipt}
+                        </span>
                         <button
-                            onClick={handleViewOrders}
-                            className="w-full bg-orange-500 text-white py-5 font-black uppercase tracking-[0.3em] text-[11px] active:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                            onClick={() => copyToClipboard(mainReceipt)}
+                            className="w-9 h-9 md:w-10 md:h-10 border border-neutral-200 bg-white flex items-center justify-center text-neutral-400 shrink-0"
                         >
-                            Track Manifest
-                            <ArrowRight className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="w-full py-4 text-neutral-400 font-black text-[9px] uppercase tracking-[0.4em] active:text-neutral-900 transition-colors"
-                        >
-                            Return to Market
+                            <Copy className="w-4 h-4" />
                         </button>
                     </div>
+                    {orders.length > 1 && (
+                        <p className="text-[8px] md:text-[9px] font-bold text-neutral-300 uppercase tracking-widest mt-2">
+                            Consolidated · {orders.length} stalls
+                        </p>
+                    )}
+                </div>
+
+                {/* Detail rows */}
+                <div className="px-5 md:px-8 py-5 md:py-6 border-b border-neutral-200 space-y-3">
+                    <div className="flex justify-between items-center">
+                        <span className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Settlement</span>
+                        <span className="text-[10px] md:text-xs font-black text-neutral-900 uppercase">{paymentMethod}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Logistics</span>
+                        <span className="text-[10px] md:text-xs font-black text-neutral-900 uppercase">{deliveryMethod}</span>
+                    </div>
+                    <div className="pt-3 border-t border-neutral-200 flex justify-between items-end">
+                        <span className="text-[10px] md:text-xs font-black text-neutral-900 uppercase tracking-[0.2em]">Total</span>
+                        <span className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tighter">
+                            ₱{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="px-5 md:px-8 py-4 md:py-6 space-y-2">
+                    <button
+                        onClick={handleViewOrders}
+                        className="w-full bg-orange-500 text-white py-3 md:py-4 font-black uppercase tracking-[0.3em] text-[10px] md:text-xs flex items-center justify-center gap-2"
+                    >
+                        Track
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 text-neutral-400 font-black text-[9px] uppercase tracking-[0.4em]"
+                    >
+                        Return to Home
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
-

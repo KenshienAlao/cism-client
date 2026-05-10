@@ -36,7 +36,7 @@ export function GlobalChatbox() {
                 <div
                     ref={windowRef}
                     style={windowDraggable.style}
-                    className="fixed inset-0 md:inset-auto md:bottom-0 md:right-6 z-[10000] w-full h-[100dvh] md:w-[450px] md:h-[600px] md:max-h-[85vh] flex flex-col overflow-hidden border-0 md:border border-neutral-100 bg-white md:rounded-t-lg shadow-2xl animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out select-none"
+                    className="fixed inset-0 md:inset-auto md:bottom-0 md:right-6 z-[110] w-full h-[100dvh] md:w-[450px] md:h-[600px] md:max-h-[85vh] flex flex-col overflow-hidden border-0 md:border border-neutral-100 bg-white md:rounded-t-lg shadow-2xl animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out select-none"
                 >
                     {/* Drag Handle for Window */}
                     <div
@@ -54,7 +54,7 @@ export function GlobalChatbox() {
                     style={buttonDraggable.style}
                     onMouseDown={buttonDraggable.handleMouseDown as any}
                     onTouchStart={buttonDraggable.handleTouchStart as any}
-                    className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[9999] cursor-grab active:cursor-grabbing select-none"
+                    className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[120] cursor-grab active:cursor-grabbing select-none"
                 >
                     <button
                         onClick={() => {

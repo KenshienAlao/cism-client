@@ -8,7 +8,7 @@ const DISMISSED_KEY = 'cism_dismissed_notifications';
 
 const NOTIF_STATUSES = ['PENDING', 'PREPARING', 'READY', 'CANCELLED'];
 
-function getNotifContent(status: string, stallName: string) {
+function getNotifContent(status: string, stallName: string, cancelledBy?: string) {
     switch (status.toUpperCase()) {
         case 'READY':
             return {
@@ -18,7 +18,9 @@ function getNotifContent(status: string, stallName: string) {
         case 'CANCELLED':
             return {
                 title: 'Order Cancelled',
-                message: `Your order from ${stallName} has been cancelled.`,
+                message: cancelledBy === 'CUSTOMER' 
+                    ? `You have cancelled your order from ${stallName}.`
+                    : `Your order from ${stallName} has been rejected by the stall.`,
             };
         case 'PREPARING':
             return {
@@ -67,7 +69,7 @@ export function useNotifications() {
         return orders
             .filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
             .map(o => {
-                const { title, message } = getNotifContent(o.status, o.stallName);
+                const { title, message } = getNotifContent(o.status, o.stallName, o.cancelledBy);
                 return {
                     id: `order-${o.id}`,
                     type: 'ORDER',
