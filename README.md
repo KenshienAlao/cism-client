@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CISM Client
+
+The customer-facing application for the **Canteen Integrated System of Management (CISM)**. Built with Next.js, this app allows students, staff and teachers to browse stalls, place orders, track deliveries, and manage their profile.
+
+## System Overview
+
+CISM is a multi-platform ecosystem designed to streamline canteen operations:
+
+- **Client App (this repo)**: Mobile-optimized web app for customers to browse, order, and chat.
+- **Stall App**: Management dashboard for stall owners to process orders and manage inventory.
+- **Core Backend**: Robust Spring Boot API handling business logic, security, and real-time WebSocket communication.
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Run the development server:**
+   ```bash
+   pnpm dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Access the app:**
+   Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4
+- **Icons:** Lucide React
+- **State Management:** React Query 5
+- **Validation:** Zod
+- **Notifications:** React Hot Toast
+- **API Client:** Axios
+- **Real-time:** WebSockets (StompJS & SockJS)
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Authentication** - Secure login and registration with OAuth 2.0 and JWT
+- **Smart Discovery** - Browse items by categories like Trending, Fresh Drops, and Budget Picks (under Php 50)
+- **Interactive Menu** - Explore stall-specific menus with detailed product information and high-quality images
+- **School Essentials** - Dedicated section for uniforms, school IDs, and campus-specific business items
+- **Global Search** - Instant search functionality for items, categories, and stall names
+- **Cart & Checkout** - Manage multiple items with real-time stock validation and secure checkout process
+- **Order Management** - Place orders, track real-time delivery status, and view comprehensive order history
+- **Notifications** - Real-time push notifications for order updates, status changes, and new messages
+- **Live Chat** - Real-time messaging system for direct communication between customers and stall owners
+- **Ratings & Reviews** - Share feedback and rate products to help other students discover the best finds
+- **Account Management** - Manage user profile, delivery addresses, and personal settings
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How It Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Browse & Search** - Find delicious meals or school essentials using the filters or global search.
+2. **Add to Cart** - Select your favorite items, select the item variations (if any), and add them to your cart.
+3. **Place Order** - Choose your delivery method (Pick-up or Delivery) and place your order.
+4. **Real-time Tracking** - Monitor your order status from preparation to delivery and chat with the stall owner if you have questions.
