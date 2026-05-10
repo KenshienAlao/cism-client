@@ -38,43 +38,37 @@ export function BottomNav() {
     if (hideOnRoutes.includes(pathname)) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[999] px-4 pb-4 pointer-events-none">
-            <nav className="max-w-md mx-auto bg-white/90 backdrop-blur-2xl border border-black/5 rounded-[2rem] pointer-events-auto overflow-hidden">
-                <div className="flex items-center justify-around h-20 px-2">
-                    {navItems.map((item: any) => {
-                        const isActive = pathname === item.href;
-                        const Icon = item.icon;
+        <div className="fixed bottom-0 left-0 right-0 z-[999] bg-white border-t border-neutral-100 pb-safe">
+            <nav className="max-w-md mx-auto h-16 md:h-18 flex items-center justify-around px-2">
+                {navItems.map((item: any) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
 
-                        const content = (
-                            <div className="flex flex-col items-center justify-center gap-1.5 h-full w-full relative transition-all duration-300">
-                                <div className={`relative p-2 rounded-2xl transition-all duration-300 ${isActive ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-neutral-400 hover:text-neutral-600'}`}>
-                                    <Icon className={`w-5 h-5 ${isActive ? 'animate-in zoom-in-75 duration-300' : ''}`} strokeWidth={2.5} />
-                                    {((item.isCart && cartCount > 0) || (item.isOrders && activeOrdersCount > 0) || (item.isActivity && notifCount > 0)) && (
-                                        <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white ring-2 ring-white z-10">
-                                            {item.isCart ? cartCount : item.isOrders ? activeOrdersCount : notifCount}
-                                        </span>
-                                    )}
-                                </div>
-                                <span className={`text-[8px] font-black uppercase tracking-[0.15em] transition-colors duration-300 ${isActive ? 'text-orange-500' : 'text-neutral-400'}`}>
-                                    {item.label}
-                                </span>
-                                {isActive && (
-                                    <div className="absolute -bottom-1 w-1 h-1 bg-orange-500 rounded-full animate-in fade-in duration-500" />
+                    const count = item.isCart ? cartCount : item.isOrders ? activeOrdersCount : item.isActivity ? notifCount : 0;
+
+                    return (
+                        <Link
+                            key={item.label}
+                            href={item.href}
+                            className="flex-1 h-full flex flex-col items-center justify-center gap-1 group active:opacity-70 transition-opacity"
+                        >
+                            <div className="relative">
+                                <Icon 
+                                    className={`w-5 h-5 ${isActive ? 'text-orange-500' : 'text-neutral-400'}`} 
+                                    strokeWidth={isActive ? 2.5 : 2} 
+                                />
+                                {count > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white border-2 border-white">
+                                        {count}
+                                    </span>
                                 )}
                             </div>
-                        );
-
-                        return (
-                            <Link
-                                key={item.label}
-                                href={item.href}
-                                className="flex-1 h-full active:scale-90 transition-transform"
-                            >
-                                {content}
-                            </Link>
-                        );
-                    })}
-                </div>
+                            <span className={`text-[9px] font-bold uppercase tracking-tight ${isActive ? 'text-orange-500' : 'text-neutral-400'}`}>
+                                {item.label}
+                            </span>
+                        </Link>
+                    );
+                })}
             </nav>
         </div>
     );

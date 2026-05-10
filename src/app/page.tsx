@@ -30,7 +30,7 @@ function HomeContent() {
     addToCart({
       stallId: Number(item.stallId),
       stallItemId: Number(item.id),
-      variationId: 0, // Default to no variation for direct add
+      variationId: 0,
       quantity: 1
     });
   };
@@ -79,14 +79,14 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50/50 pb-32">
+    <div className="min-h-screen bg-neutral-50 pb-32">
 
-      <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 space-y-10">
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-12">
         <CategoryChips onCategoryChange={setSelectedCategory} />
 
         {(selectedCategory === 'all' || selectedCategory === 'popular') && (
           <HorizontalScrollSection
-            icon={<TrendingUp className="w-6 h-6 text-orange-500" />}
+            icon={<TrendingUp className="w-5 h-5 text-orange-500" />}
             title="Trending Now"
             subtitle="Most popular items on campus"
             items={trendingItems}
@@ -99,7 +99,7 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'fresh') && (
           <HorizontalScrollSection
-            icon={<Sparkles className="w-6 h-6 text-blue-500" />}
+            icon={<Sparkles className="w-5 h-5 text-orange-500" />}
             title="Fresh Drops"
             subtitle="New items added today"
             items={freshDrops}
@@ -111,7 +111,7 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'budget') && (
           <HorizontalScrollSection
-            icon={<DollarSign className="w-6 h-6 text-green-500" />}
+            icon={<DollarSign className="w-5 h-5 text-orange-500" />}
             title="Budget Picks"
             subtitle="Delicious finds under Php 50"
             items={budgetPicks}
@@ -123,7 +123,7 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'meals') && (
           <HorizontalScrollSection
-            icon={<CookingPot className="w-6 h-6 text-orange-500" />}
+            icon={<CookingPot className="w-5 h-5 text-orange-500" />}
             title="Meals"
             subtitle="Explore all available meals"
             items={allFlattenedItems.filter(i => i.category === 'MEAL')}
@@ -135,7 +135,7 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'drinks') && (
           <HorizontalScrollSection
-            icon={<CupSoda className="w-6 h-6 text-blue-500" />}
+            icon={<CupSoda className="w-5 h-5 text-orange-500" />}
             title="Drinks"
             subtitle="Explore all available drinks"
             items={allFlattenedItems.filter(i => i.category === 'DRINK')}
@@ -147,7 +147,7 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'snacks') && (
           <HorizontalScrollSection
-            icon={<Hamburger className="w-6 h-6 text-orange-500" />}
+            icon={<Hamburger className="w-5 h-5 text-orange-500" />}
             title="Snacks"
             subtitle="Explore all available snacks"
             items={allFlattenedItems.filter(i => i.category === 'SNACK')}
@@ -159,11 +159,11 @@ function HomeContent() {
 
         {(selectedCategory === 'all' || selectedCategory === 'business') && (
           selectedCategory === 'business' ? (
-            <div className="space-y-10 pt-4">
+            <div className="space-y-12">
               {Object.entries(schoolItemsByCategory).map(([category, catItems]) => (
                 <HorizontalScrollSection
                   key={category}
-                  icon={<School className="w-6 h-6 text-indigo-500" />}
+                  icon={<School className="w-5 h-5 text-orange-500" />}
                   title={category.replace(/_/g, ' ')}
                   subtitle={`Explore all available ${category.replace(/_/g, ' ')} items.`}
                   items={catItems}
@@ -175,7 +175,7 @@ function HomeContent() {
             </div>
           ) : (
             <HorizontalScrollSection
-              icon={<School className="w-6 h-6 text-indigo-500" />}
+              icon={<School className="w-5 h-5 text-orange-500" />}
               title="School Items"
               subtitle="Uniforms, IDs, and campus essentials"
               items={schoolItems}

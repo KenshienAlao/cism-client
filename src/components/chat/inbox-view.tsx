@@ -7,6 +7,7 @@ import { X, Search, Inbox } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/config/api.config';
+import { formatDate } from '@/lib/utils/formatDate';
 
 function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, openChat: (chat: any) => void }) {
     const isCustomer = thread.customerId === profile?.user?.id;
@@ -36,29 +37,29 @@ function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, 
                 customerName: !isCustomer ? thread.customerName : undefined,
                 customerImage: !isCustomer ? thread.customerImage : undefined
             })}
-            className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm"
+            className="w-full flex items-center gap-3 p-3.5 bg-white border-b border-neutral-50 active:bg-neutral-50 transition-colors text-left"
         >
             <div className="relative flex-shrink-0">
-                <Avatar src={image} name={name} size="md" />
+                <Avatar src={image} name={name} size="md" className="rounded-md" />
                 {presence?.isOnline && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
                 )}
             </div>
             <div className="flex-1 overflow-hidden">
                 <div className="flex justify-between items-baseline mb-1">
-                    <h4 className="font-semibold text-sm text-gray-900 truncate">
+                    <h4 className="text-[11px] font-bold text-neutral-900 uppercase tracking-widest truncate">
                         {name}
                     </h4>
-                    <span className="text-[10px] text-gray-400 flex-shrink-0 ml-2">
-                        {new Date(thread.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    <span className="text-[9px] font-bold text-neutral-400 tracking-widest flex-shrink-0 ml-2">
+                        {formatDate(thread.lastMessageAt)}
                     </span>
                 </div>
-                <p className={`text-xs truncate ${thread.isUnread ? 'text-gray-900 font-bold' : 'text-gray-500'}`}>
+                <p className={`text-[10px] tracking-wide truncate ${thread.isUnread ? 'text-neutral-900 font-bold' : 'text-neutral-400 font-medium'}`}>
                     {thread.lastMessage}
                 </p>
             </div>
             {thread.isUnread && (
-                <div className="w-2.5 h-2.5 bg-orange-500 rounded-full flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
             )}
         </button>
     );
@@ -82,37 +83,37 @@ export function InboxView() {
 
     return (
         <>
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 pb-3 shadow-md z-10 flex flex-col gap-3 shrink-0">
+            <div className="bg-white border-b border-neutral-100 p-4 flex flex-col gap-3 shrink-0">
                 <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg">Messages</h3>
-                    <button onClick={closeChat} className="p-1 hover:bg-white/20 rounded-full transition">
+                    <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-[0.2em]">Messages</h3>
+                    <button onClick={closeChat} className="p-1.5 active:bg-neutral-50 rounded-md transition-colors text-neutral-400">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-orange-200" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-300" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search stalls..."
-                        className="w-full bg-white/20 border border-white/20 rounded-full py-1.5 pl-9 pr-4 text-sm text-white placeholder:text-orange-100 focus:outline-none focus:bg-white/30 transition-all"
+                        className="w-full bg-neutral-50 border border-neutral-100 rounded-md py-2.5 pl-9 pr-4 text-[11px] font-bold uppercase tracking-widest text-neutral-900 placeholder:text-neutral-300 placeholder:font-medium focus:outline-none focus:bg-white focus:border-orange-500/30 transition-all"
                     />
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-gray-50 p-2 space-y-1">
+            <div className="flex-1 overflow-y-auto bg-neutral-50">
                 {searchQuery.trim() ? (
                     filteredStalls.length === 0 && filteredThreads.length === 0 ? (
-                        <div className="flex flex-col justify-center items-center h-full text-gray-400 text-sm text-center px-4 space-y-4 py-20">
-                            <Search className="w-12 h-12 text-gray-200" />
-                            <p>No stalls or conversations found matching "{searchQuery}"</p>
+                        <div className="flex flex-col justify-center items-center py-24 px-6 text-center space-y-4">
+                            <Search className="w-10 h-10 text-neutral-200" />
+                            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">No results for "{searchQuery}"</p>
                         </div>
                     ) : (
-                        <>
+                        <div className="space-y-4 py-4">
                             {filteredThreads.length > 0 && (
-                                <div className="px-2 py-1">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2">Recent Conversations</span>
+                                <div>
+                                    <span className="text-[9px] font-bold text-orange-500 uppercase tracking-[0.2em] px-4 block mb-2">Conversations</span>
                                     {filteredThreads.map((thread, idx) => (
                                         <ThreadItem key={`thread-search-${idx}`} thread={thread} profile={profile} openChat={openChat} />
                                     ))}
@@ -120,8 +121,8 @@ export function InboxView() {
                             )}
 
                             {filteredStalls.length > 0 && (
-                                <div className="px-2 py-1 mt-4">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2">Find Stalls</span>
+                                <div>
+                                    <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-[0.2em] px-4 block mb-2 mt-2">Find Stalls</span>
                                     {filteredStalls.map((stall) => (
                                         <button
                                             key={`stall-search-${stall.id}`}
@@ -134,32 +135,34 @@ export function InboxView() {
                                                     stallRole: stall.role
                                                 });
                                             }}
-                                            className="w-full flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all text-left border border-transparent hover:border-gray-100 hover:shadow-sm mt-1"
+                                            className="w-full flex items-center gap-3 p-3.5 bg-white border-b border-neutral-50 active:bg-neutral-50 transition-colors text-left"
                                         >
-                                            <Avatar src={stall.image} name={stall.name} size="md" className="flex-shrink-0" />
+                                            <Avatar src={stall.image} name={stall.name} size="md" className="flex-shrink-0 rounded-md" />
                                             <div className="flex-1 overflow-hidden">
-                                                <h4 className="font-semibold text-sm text-gray-900 truncate">{stall.name}</h4>
-                                                <p className="text-xs text-gray-500 truncate">Start a new conversation</p>
+                                                <h4 className="text-[11px] font-bold text-neutral-900 uppercase tracking-widest truncate">{stall.name}</h4>
+                                                <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-widest truncate">Start conversation</p>
                                             </div>
                                         </button>
                                     ))}
                                 </div>
                             )}
-                        </>
+                        </div>
                     )
                 ) : isLoadingThreads ? (
-                    <div className="flex justify-center items-center h-32 text-gray-400">
-                        <span className="animate-pulse text-sm">Loading chats...</span>
+                    <div className="flex justify-center items-center py-20 text-neutral-300">
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Loading...</span>
                     </div>
                 ) : threads.length === 0 ? (
-                    <div className="flex flex-col justify-center items-center h-full text-gray-400 text-sm text-center px-4 space-y-4 py-20">
-                        <Inbox className="w-12 h-12 text-gray-300" />
-                        <p>No conversations yet.</p>
+                    <div className="flex flex-col justify-center items-center py-24 px-6 text-center space-y-4">
+                        <Inbox className="w-10 h-10 text-neutral-200" />
+                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">No conversations</p>
                     </div>
                 ) : (
-                    threads.map((thread, idx) => (
-                        <ThreadItem key={idx} thread={thread} profile={profile} openChat={openChat} />
-                    ))
+                    <div className="bg-white">
+                        {threads.map((thread, idx) => (
+                            <ThreadItem key={idx} thread={thread} profile={profile} openChat={openChat} />
+                        ))}
+                    </div>
                 )}
             </div>
         </>

@@ -24,6 +24,7 @@ export function useCart() {
     queryKey: CART_QUERY_KEY,
     queryFn: async () => (await cartService.getCart()).data || [],
     enabled: !!profile,
+    staleTime: 1000 * 60 * 5,
   });
 
   const getStock = useCallback((itemId: number, variationId?: number | null) => {
@@ -64,7 +65,7 @@ export function useCart() {
         if (variation) {
           if (variation.image) enrichedItem.image = variation.image;
           if (variation.name && variation.name.toLowerCase() !== 'default') {
-            enrichedItem.name = `${item.name} (${variation.name})`;
+            enrichedItem.variationName = variation.name;
           }
         }
       }

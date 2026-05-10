@@ -89,13 +89,13 @@ export function HorizontalScrollSection({
 
 function SkeletonCard() {
   return (
-    <div className="bg-card rounded-[--radius] overflow-hidden shadow-sm animate-pulse border border-border">
-      <div className="aspect-square bg-muted/20" />
-      <div className="p-3 space-y-2.5">
-        <div className="h-2.5 bg-muted/20 rounded-full w-3/4" />
-        <div className="h-2.5 bg-muted/20 rounded-full w-1/2" />
-        <div className="h-2.5 bg-muted/20 rounded-full w-2/3" />
-        <div className="h-5 bg-muted/20 rounded-full w-1/2 mt-1" />
+    <div className="bg-white border border-neutral-100 rounded-md overflow-hidden">
+      <div className="aspect-square bg-neutral-50 animate-pulse" />
+      <div className="p-3 space-y-2">
+        <div className="h-2 bg-neutral-50 rounded-full w-3/4 animate-pulse" />
+        <div className="h-2 bg-neutral-50 rounded-full w-1/2 animate-pulse" />
+        <div className="h-2 bg-neutral-50 rounded-full w-2/3 animate-pulse" />
+        <div className="h-4 bg-neutral-50 rounded-full w-1/2 mt-1 animate-pulse" />
       </div>
     </div>
   );

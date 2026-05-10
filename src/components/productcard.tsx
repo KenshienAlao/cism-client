@@ -21,7 +21,7 @@ export function ProductCard({
     return (
         <Link
             href={`/stall/item/show?a=${encodeURIComponent(stallName || '')}&id=${id}&q=${encodeURIComponent(name)}`}
-            className="group block bg-card rounded-[--radius] overflow-hidden shadow-sm transition-all duration-300 cursor-pointer border border-border hover:shadow-md hover:border-primary/20"
+            className="group block bg-white border border-neutral-100 rounded-md overflow-hidden active:border-orange-500/30 transition-colors"
         >
             <div className="relative aspect-square overflow-hidden">
                 {image ? (
@@ -52,31 +52,32 @@ export function ProductCard({
                 )}
             </div>
 
-            <div className="p-3 space-y-2">
-                <h3 className="text-sm line-clamp-2 min-h-[2.5rem]">{name}</h3>
-
-                <div className="flex items-center gap-1 text-xs">
-                    <Star className="w-3 h-3 fill-primary text-primary" />
-                    <span className="font-medium">{rating?.toFixed(1)}</span>
-                    <span className="text-gray-400">({reviewCount})</span>
+            <div className="p-3 space-y-2.5">
+                <div className="min-h-[2.5rem]">
+                    <h3 className="text-[11px] font-bold text-neutral-900 line-clamp-2 leading-relaxed">{name}</h3>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                    <Avatar
-                        src={stallImage}
-                        name={stallName}
-                        size="xs"
-                        className="ring-1 ring-black/10"
-                    />
-                    <p className="text-xs text-gray-500 truncate">{stallName}</p>
-                </div>
-
-                <div className="flex items-end justify-between pt-2">
-                    <div className="flex flex-col">
-                        <span className="text-lg font-semibold text-primary">
-                            Php {price.toFixed(2)}
-                        </span>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <Avatar
+                            src={stallImage}
+                            name={stallName}
+                            size="xs"
+                            className="border border-neutral-100"
+                        />
+                        <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest truncate">{stallName}</p>
                     </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                        <Star className="w-2.5 h-2.5 fill-orange-500 text-orange-500" />
+                        <span className="text-[9px] font-bold text-neutral-900">{rating?.toFixed(1)}</span>
+                    </div>
+                </div>
+
+                <div className="pt-1.5 border-t border-neutral-50">
+                    <span className="text-[12px] font-bold text-orange-500 tracking-tight">
+                        ₱{price.toFixed(2)}
+                    </span>
                 </div>
             </div>
         </Link>

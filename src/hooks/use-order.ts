@@ -27,7 +27,7 @@ export function useOrder() {
     });
 
     const cancelOrder = useMutation({
-        mutationFn: (orderId: number) => orderService.cancelOrder(orderId),
+        mutationFn: (orderId: string) => orderService.cancelOrder(orderId),
         onMutate: async (orderId) => {
             trackMutation(`order-${orderId}-CANCELLED`);
 
@@ -58,7 +58,7 @@ export function useOrder() {
     });
 
     const deleteOrder = useMutation({
-        mutationFn: (orderId: number) => orderService.deleteOrder(orderId),
+        mutationFn: (orderId: string) => orderService.deleteOrder(orderId),
         onMutate: async (orderId) => {
             await queryClient.cancelQueries({ queryKey: MY_ORDERS_QUERY_KEY });
             const previousOrders = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY);
@@ -91,7 +91,7 @@ export function useOrder() {
     });
 
     const updateStatus = useMutation({
-        mutationFn: ({ id, status }: { id: number, status: string }) =>
+        mutationFn: ({ id, status }: { id: string, status: string }) =>
             orderService.updateOrderStatus(id, status),
         onMutate: async ({ id, status }) => {
             trackMutation(`order-${id}-${status.toUpperCase()}`);
@@ -127,7 +127,18 @@ export function useOrder() {
         }
     });
 
-    const useTrackOrder = (orderId: number | null) => useQuery({
+    const receiveOrder = useMutation({
+        mutationFn: (orderId: string) => orderService.receiveOrder(orderId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
+            notifSuccess('Order received!');
+        },
+        onError: (error: any) => {
+            notifError(error.response?.data?.message || 'Failed to mark as received');
+        }
+    });
+
+    const useTrackOrder = (orderId: string | null) => useQuery({
         queryKey: [...MY_ORDERS_QUERY_KEY, orderId],
         queryFn: async () => {
             if (!orderId) return null;
@@ -140,7 +151,7 @@ export function useOrder() {
         }
     });
 
-    const handleCancelOrder = (orderId: number) => {
+    const handleCancelOrder = (orderId: string) => {
         showConfirmation({
             title: "Cancel Order",
             message: "Are you sure you want to cancel this order? This action cannot be undone.",
@@ -152,7 +163,7 @@ export function useOrder() {
         });
     };
 
-    const handleDeleteOrder = (orderId: number) => {
+    const handleDeleteOrder = (orderId: string) => {
         showConfirmation({
             title: "Delete Order",
             message: "Are you sure you want to remove this order from your history? This action cannot be undone.",
@@ -171,6 +182,7 @@ export function useOrder() {
     return {
         addOrder,
         cancelOrder,
+        receiveOrder,
         deleteOrder,
         useMyOrders,
         useTrackOrder,
@@ -188,10 +200,16 @@ export function useCheckout() {
     const [message, setMessage] = useState('');
     const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
 
-    const handlePlaceOrder = (items: any[]) => {
+    const handlePlaceOrder = (items: any[], buyNowItem?: { stallId: number, itemId: number, variationId: number, quantity: number }) => {
         addOrder.mutate({
             cartItemIds: items.map(item => item.id),
-            deliveryMethod: deliveryMethod.toUpperCase() as 'DELIVERY' | 'PICKUP',
+            buyNowItem: buyNowItem ? {
+                stallId: buyNowItem.stallId,
+                itemId: buyNowItem.itemId,
+                variationId: buyNowItem.variationId,
+                quantity: buyNowItem.quantity
+            } : undefined,
+            deliveryMethod: deliveryMethod.toUpperCase() as 'DELIVER' | 'PICKUP',
             paymentMethod: 'CASH',
             note: message
         }, {

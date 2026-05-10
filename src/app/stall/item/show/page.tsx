@@ -1,8 +1,8 @@
 'use client';
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useMemo } from 'react';
-import { useItem, useItemDetail } from "@/hooks/use-item";
+import { Suspense } from 'react';
+import { useItemDetail } from "@/hooks/use-item";
 import { ShoppingCart } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { ProductDetails } from "@/components/item/productdetails";
@@ -18,17 +18,7 @@ function StallItemDetailContent() {
     const stallAccount = searchParams.get('a'); // Stall Name
     const queryName = searchParams.get('q'); // Item Name 
 
-    const { createReview } = useItem();
     const { data: itemDetails, isLoading } = useItemDetail(id, stallAccount, queryName);
-
-    const handleCreateReview = async (stallId: number, itemId: number, star: number, comment: string) => {
-        await createReview({
-            itemId: Number(itemId),
-            stallId: Number(stallId),
-            star: star,
-            comment: comment
-        });
-    }
 
     if (isLoading) return <Loading />;
 
@@ -55,7 +45,6 @@ function StallItemDetailContent() {
                 <WriteReviewForm
                     stallId={itemDetails.stallId!}
                     itemId={itemDetails.id!}
-                    onCreateReview={handleCreateReview}
                 />
                 <ProductRatings
                     reviews={itemDetails.reviews}

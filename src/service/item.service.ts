@@ -3,6 +3,7 @@ import { ApiResponse } from "@/lib/api";
 import { StallItems } from "@/model/stall.model";
 import { API_ENDPOINTS } from "@/config/app.config";
 import { Review, ReviewRequest } from "@/model/review.model";
+import { prepareFormData } from "@/lib/utils/formdata";
 
 export const itemService = {
   getAllItems(): Promise<ApiResponse<StallItems[]>> {
@@ -10,7 +11,7 @@ export const itemService = {
   },
 
   createReview(review: ReviewRequest): Promise<ApiResponse<Review>> {
-    return apiClient.post<Review>(API_ENDPOINTS.REVIEW.CREATE, review);
+    return apiClient.postForm<Review>(API_ENDPOINTS.REVIEW.CREATE, prepareFormData(review));
   }
 
 };

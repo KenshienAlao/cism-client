@@ -43,29 +43,29 @@ export function useWebSocket() {
     const profileId = profile?.user?.id;
 
     const patchOrderInCache = useCallback((order: any) => {
-        queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY, (prev) => {
+        const updateList = (prev: Order[] | undefined) => {
             if (!prev) return prev;
+            const exists = prev.some(o => o.id === order.id);
+            if (!exists) return [order, ...prev];
             return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
-        });
+        };
 
-        queryClient.setQueryData<Order[]>(['stall-orders'], (prev) => {
-            if (!prev) return prev;
-            return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
-        });
-        queryClient.setQueryData([...MY_ORDERS_QUERY_KEY, order.id], (prev: any) => {
-            if (!prev) return prev;
-            return { ...prev, ...order };
-        });
-        queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
-        queryClient.invalidateQueries({ queryKey: ['stall-orders'] });
-        queryClient.invalidateQueries({ queryKey: [...MY_ORDERS_QUERY_KEY, order.id] });
-        queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+        queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY, updateList);
+        queryClient.setQueryData<Order[]>(['stall-orders'], updateList);
+        queryClient.setQueryData([...MY_ORDERS_QUERY_KEY, order.id], (prev: any) =>
+            prev ? { ...prev, ...order } : order
+        );
+
+        // Only invalidate cart if order status changed to COMPLETED or CANCELLED to sync stock/cart
+        if (['COMPLETED', 'CANCELLED'].includes(order.status?.toUpperCase())) {
+            queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+        }
     }, [queryClient]);
 
     const getToastMessage = useCallback((order: any): string => {
         const status = order.status?.toUpperCase();
         const config = STATUS[status];
-        const name = order.stallName || order.receipt;
+        const name = order.stallName || order.orderCode;
 
         switch (status) {
             case 'PENDING':
@@ -73,13 +73,13 @@ export function useWebSocket() {
             case 'PREPARING':
                 return `${name} is now preparing your order`;
             case 'READY':
-                return `🎉 Your order from ${name} is ready for pickup!`;
+                return `Your order from ${name} is ready for pickup!`;
             case 'COMPLETED':
                 return `Order from ${name} completed`;
             case 'CANCELLED':
                 return `Order from ${name} has been cancelled`;
             default:
-                return config?.description || `Order ${order.receipt} updated`;
+                return config?.description || `Order ${order.orderCode} updated`;
         }
     }, []);
 
@@ -96,16 +96,21 @@ export function useWebSocket() {
 
         const client = new Client({
             webSocketFactory: () => new SockJS(`${WS_URL}?appType=client`),
-            reconnectDelay: 0,
+            reconnectDelay: 5000,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,
             debug: () => { },
             onConnect: () => {
                 reconnectAttempts.current = 0;
+
+                // Orders Subscription
                 client.subscribe('/user/queue/orders', (message) => {
-                    const order = JSON.parse(message.body);
+                    const event = JSON.parse(message.body);
+                    const { data: order } = event;
                     const mutationKey = `order-${order.id}-${order.status}`;
+
                     patchOrderInCache(order);
+
                     if (pendingMutations.has(mutationKey)) {
                         pendingMutations.delete(mutationKey);
                         return;
@@ -114,30 +119,29 @@ export function useWebSocket() {
                     notifSuccess(getToastMessage(order));
                 });
 
-                client.subscribe('/topic/inventory', (message) => {
+                // Inventory Subscription
+                client.subscribe('/topic/inventory', () => {
                     queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
                 });
 
-                // Presence tracking
+                // Presence Subscription
                 client.subscribe('/topic/presence', (message) => {
                     const presence = JSON.parse(message.body);
-                    // Update user/stall presence in cache
                     queryClient.setQueryData(['presence', presence.id, presence.userType], presence);
                 });
 
+                // Chat Subscription
                 client.subscribe('/user/queue/chat', (message) => {
                     const chat = JSON.parse(message.body);
 
                     if (chat.type === 'READ_RECEIPT') {
-                      const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
+                        const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
                         queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
                             if (!prev) return prev;
                             return prev.map(msg => {
                                 if (chat.sentByStall) {
-                                    // Stall read the messages → mark messages sent by customer as read
                                     return msg.sentByStall === false ? { ...msg, readByStall: true } : msg;
                                 } else {
-                                    // Customer read the messages → mark messages sent by stall as read
                                     return msg.sentByStall === true ? { ...msg, readByCustomer: true } : msg;
                                 }
                             });
@@ -158,46 +162,31 @@ export function useWebSocket() {
                         return;
                     }
 
-                    // New message received via WebSocket
-                    const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
-                    queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
+                    // message logic
+                    const chatListKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
+                    queryClient.setQueryData<any[]>(chatListKey, (prev) => {
                         if (!prev) return [chat];
-                        const alreadyExists = prev.some(m => m.id === chat.id);
-                        if (alreadyExists) return prev;
-                        const hasOptimistic = prev.some(m => m.status === 'sending' && m.content === chat.content);
-                        if (hasOptimistic) {
-                            return prev.map(m => 
-                                (m.status === 'sending' && m.content === chat.content) 
-                                    ? { ...chat, status: 'sent' } 
-                                    : m
-                            );
+                        if (prev.some(m => m.id === chat.id)) return prev;
+
+                        const optimisticIdx = prev.findIndex(m => m.status === 'sending' && m.content === chat.content);
+                        if (optimisticIdx !== -1) {
+                            const updated = [...prev];
+                            updated[optimisticIdx] = { ...chat, status: 'sent' };
+                            return updated;
                         }
                         return [...prev, chat];
                     });
-                    // NOTE: No invalidateQueries here — it would trigger a refetch that overwrites
-                    // in-memory read state (readByStall/readByCustomer) with potentially stale DB data.
 
-                    // Update thread list directly in cache instead of invalidating
-                    queryClient.setQueryData<any[]>([...CHAT_QUERY_KEY, 'threads', profileId], (prev) => {
+                    // Thread list update
+                    const threadListKey = [...CHAT_QUERY_KEY, 'threads', profileId];
+                    queryClient.setQueryData<any[]>(threadListKey, (prev) => {
                         if (!prev) return prev;
-                        const threadIdx = prev.findIndex(
+                        const updated = [...prev];
+                        const threadIdx = updated.findIndex(
                             (t: any) => t.stallId === chat.stallId && t.customerId === chat.customerId
                         );
-                        if (threadIdx >= 0) {
-                            const updated = [...prev];
-                            updated[threadIdx] = {
-                                ...updated[threadIdx],
-                                lastMessage: chat.content,
-                                lastMessageAt: chat.createdAt,
-                                isUnread: chat.sentByStall,
-                            };
-                            // Move to top
-                            const [thread] = updated.splice(threadIdx, 1);
-                            updated.unshift(thread);
-                            return updated;
-                        }
-                        // New thread — add to top
-                        return [{
+
+                        const threadData = {
                             stallId: chat.stallId,
                             stallName: chat.senderName,
                             stallImage: null,
@@ -206,11 +195,19 @@ export function useWebSocket() {
                             customerImage: null,
                             lastMessage: chat.content,
                             lastMessageAt: chat.createdAt,
-                            isUnread: profileId !== chat.senderId,
-                        }, ...prev];
+                            isUnread: chat.sentByStall,
+                        };
+
+                        if (threadIdx >= 0) {
+                            updated[threadIdx] = { ...updated[threadIdx], ...threadData };
+                            const [thread] = updated.splice(threadIdx, 1);
+                            updated.unshift(thread);
+                        } else {
+                            updated.unshift(threadData);
+                        }
+                        return updated;
                     });
 
-                    // Toast only for messages from others
                     if (chat.sentByStall) {
                         notifSuccess(`New message from ${chat.senderName}`);
                     }
@@ -218,18 +215,7 @@ export function useWebSocket() {
             },
             onStompError: (frame) => {
                 console.error('WS STOMP Error:', frame.headers['message']);
-            },
-            onWebSocketClose: () => {
-                if (reconnectAttempts.current < maxReconnectAttempts) {
-                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
-                    reconnectAttempts.current++;
-                    setTimeout(() => {
-                        if (clientRef.current && !clientRef.current.connected) {
-                            clientRef.current.activate();
-                        }
-                    }, delay);
-                }
-            },
+            }
         });
 
         client.activate();

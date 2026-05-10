@@ -32,6 +32,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 instance.interceptors.response.use(
   (response) => {
+    // Return standard ApiResponse format
     const data = response.data;
     return {
       data: data?.data ?? data,
@@ -55,6 +56,7 @@ instance.interceptors.response.use(
       originalRequest.url === endpoint || originalRequest.url?.endsWith(endpoint)
     );
 
+    // If 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry && !isSkipRefresh) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -72,17 +74,16 @@ instance.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const refreshUrl = `${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`;
+        const res = await axios.post(refreshUrl, {}, { withCredentials: true });
 
-        const res = await instance.post(API_ENDPOINTS.AUTH.REFRESH);
-
-        if (!(res as any).success) {
+        if (!res.data?.success) {
           throw new Error("Refresh failed");
         }
 
         isRefreshing = false;
         processQueue(null);
 
-        // Retry original request
         return instance(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
@@ -97,6 +98,7 @@ instance.interceptors.response.use(
       }
     }
 
+    // Default error handling
     return {
       data: null,
       status: error.response?.status || 500,

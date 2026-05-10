@@ -8,34 +8,65 @@ import { ActiveChatView } from './chat/active-chat-view';
 import { InboxView } from './chat/inbox-view';
 import { usePathname } from 'next/navigation';
 
+import { useRef } from 'react';
+import { useDraggable } from '@/hooks/use-draggable';
+
 export function GlobalChatbox() {
-    const { profile } = useAuth();
+    const { profile, isLoading: isAuthPending } = useAuth();
     const { isOpen, toggleChat, activeChat } = useGlobalChat();
-    const { data: threads = [] } = useChatThreads();
+    const { data: threads = [], isPending: isThreadsPending } = useChatThreads();
     const pathname = usePathname();
+
+    const windowRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLDivElement>(null);
+
+    const windowDraggable = useDraggable(windowRef, 'cism-client-chat-window-pos');
+    const buttonDraggable = useDraggable(buttonRef, 'cism-client-chat-button-pos');
 
     const hideOnRoutesChatbox = [
         "/login",
         "/register",
     ]
 
-    if (!profile || hideOnRoutesChatbox.includes(pathname)) return null;
+    if (isAuthPending || isThreadsPending || !profile || hideOnRoutesChatbox.includes(pathname)) return null;
 
     return (
         <>
             {isOpen ? (
-                <div className="fixed inset-0 md:inset-auto md:bottom-0 md:right-4 z-[10000] w-full h-[100dvh] md:w-[700px] md:h-[800px] md:max-h-[85vh] shadow-2xl md:rounded-t-2xl flex flex-col overflow-hidden border-0 md:border border-gray-200/50 bg-white animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out">
+                <div
+                    ref={windowRef}
+                    style={windowDraggable.style}
+                    className="fixed inset-0 md:inset-auto md:bottom-0 md:right-6 z-[10000] w-full h-[100dvh] md:w-[450px] md:h-[600px] md:max-h-[85vh] flex flex-col overflow-hidden border-0 md:border border-neutral-100 bg-white md:rounded-t-lg shadow-2xl animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out select-none"
+                >
+                    {/* Drag Handle for Window */}
+                    <div
+                        onMouseDown={windowDraggable.handleMouseDown as any}
+                        onTouchStart={windowDraggable.handleTouchStart as any}
+                        className="h-2 w-full flex items-center justify-center bg-neutral-50/50 cursor-grab active:cursor-grabbing hover:bg-neutral-100 transition-colors shrink-0"
+                    >
+                        <div className="w-10 h-1 bg-neutral-200 rounded-full" />
+                    </div>
                     {activeChat ? <ActiveChatView /> : <InboxView />}
                 </div>
             ) : (
-                <div className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-[9999]">
+                <div
+                    ref={buttonRef}
+                    style={buttonDraggable.style}
+                    onMouseDown={buttonDraggable.handleMouseDown as any}
+                    onTouchStart={buttonDraggable.handleTouchStart as any}
+                    className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[9999] cursor-grab active:cursor-grabbing select-none"
+                >
                     <button
-                        onClick={toggleChat}
-                        className="relative bg-orange-500 text-white p-4 rounded-full hover:bg-orange-600 hover:scale-105 transition-all duration-200 border-4 border-white"
+                        onClick={() => {
+                            if (!buttonDraggable.hasMoved) {
+                                toggleChat();
+                            }
+                        }}
+                        className="relative bg-orange-500 rounded-full text-white p-3.5 border-4 border-white shadow-xl transition-all duration-200 active:scale-95 pointer-events-auto"
                     >
-                        <MessageCircle className="w-7 h-7" />
+                        <MessageCircle className="w-6 h-6" />
                         {threads.some(t => t.isUnread) && (
-                            <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-bounce"></span>
+                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white rounded-full animate-bounce"></span>
                         )}
                     </button>
                 </div>

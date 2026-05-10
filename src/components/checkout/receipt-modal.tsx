@@ -17,7 +17,7 @@ export function ReceiptModal({ isOpen, onClose, orders }: ReceiptModalProps) {
     if (!isOpen || !orders || !Array.isArray(orders) || orders.length === 0) return null;
 
     const totalAmount = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
-    const mainReceipt = orders[0]?.receipt || 'N/A';
+    const mainReceipt = orders[0]?.orderCode || 'N/A';
     const deliveryMethod = orders[0]?.deliveryMethod || 'N/A';
     const paymentMethod = orders[0]?.paymentMethod || 'N/A';
 
@@ -35,79 +35,80 @@ export function ReceiptModal({ isOpen, onClose, orders }: ReceiptModalProps) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-neutral-900/40 backdrop-blur-md animate-in fade-in duration-300"
+                className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
             />
 
-            {/* Modal Card */}
-            <div className="relative w-full max-w-sm bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-8 duration-500 border border-neutral-100">
+            {/* Modal Manifest */}
+            <div className="relative w-full max-w-sm bg-white border border-neutral-200 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-5 right-5 p-2 rounded-full hover:bg-neutral-50 text-neutral-400 hover:text-neutral-900 z-10"
+                    className="absolute top-4 right-4 p-2 text-neutral-300 active:text-neutral-900 z-10 transition-colors"
                 >
                     <X className="w-5 h-5" />
                 </button>
 
-                <div className="p-8 text-center">
-                    {/* Success Icon */}
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 mb-4">
-                        <CheckCircle2 className="w-7 h-7 text-emerald-500" />
+                <div className="p-8 md:p-10 text-center">
+                    {/* Status Identification */}
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 border border-emerald-100 mb-6">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                     </div>
 
-                    <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Order Placed!</h2>
-                    <p className="text-neutral-500 text-[13px] mt-1 mb-8">Thank you for your purchase.</p>
+                    <h2 className="text-2xl font-black text-neutral-900 tracking-tighter uppercase mb-2">Order Confirmed</h2>
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.3em] mb-10">Transaction Proof Generated</p>
 
-                    {/* Receipt Section */}
-                    <div className="bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl p-6 mb-6 group relative">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2 block">Order Receipt Code</span>
-                        <div className="flex items-center justify-center gap-3">
+                    {/* Receipt Identification */}
+                    <div className="bg-neutral-50 border border-neutral-200 p-8 mb-8 relative">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-3 block">Receipt Code</span>
+                        <div className="flex items-center justify-center gap-4">
                             <span className="text-3xl font-black text-neutral-900 font-mono tracking-tight">
                                 {mainReceipt}
                             </span>
                             <button
                                 onClick={() => copyToClipboard(mainReceipt)}
-                                className="p-2 bg-white border border-neutral-100 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 hover:border-neutral-900 transition-all active:scale-90 shadow-sm"
+                                className="p-2.5 bg-white border border-neutral-200 text-neutral-400 active:bg-neutral-900 active:text-white transition-colors"
                             >
                                 <Copy className="w-4 h-4" />
                             </button>
                         </div>
                         {orders.length > 1 && (
-                            <p className="text-[10px] text-neutral-400 mt-2 font-medium">
-                                + {orders.length - 1} other {orders.length - 1 === 1 ? 'stall' : 'stalls'} in this checkout
+                            <p className="text-[9px] font-bold text-neutral-300 uppercase tracking-widest mt-4">
+                                Consolidated Multi-Stall Manifest
                             </p>
                         )}
                     </div>
 
-                    {/* Checkout Details */}
-                    <div className="space-y-3 mb-8 bg-neutral-50/50 p-5 rounded-2xl text-left">
+                    {/* Detail Manifest */}
+                    <div className="space-y-4 mb-10 bg-neutral-50/50 p-6 border border-neutral-100 text-left">
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-medium text-neutral-500">Payment</span>
-                            <span className="text-xs font-bold text-neutral-900 uppercase tracking-tight">{paymentMethod}</span>
+                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Settlement</span>
+                            <span className="text-xs font-black text-neutral-900 uppercase tracking-tight">{paymentMethod}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-medium text-neutral-500">Method</span>
-                            <span className="text-xs font-bold text-neutral-900 uppercase tracking-tight">{deliveryMethod}</span>
+                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Logistics</span>
+                            <span className="text-xs font-black text-neutral-900 uppercase tracking-tight">{deliveryMethod}</span>
                         </div>
-                        <div className="pt-3 mt-1 border-t border-neutral-100 flex justify-between items-center">
-                            <span className="text-sm font-bold text-neutral-900">Total Paid</span>
-                            <span className="text-xl font-black text-neutral-900">₱{totalAmount.toFixed(2)}</span>
+                        <div className="pt-4 mt-2 border-t border-neutral-100 flex justify-between items-end">
+                            <span className="text-[11px] font-black text-neutral-900 uppercase tracking-[0.2em]">Total</span>
+                            <span className="text-2xl font-black text-neutral-900 tracking-tighter">₱{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         </div>
                     </div>
 
-                    {/* Footer Actions */}
-                    <div className="flex flex-col gap-2">
+                    {/* Actions */}
+                    <div className="space-y-3">
                         <button
                             onClick={handleViewOrders}
-                            className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-neutral-900/10"
+                            className="w-full bg-orange-500 text-white py-5 font-black uppercase tracking-[0.3em] text-[11px] active:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                         >
-                            Track Order Status
+                            Track Manifest
+                            <ArrowRight className="w-4 h-4" />
                         </button>
                         <button
                             onClick={onClose}
-                            className="w-full py-3 text-neutral-400 font-bold text-[10px] uppercase tracking-widest"
+                            className="w-full py-4 text-neutral-400 font-black text-[9px] uppercase tracking-[0.4em] active:text-neutral-900 transition-colors"
                         >
-                            Back to Market
+                            Return to Market
                         </button>
                     </div>
                 </div>

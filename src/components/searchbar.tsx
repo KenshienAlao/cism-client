@@ -183,24 +183,24 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
     const avatar = profile?.user?.avatar ?? null;
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-black/5 h-16 md:h-24 flex items-center">
+        <header className="sticky top-0 z-50 bg-white border-b border-neutral-100 h-16 flex items-center">
             {!isHome && (
                 <button
                     onClick={() => router.back()}
-                    className="absolute left-3 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 p-2 md:p-2.5 bg-neutral-50 rounded-xl md:rounded-2xl text-neutral-400 hover:bg-neutral-100 hover:text-orange-500 transition-all active:scale-90 shrink-0 z-10 shadow-sm border border-black/5"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-neutral-50 rounded-md text-neutral-400 active:bg-neutral-100 active:text-orange-500 transition-colors z-10 border border-neutral-100"
                     aria-label="Go back"
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </button>
             )}
 
-            <div className={`max-w-7xl mx-auto w-full px-4 md:px-6 h-full transition-all duration-300 ${!isHome ? 'pl-14 sm:pl-16 md:pl-24' : ''}`}>
-                <div className="flex items-center gap-3 md:gap-6 h-full">
+            <div className={`max-w-2xl mx-auto w-full px-4 h-full ${!isHome ? 'pl-16' : ''}`}>
+                <div className="flex items-center gap-4 h-full">
                     <div className="flex-1 relative" ref={dropdownRef}>
                         <form onSubmit={handleSubmit} className="w-full">
-                            <div className={`relative flex items-center rounded-xl border transition-colors ${isFocused ? 'border-orange-500 bg-white' : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100'
+                            <div className={`relative flex items-center rounded-md border transition-colors ${isFocused ? 'border-orange-500/30 bg-white' : 'border-neutral-100 bg-neutral-50'
                                 }`}>
-                                <Search className={`absolute left-3.5 w-4 h-4 transition-colors ${isFocused ? 'text-orange-500' : 'text-neutral-400'}`} strokeWidth={2.5} />
+                                <Search className={`absolute left-3.5 w-4 h-4 ${isFocused ? 'text-orange-500' : 'text-neutral-300'}`} />
                                 <input
                                     ref={inputRef}
                                     type="text"
@@ -212,13 +212,13 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                                     onFocus={() => setIsFocused(true)}
                                     onKeyDown={handleKeyDown}
                                     placeholder={placeholder}
-                                    className="w-full bg-transparent pl-10 pr-10 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 outline-none font-medium"
+                                    className="w-full bg-transparent pl-10 pr-10 py-2.5 text-xs font-bold uppercase tracking-widest text-neutral-900 outline-none placeholder:text-neutral-300 placeholder:font-medium"
                                 />
                                 {query && (
                                     <button
                                         type="button"
                                         onClick={handleClear}
-                                        className="absolute right-3 text-neutral-400 hover:text-neutral-700 transition-colors"
+                                        className="absolute right-3 text-neutral-300 active:text-neutral-600 transition-colors"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -227,32 +227,31 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                         </form>
 
                         {isFocused && query.trim() !== '' && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-                                <div className="p-2 max-h-[70vh] overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-neutral-100 rounded-md overflow-hidden z-50">
+                                <div className="p-1.5 max-h-[70vh] overflow-y-auto">
                                     {results.map((result, idx) => (
                                         <button
                                             key={`${result.type}-${result.id}`}
                                             onClick={() => navigateToResult(result)}
                                             onMouseEnter={() => setActiveIndex(idx)}
-                                            className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-neutral-700 rounded-xl transition-colors text-left ${activeIndex === idx ? 'bg-orange-50 text-orange-600' : 'hover:bg-neutral-50'
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left ${activeIndex === idx ? 'bg-neutral-50' : ''
                                                 }`}
                                         >
-                                            <div className="h-8 w-8 shrink-0 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden relative">
+                                            <div className="h-9 w-9 shrink-0 rounded-md bg-neutral-50 flex items-center justify-center overflow-hidden relative border border-neutral-100">
                                                 {result.metadata.image ? (
                                                     <Image src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} fill className="h-full w-full object-cover" />
                                                 ) : (
-                                                    result.type === 'stall' ? <Store className="w-4 h-4 text-orange-500" /> : <UtensilsCrossed className="w-4 h-4 text-neutral-400" />
+                                                    result.type === 'stall' ? <Store className="w-4 h-4 text-orange-500" /> : <UtensilsCrossed className="w-4 h-4 text-neutral-300" />
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-semibold truncate">{result.name}</div>
-                                                <div className="text-[11px] text-neutral-400 truncate flex items-center gap-1">
-                                                    {result.type === 'stall' ? <Store className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                                                <div className="text-[11px] font-bold text-neutral-900 uppercase tracking-widest truncate">{result.name}</div>
+                                                <div className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest truncate flex items-center gap-1 mt-0.5">
                                                     {result.type === 'stall' ? 'Shop' : result.metadata.stallName}
                                                 </div>
                                             </div>
                                             {result.type === 'product' && (
-                                                <div className="text-xs font-bold text-neutral-400">₱{result.metadata.price}</div>
+                                                <div className="text-[10px] font-bold text-neutral-900 tracking-tight">₱{result.metadata.price}</div>
                                             )}
                                         </button>
                                     ))}
@@ -260,9 +259,9 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                                     {query.trim() && (
                                         <button
                                             onClick={() => handleSubmit()}
-                                            className="w-full mt-1 px-3 py-2 text-xs font-bold text-orange-500 hover:bg-orange-50 rounded-xl transition-colors text-left flex items-center gap-2"
+                                            className="w-full mt-1.5 px-3 py-3 text-[9px] font-bold text-orange-500 uppercase tracking-widest bg-neutral-50 rounded-md active:bg-orange-500 active:text-white transition-colors text-center"
                                         >
-                                            <Search className="w-3 h-3" /> Search all results for "{query}"
+                                            Search all results for "{query}"
                                         </button>
                                     )}
                                 </div>
@@ -270,18 +269,20 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                         )}
                     </div>
 
-                    <Link href="/account" className="group relative shrink-0">
-                        <div className="relative size-14 md:size-20 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden ring-4 ring-white group-hover:ring-orange-500/20 transition-all duration-300">
+                    <Link href="/account" className="shrink-0">
+                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-neutral-50 border border-neutral-100 active:bg-neutral-100 transition-colors">
                             {!mounted ? (
-                                <div className="h-full w-full bg-neutral-200 animate-pulse" />
+                                <div className="h-full w-full bg-neutral-50 animate-pulse" />
                             ) : avatar ? (
                                 <Image src={avatar} alt="avatar" fill className="object-cover" />
                             ) : initials ? (
-                                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-rose-500">
-                                    <span className="text-sm md:text-xl font-black text-white tracking-tight">{initials}</span>
+                                <div className="h-full w-full flex items-center justify-center bg-orange-500">
+                                    <span className="text-xs font-bold text-white tracking-widest">{initials}</span>
                                 </div>
                             ) : (
-                                <div className="h-full w-full bg-neutral-200 animate-pulse" />
+                                <div className="h-full w-full flex items-center justify-center">
+                                    <span className="text-[10px] font-bold text-neutral-300">??</span>
+                                </div>
                             )}
                         </div>
                     </Link>

@@ -12,23 +12,27 @@ export const orderService = {
         return apiClient.get<Order[]>(ORDER_API_ENDPOINTS.CUSTOMER.GET_MY_ORDERS);
     },
 
-    cancelOrder(id: number): Promise<ApiResponse<Order>> {
+    cancelOrder(id: string): Promise<ApiResponse<Order>> {
         return apiClient.post<Order>(ORDER_API_ENDPOINTS.CUSTOMER.CANCEL_ORDER(id));
+    },
+
+    receiveOrder(id: string): Promise<ApiResponse<Order>> {
+        return apiClient.post<Order>(ORDER_API_ENDPOINTS.CUSTOMER.RECEIVE_ORDER(id));
     },
 
     getStallOrders(stallId: number): Promise<ApiResponse<Order[]>> {
         return apiClient.get<Order[]>(ORDER_API_ENDPOINTS.STALL.GET_STALL_ORDERS(stallId));
     },
 
-    updateOrderStatus(id: number, status: string): Promise<ApiResponse<Order>> {
-        return apiClient.post<Order>(ORDER_API_ENDPOINTS.STALL.UPDATE_STATUS(id), { status });
+    updateOrderStatus(id: string, status: string): Promise<ApiResponse<Order>> {
+        return apiClient.post<Order>(`${ORDER_API_ENDPOINTS.STALL.UPDATE_STATUS(id)}?status=${status}`);
     },
 
-    getOrderById(id: number): Promise<ApiResponse<Order>> {
+    getOrderById(id: string): Promise<ApiResponse<Order>> {
         return apiClient.get<Order>(`${ORDER_API_ENDPOINTS.CUSTOMER.GET_MY_ORDERS}/${id}`);
     },
     
-    deleteOrder(id: number): Promise<ApiResponse<string>> {
+    deleteOrder(id: string): Promise<ApiResponse<string>> {
         return apiClient.post<string>(ORDER_API_ENDPOINTS.CUSTOMER.DELETE_ORDER(id));
     }
 };

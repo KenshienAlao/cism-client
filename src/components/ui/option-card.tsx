@@ -10,14 +10,20 @@ export function OptionCard({ active, onClick, icon: Icon, label, subtitle }: Opt
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col p-4 rounded-xl text-left transition-all ${active
-                    ? 'border-2 border-orange-500 bg-orange-50/20'
-                    : 'border border-neutral-500 opacity-40 hover:opacity-70'
+            className={`flex flex-col p-6 md:p-10 text-left border transition-all duration-300 ${active
+                ? 'border-orange-500 bg-white ring-1 ring-orange-500 shadow-sm'
+                : 'border-neutral-200 bg-neutral-50/50'
                 }`}
         >
-            <Icon className={`w-4 h-4 mb-2 ${active ? 'text-orange-500' : 'text-neutral-500'}`} />
-            <span className={`text-xs font-bold ${active ? 'text-neutral-900' : 'text-neutral-500'}`}>{label}</span>
-            <span className={`text-[10px] mt-0.5 ${active ? 'text-neutral-400' : 'text-neutral-500'}`}>{subtitle}</span>
+            <Icon className={`w-6 h-6 md:w-10 md:h-10 mb-6 md:mb-10 ${active ? 'text-orange-500' : 'text-neutral-300'}`} />
+            <div className="space-y-2 md:space-y-3">
+                <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.4em] block ${active ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                    {label}
+                </span>
+                <p className={`text-[9px] md:text-xs font-bold uppercase tracking-widest block leading-relaxed ${active ? 'text-orange-500' : 'text-neutral-300'}`}>
+                    {subtitle}
+                </p>
+            </div>
         </button>
     );
 }

@@ -5,26 +5,38 @@ export interface OrderItem {
     quantity: number;
     priceAtPurchase: number;
     image: string;
+    itemId: number;
 }
 
 export interface Order {
-    id: number;
-    receipt: string;
+    id: string;
+    orderCode: string;
     subtotal: number;
     deliveryFee: number;
     totalAmount: number;
-    deliveryMethod: string;
+    deliveryMethod: 'DELIVER' | 'PICKUP';
     paymentMethod: string;
     status: string;
     note: string;
     stallName: string;
+    stallImage?: string;
     orderItems: OrderItem[];
     createdAt: string;
+    stallId: number;
+    cancelReason?: string;
+    deletedByCustomer: boolean;
+    deletedByStall: boolean;
 }
 
 export interface OrderRequest {
     cartItemIds: number[];
-    deliveryMethod: 'DELIVERY' | 'PICKUP';
+    buyNowItem?: {
+        stallId: number;
+        itemId: number;
+        variationId: number;
+        quantity: number;
+    };
+    deliveryMethod: 'DELIVER' | 'PICKUP';
     paymentMethod: string;
     note: string;
 }

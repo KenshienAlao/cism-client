@@ -3,6 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { notifError } from "@/lib/toast";
 import { useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export function AvatarUpload() {
     const { profile, uploadAvatar, isUploadingAvatar } = useAuth();
@@ -34,11 +35,11 @@ export function AvatarUpload() {
     const initials = profile?.user?.clientName?.split(" ")[0][0];
 
     return (
-        <div className="order-first flex flex-col items-center gap-4 border-neutral-100 pb-8 md:order-last md:w-64 md:border-l md:pb-0">
-            <div className="relative h-20 w-20 overflow-hidden rounded-full border border-neutral-200 bg-neutral-50 md:h-24 md:w-24">
+        <div className="order-first flex flex-col items-center gap-6 border-neutral-100 pb-8 md:order-last md:w-64 md:border-l md:pb-0">
+            <div className="relative h-24 w-24 overflow-hidden rounded-full border border-neutral-100 bg-neutral-50 shadow-inner">
                 {isUploadingAvatar && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
-                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+                        <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
                     </div>
                 )}
                 {avatarPreview || profile?.user?.avatar ? (
@@ -48,28 +49,31 @@ export function AvatarUpload() {
                         className="h-full w-full object-cover"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xl font-bold text-neutral-400">
+                    <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-neutral-300">
                         {initials}
                     </div>
                 )}
             </div>
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleAvatarChange}
-            />
-            <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploadingAvatar}
-                className="border border-neutral-200 px-4 py-2 text-[11px] text-neutral-600 transition-opacity hover:bg-neutral-50 disabled:opacity-50"
-            >
-                {isUploadingAvatar ? "Uploading..." : "Select Image"}
-            </button>
-            <div className="text-[10px] text-neutral-400 text-center md:text-[12px]">
-                <p>File size: maximum 2 MB</p>
-                <p>File extension: .JPEG, .PNG</p>
+
+            <div className="flex flex-col items-center gap-3">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                />
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="border border-neutral-200 px-6 py-2 rounded-md text-[10px] font-bold text-neutral-700 uppercase tracking-widest transition-colors active:bg-neutral-50 disabled:opacity-50"
+                >
+                    {isUploadingAvatar ? "Uploading..." : "Select Image"}
+                </button>
+                <div className="text-[9px] text-neutral-400 font-bold uppercase tracking-tighter text-center leading-relaxed">
+                    <p>Maximum 2 MB</p>
+                    <p>JPEG, PNG, WEBP</p>
+                </div>
             </div>
         </div>
     );

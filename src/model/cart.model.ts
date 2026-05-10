@@ -7,4 +7,5 @@ export interface CartResponse {
     image: string;
     stallName: string;
     quantity: number;
+    variationName?: string;
 }

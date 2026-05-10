@@ -39,7 +39,7 @@ export function useAuth(): UseAuthReturn {
       return res.success ? res.data : null;
     },
     retry: false,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {

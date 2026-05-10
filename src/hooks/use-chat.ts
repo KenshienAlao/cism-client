@@ -81,6 +81,7 @@ export const useChatThreads = () => {
             if (!res.success) throw new Error(res.message);
             return res.data;
         },
+        enabled: !!profile,
         staleTime: 30_000,
     });
 };

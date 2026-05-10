@@ -106,73 +106,69 @@ export function ActiveChatView() {
     return (
         <>
             {/* Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-3 flex justify-between items-center shrink-0">
+            <div className="bg-white border-b border-neutral-100 p-3 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
-                    <button onClick={clearActiveChat} className="p-1.5 hover:bg-white/20 rounded-full transition">
+                    <button onClick={clearActiveChat} className="p-1.5 active:bg-neutral-50 rounded-md transition-colors text-neutral-400">
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-sm leading-none">
+                            <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-widest leading-none">
                                 {activeChat.customerName ? activeChat.customerName : activeChat.stallName}
                             </h3>
-                            {isOnline && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />}
+                            {isOnline && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
                         </div>
-                        <p className="text-[10px] text-orange-100 uppercase tracking-wider font-bold mt-1">
-                            {isOnline ? 'Active now' : getRoleLabel()}
+                        <p className="text-[9px] text-orange-500 uppercase tracking-widest font-bold mt-1">
+                            {isOnline ? 'Online' : getRoleLabel()}
                         </p>
                     </div>
                 </div>
-                <button onClick={closeChat} className="p-1 hover:bg-white/20 rounded-full transition">
+                <button onClick={closeChat} className="p-1.5 active:bg-neutral-50 rounded-md transition-colors text-neutral-400">
                     <X className="w-5 h-5" />
                 </button>
             </div>
 
             {/* Messages Area */}
-            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 relative">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50 relative">
                 {isLoadingMessages ? (
-                    <div className="flex justify-center items-center h-full text-gray-400">
-                        <span className="animate-pulse text-sm">Loading messages...</span>
+                    <div className="flex justify-center items-center h-full text-neutral-300">
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Loading...</span>
                     </div>
                 ) : (
                     <>
                         {/* Profile Starting Section */}
-                        <div className="flex flex-col items-center py-14 px-4 text-center">
-                            <div className="relative mb-5 group/profile">
+                        <div className="flex flex-col items-center py-16 px-6 text-center">
+                            <div className="relative mb-6">
                                 <Avatar
                                     src={activeChat.customerImage || activeChat.stallImage}
                                     name={activeChat.customerName || activeChat.stallName}
                                     size="lg"
-                                    className="w-28 h-28 shadow-2xl border-4 border-white ring-1 ring-gray-100 transition-transform group-hover/profile:scale-105 duration-300"
+                                    className="w-24 h-24 rounded-md border border-neutral-100"
                                 />
-                                <div className={`absolute bottom-1.5 right-1.5 w-7 h-7 border-4 border-white rounded-full shadow-sm transition-all duration-500
-                                    ${isOnline ? 'bg-green-500 scale-110 shadow-[0_0_12px_rgba(34,197,94,0.4)]' : 'bg-gray-400'}`}>
+                                <div className={`absolute -bottom-1 -right-1 w-5 h-5 border-4 border-neutral-50 rounded-full
+                                    ${isOnline ? 'bg-emerald-500' : 'bg-neutral-300'}`}>
                                 </div>
                             </div>
 
-                            <div className="space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                            <div className="space-y-1.5">
+                                <h2 className="text-xl font-bold text-neutral-900 uppercase tracking-tight">
                                     {activeChat.customerName || activeChat.stallName}
                                 </h2>
-                                <p className="text-[14px] text-gray-500 font-semibold uppercase tracking-widest flex items-center justify-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
                                     {getRoleLabel()}
-                                </p>
-                                <p className="text-[13px] text-gray-400 font-medium">
-                                    Member since {new Date().getFullYear()}
                                 </p>
                             </div>
 
-                            <div className="flex gap-3 mt-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
+                            <div className="mt-8">
                                 {!activeChat.customerName && (
                                     <button
                                         onClick={() => {
                                             router.push(`/stall?name=${activeChat.stallName}`);
                                             closeChat();
                                         }}
-                                        className="flex items-center gap-2.5 px-6 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-[13px] font-bold rounded-full shadow-sm hover:shadow transition-all active:scale-95"
+                                        className="flex items-center gap-2 px-6 py-2.5 bg-white border border-neutral-100 text-neutral-900 text-[10px] font-bold uppercase tracking-widest rounded-md active:bg-neutral-50 transition-colors"
                                     >
-                                        <User className="w-4 h-4 text-gray-400" />
+                                        <User className="w-3.5 h-3.5 text-orange-500" />
                                         View Profile
                                     </button>
                                 )}
@@ -180,9 +176,9 @@ export function ActiveChatView() {
                         </div>
 
                         {messages.length === 0 ? (
-                            <div className="py-10 text-center">
-                                <p className="text-[13px] text-gray-400 font-medium italic">
-                                    Send a message to start chatting with {activeChat.customerName || activeChat.stallName}
+                            <div className="py-12 text-center">
+                                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
+                                    No conversation yet
                                 </p>
                             </div>
                         ) : (() => {
@@ -230,22 +226,22 @@ export function ActiveChatView() {
             </div >
 
             {/* Input Area */}
-            < form onSubmit={handleSend} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2 shrink-0" >
+            <form onSubmit={handleSend} className="p-3 bg-white border-t border-neutral-100 flex items-center gap-2 shrink-0">
                 <input
                     type="text"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-1 bg-gray-100 text-sm rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                    className="flex-1 bg-neutral-50 text-[11px] font-bold uppercase tracking-widest rounded-md px-4 py-3 focus:outline-none focus:bg-white focus:ring-1 focus:ring-orange-500/20 transition-all placeholder:text-neutral-300 placeholder:font-medium"
                 />
                 <button
                     type="submit"
                     disabled={!content.trim() || sendMessage.isPending}
-                    className="bg-orange-500 text-white p-2.5 rounded-full hover:bg-orange-600 transition disabled:opacity-50 disabled:hover:bg-orange-500 flex-shrink-0"
+                    className="bg-orange-500 text-white p-3 rounded-md active:bg-orange-600 transition-colors disabled:opacity-50 flex-shrink-0"
                 >
                     <Send className="w-4 h-4" />
                 </button>
-            </form >
+            </form>
         </>
     );
 }

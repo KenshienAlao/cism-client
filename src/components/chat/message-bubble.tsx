@@ -20,8 +20,8 @@ export function MessageBubble({
 }: MessageBubbleProps) {
     const showName = isFirstInGroup && !isMe;
     const bubbleCorners = isMe
-        ? `${isFirstInGroup ? 'rounded-t-2xl' : 'rounded-t-md'} ${isLastInGroup ? 'rounded-bl-2xl rounded-br-md' : 'rounded-b-md'} rounded-l-2xl`
-        : `${isFirstInGroup ? 'rounded-t-2xl' : 'rounded-t-md'} ${isLastInGroup ? 'rounded-br-2xl rounded-bl-md' : 'rounded-b-md'} rounded-r-2xl`;
+        ? `${isFirstInGroup ? 'rounded-t-md' : 'rounded-t-sm'} ${isLastInGroup ? 'rounded-bl-md rounded-br-sm' : 'rounded-b-sm'} rounded-l-md`
+        : `${isFirstInGroup ? 'rounded-t-md' : 'rounded-t-sm'} ${isLastInGroup ? 'rounded-br-md rounded-bl-sm' : 'rounded-b-sm'} rounded-r-md`;
 
     const [menuDirection, setMenuDirection] = useState<'up' | 'down'>('up');
     const buttonRef = useRef<HTMLDivElement>(null);
@@ -46,25 +46,25 @@ export function MessageBubble({
 
     if (msg.isDeleted) {
         return (
-            <div className={`flex flex-col relative group ${isMe ? 'items-end' : 'items-start'} ${isLastInGroup ? 'mb-2' : 'mb-0.5'}`}>
+            <div className={`flex flex-col relative ${isMe ? 'items-end' : 'items-start'} ${isLastInGroup ? 'mb-2' : 'mb-0.5'}`}>
                 <div className="flex items-center gap-2 relative group/msg">
-                    <div className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
-                        <Ban className="w-3.5 h-3.5 text-gray-300" />
-                        <span className="text-[13px] italic text-gray-400">
-                            {isMe ? 'You removed a message' : `${msg.senderName} removed a message`}
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-neutral-100 bg-neutral-50/50">
+                        <Ban className="w-3 h-3 text-neutral-300" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                            {isMe ? 'Message removed' : 'Removed'}
                         </span>
                     </div>
                     <div
                         className={`
                             absolute top-1/2 -translate-y-1/2 z-10
-                            opacity-0 group-hover/msg:opacity-100 transition-all duration-200
+                            opacity-0 group-hover/msg:opacity-100 transition-all
                             ${isMe ? 'right-full mr-2' : 'left-full ml-2'}
                         `}
                         ref={buttonRef}
                     >
                         <button
                             onClick={handleMenuToggle}
-                            className={`p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 rounded-lg transition-all ${activeMessageMenu === msg.id ? 'opacity-100 text-gray-600 bg-gray-100' : ''}`}
+                            className={`p-1 text-neutral-400 active:text-neutral-900 active:bg-neutral-100 rounded-md transition-colors ${activeMessageMenu === msg.id ? 'opacity-100 text-neutral-900 bg-neutral-100' : ''}`}
                         >
                             <MoreVertical className="w-3.5 h-3.5" />
                         </button>
@@ -72,21 +72,20 @@ export function MessageBubble({
                         {activeMessageMenu === msg.id && (
                             <div
                                 className={`
-                                    absolute z-[100] bg-white/95 backdrop-blur-sm rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] 
-                                    border border-gray-100 py-1 min-w-[150px] animate-in fade-in zoom-in-95 duration-200
+                                    absolute z-[100] bg-white rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
                                     ${isMe ? 'right-0' : 'left-0'}
                                     ${menuDirection === 'up'
-                                        ? 'bottom-full mb-1.5 slide-in-from-bottom-1'
-                                        : 'top-full mt-1.5 slide-in-from-top-1'
+                                        ? 'bottom-full mb-1.5'
+                                        : 'top-full mt-1.5'
                                     }
                                 `}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button
                                     onClick={() => handleDeleteMessage(msg.id, true)}
-                                    className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-gray-600 hover:bg-gray-50 transition-colors"
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-neutral-600 active:bg-neutral-50 transition-colors"
                                 >
-                                    <Trash2 className="w-3.5 h-3.5 opacity-70" />
+                                    <Trash2 className="w-3 h-3 opacity-70" />
                                     <span>Remove</span>
                                 </button>
                             </div>
@@ -100,18 +99,18 @@ export function MessageBubble({
     return (
         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${isLastInGroup ? 'mb-2' : 'mb-0.5'}`}>
             {showName && (
-                <span className="text-[10px] text-gray-400 mb-1 ml-2 font-semibold uppercase tracking-wider">
+                <span className="text-[9px] text-neutral-400 mb-1.5 ml-2 font-bold uppercase tracking-[0.2em]">
                     {msg.senderName}
                 </span>
             )}
 
-            <div className={`flex items-end gap-2 max-w-[85%] group relative ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex items-end gap-2 max-w-[90%] group relative ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 {!isMe && isLastInGroup && (
                     <Avatar
                         src={activeChat?.stallId === msg.senderId ? activeChat?.stallImage : (activeChat?.customerId === msg.senderId ? activeChat?.customerImage : '')}
                         name={msg.senderName}
                         size="xs"
-                        className="mb-1"
+                        className="mb-0.5 rounded-md"
                     />
                 )}
                 {!isMe && !isLastInGroup && <div className="w-6" />}
@@ -119,26 +118,26 @@ export function MessageBubble({
                 <div className={`flex flex-col relative ${isMe ? 'items-end' : 'items-start'}`}>
                     <div className="flex items-center gap-2 relative group/msg">
                         <div className={`
-                            relative transition-all duration-200 cursor-default select-text overflow-hidden
+                            relative transition-colors cursor-default select-text overflow-hidden
                             ${bubbleCorners}
                             ${isMe
                                 ? (msg.status === 'sending'
-                                    ? 'bg-orange-200 text-orange-700/70 animate-pulse'
-                                    : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md')
-                                : 'bg-white text-[#050505] border border-gray-100 shadow-sm'
+                                    ? 'bg-orange-100 text-orange-600/60'
+                                    : 'bg-orange-500 text-white')
+                                : 'bg-white text-neutral-900 border border-neutral-100'
                             }
                         `}>
                             {isImage(msg.content) ? (
-                                <div className="p-1">
+                                <div className="p-0.5">
                                     <img
                                         src={msg.content}
-                                        alt="Shared pic"
-                                        className="max-w-[240px] md:max-w-[320px] rounded-xl object-cover hover:opacity-95 transition-opacity cursor-pointer"
+                                        alt="Media"
+                                        className="max-w-[240px] md:max-w-[320px] rounded-md object-cover transition-opacity cursor-pointer active:opacity-90"
                                         onClick={() => window.open(msg.content, '_blank')}
                                     />
                                 </div>
                             ) : (
-                                <div className="px-4 py-2.5 text-[13.5px] leading-relaxed break-words whitespace-pre-wrap">
+                                <div className="px-3.5 py-2 text-[12px] font-medium leading-relaxed break-words whitespace-pre-wrap tracking-wide">
                                     {msg.content}
                                 </div>
                             )}
@@ -149,14 +148,14 @@ export function MessageBubble({
                             <div
                                 className={`
                                     absolute top-1/2 -translate-y-1/2 z-10
-                                    opacity-0 group-hover/msg:opacity-100 transition-all duration-200
+                                    opacity-0 group-hover/msg:opacity-100 transition-all
                                     ${isMe ? 'right-full mr-2' : 'left-full ml-2'}
                                 `}
                                 ref={buttonRef}
                             >
                                 <button
                                     onClick={handleMenuToggle}
-                                    className={`p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 rounded-lg transition-all ${activeMessageMenu === msg.id ? 'opacity-100 text-gray-600 bg-gray-100' : ''}`}
+                                    className={`p-1 text-neutral-300 active:text-neutral-900 active:bg-neutral-100 rounded-md transition-colors ${activeMessageMenu === msg.id ? 'opacity-100 text-neutral-900 bg-neutral-100' : ''}`}
                                 >
                                     <MoreVertical className="w-3.5 h-3.5" />
                                 </button>
@@ -164,29 +163,28 @@ export function MessageBubble({
                                 {activeMessageMenu === msg.id && (
                                     <div
                                         className={`
-                                            absolute z-[100] bg-white/95 backdrop-blur-sm rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] 
-                                            border border-gray-100 py-1 min-w-[150px] animate-in fade-in zoom-in-95 duration-200
+                                            absolute z-[100] bg-white rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
                                             ${isMe ? 'right-0' : 'left-0'}
                                             ${menuDirection === 'up'
-                                                ? 'bottom-full mb-1.5 slide-in-from-bottom-1'
-                                                : 'top-full mt-1.5 slide-in-from-top-1'
+                                                ? 'bottom-full mb-1.5'
+                                                : 'top-full mt-1.5'
                                             }
                                         `}
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <button
                                             onClick={() => handleDeleteMessage(msg.id, true)}
-                                            className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-gray-600 hover:bg-gray-50 transition-colors"
+                                            className="w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-neutral-600 active:bg-neutral-50 transition-colors"
                                         >
-                                            <Trash2 className="w-3.5 h-3.5 opacity-70" />
+                                            <Trash2 className="w-3 h-3 opacity-70" />
                                             <span>Remove</span>
                                         </button>
                                         {isMe && (
                                             <button
                                                 onClick={() => handleDeleteMessage(msg.id, false)}
-                                                className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-rose-500 active:bg-rose-50 transition-colors"
                                             >
-                                                <Ban className="w-3.5 h-3.5 opacity-70" />
+                                                <Ban className="w-3 h-3 opacity-70" />
                                                 <span>Unsend</span>
                                             </button>
                                         )}
@@ -200,19 +198,19 @@ export function MessageBubble({
                     {isMe && isLastInGroup && (
                         <div className="mt-1 flex items-center gap-1">
                             {msg.status === 'sending' ? (
-                                <Circle className="w-2.5 h-2.5 text-orange-300 animate-pulse" strokeWidth={3} />
+                                <Circle className="w-2 h-2 text-orange-300" strokeWidth={3} />
                             ) : (msg.readByStall && isLastRead) ? (
                                 <Avatar
                                     src={activeChat?.stallImage}
                                     name={activeChat?.stallName}
                                     size="xs"
-                                    className="w-3.5 h-3.5 border border-white shadow-sm ring-1 ring-orange-100"
+                                    className="w-3 h-3 rounded-md"
                                 />
                             ) : msg.readByStall ? (
                                 null
                             ) : (
-                                <div className="bg-orange-100 rounded-full p-0.5">
-                                    <Check className="w-2 h-2 text-orange-600" strokeWidth={4} />
+                                <div className="bg-orange-50 rounded-md p-0.5">
+                                    <Check className="w-1.5 h-1.5 text-orange-500" strokeWidth={5} />
                                 </div>
                             )}
                         </div>
@@ -221,7 +219,7 @@ export function MessageBubble({
             </div>
 
             {isLastInGroup && (
-                <span className={`text-[9px] text-gray-400 mt-1.5 font-medium tracking-tight ${isMe ? 'mr-1' : 'ml-8'}`}>
+                <span className={`text-[8px] font-bold text-neutral-300 uppercase tracking-widest mt-1.5 ${isMe ? 'mr-0.5' : 'ml-8'}`}>
                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                 </span>
             )}

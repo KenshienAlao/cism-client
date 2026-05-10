@@ -14,6 +14,7 @@ interface UseItemReturn {
   error: Error | null;
   refetch: () => void;
   createReview: (review: ReviewRequest) => Promise<ApiResponse<Review>>;
+  createReviewMutation: any;
 }
 
 export function useItem(): UseItemReturn {
@@ -25,7 +26,7 @@ export function useItem(): UseItemReturn {
       if (!res.success) throw new Error(res.message);
       return res.data;
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5, // Cache for 5 mins
     retry: 1,
   });
 
@@ -58,6 +59,7 @@ export function useItem(): UseItemReturn {
     error: query.error,
     refetch: () => query.refetch(),
     createReview: createReviewMutation.mutateAsync,
+    createReviewMutation,
   };
 }
 
@@ -69,7 +71,7 @@ export function useItemDetail(id: string | null, stallName?: string | null, item
       if (!res.success) throw new Error(res.message);
       return res.data;
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
     select: (stalls) => {
       if (!stalls.length) return null;
 
@@ -105,7 +107,7 @@ export function useItemDetail(id: string | null, stallName?: string | null, item
 
       if (found) {
         const { item, stall } = found;
-        const itemReviews = stall.reviews.filter(r => r.itemId === item.id);
+        const itemReviews = stall.reviews.filter(r => (r.itemId === item.id) || (r.stall_item_id === item.id));
         const avgRating = itemReviews.length > 0
           ? itemReviews.reduce((acc, r) => acc + r.star, 0) / itemReviews.length
           : 0;

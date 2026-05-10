@@ -14,17 +14,18 @@ export default function Page() {
     if (isLoading || !profile) return <Loading />;
 
     return (
-        <main className="min-h-screen bg-[#F5F5F5] font-sans text-neutral-800">
-            <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
+        <main className="min-h-screen bg-neutral-50 font-sans text-neutral-900 pb-20 md:pb-0">
+            <div className="mx-auto flex max-w-6xl flex-col md:flex-row gap-6 px-4 py-6 md:py-10">
                 <AccountSidebar />
+
                 <div className="flex-1 space-y-6">
-                    <section className="border border-neutral-200 bg-white p-6 shadow-sm">
-                        <div className="mb-6 border-b border-neutral-100 pb-4">
-                            <h2 className="text-lg font-medium">My Profile</h2>
-                            <p className="text-sm text-neutral-500">Manage and protect your account</p>
+                    <section className="bg-white border border-neutral-100 p-6 md:p-8">
+                        <div className="mb-8 border-b border-neutral-50 pb-5">
+                            <h2 className="text-xl font-bold tracking-tight">My Profile</h2>
+                            <p className="text-xs font-medium text-neutral-400 mt-1 uppercase tracking-wider">Account security & personal info</p>
                         </div>
 
-                        <div className="flex flex-col gap-10 md:flex-row">
+                        <div className="flex flex-col gap-10 lg:flex-row">
                             <ProfileForm />
                             <AvatarUpload />
                         </div>
@@ -32,14 +33,14 @@ export default function Page() {
 
                     <button
                         onClick={logout}
-                        className="flex w-full items-center justify-center gap-3 border border-neutral-200 bg-white py-4 text-sm font-bold text-neutral-800 transition-all hover:bg-neutral-50 active:scale-[0.99] md:hidden"
+                        className="flex w-full items-center justify-center gap-3 border border-neutral-100 bg-white py-4 text-xs font-bold text-neutral-900 uppercase tracking-widest transition-colors active:bg-neutral-50 md:hidden"
                     >
-                        <LogOut size={18} /> Logout
+                        <LogOut size={16} className="text-orange-500" /> Logout
                     </button>
 
                     <DangerZone />
                 </div>
-            </div>
+            </div>  
         </main>
     );
 }
