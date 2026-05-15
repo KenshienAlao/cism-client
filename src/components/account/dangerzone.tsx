@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirmation } from "@/context/confirmation.context";
+import { AlertTriangle } from "lucide-react";
 
 export function DangerZone() {
     const { deleteAccount, isDeletingAccount } = useAuth();
@@ -9,9 +10,9 @@ export function DangerZone() {
 
     const handleDeleteAccount = () => {
         showConfirmation({
-            title: "Account Deletion",
+            title: "Permanently Delete Account",
             message:
-                "You are about to permanently delete your Account. This action is irreversible and all encrypted records will be lost.",
+                "This action is irreversible. All data, settings, and encrypted records associated with this account will be permanently removed.",
             confirmText: "Delete Account",
             type: "danger",
             onConfirm: async () => {
@@ -21,18 +22,28 @@ export function DangerZone() {
     };
 
     return (
-        <section className="border border-red-100 bg-red-50/10 p-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-sm font-bold text-red-500">Delete Account</h3>
-                    <p className="text-[12px] text-neutral-400">Once you delete your account, there is no going back.</p>
+        <section className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md transition-colors">
+            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-2">
+                <AlertTriangle size={14} className="text-red-500" />
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
+                    Security & Access
+                </h3>
+            </div>
+
+            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100">Delete Account</p>
+                    <p className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 max-w-md leading-relaxed">
+                        Permanently remove your account and all associated data. This action cannot be undone.
+                    </p>
                 </div>
+                
                 <button
                     onClick={handleDeleteAccount}
                     disabled={isDeletingAccount}
-                    className="border border-red-200 px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-500 hover:text-white disabled:opacity-50"
+                    className="w-fit border border-red-200 dark:border-red-900/50 px-5 py-2 rounded-md text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-[0.98] disabled:opacity-50"
                 >
-                    {isDeletingAccount ? "Deleting..." : "Delete"}
+                    {isDeletingAccount ? "Processing..." : "Delete Account"}
                 </button>
             </div>
         </section>

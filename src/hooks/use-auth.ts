@@ -25,6 +25,10 @@ interface UseAuthReturn {
   isUploadingAvatar: boolean;
   deleteAccount: () => Promise<any>;
   isDeletingAccount: boolean;
+  changeEmail: (data: any) => Promise<any>;
+  isChangingEmail: boolean;
+  changePassword: (data: any) => Promise<any>;
+  isChangingPassword: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -32,7 +36,7 @@ export function useAuth(): UseAuthReturn {
   const pathname = usePathname();
   const queryClient = useQueryClient();
 
-  const { data: profile = null, isLoading } = useQuery<LoginResponse | null>({
+  const { data: profile = null, isLoading, isFetched } = useQuery<LoginResponse | null>({
     queryKey: authKeys.profile(),
     queryFn: async () => {
       const res = await authService.validateCookie();
@@ -40,10 +44,11 @@ export function useAuth(): UseAuthReturn {
     },
     retry: false,
     staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   });
 
   useEffect(() => {
-    if (isLoading) return;
+     if (!isFetched) return;
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
@@ -52,7 +57,7 @@ export function useAuth(): UseAuthReturn {
     } else if (profile && isPublicRoute) {
       router.replace(ROUTES.HOME);
     }
-  }, [isLoading, profile, pathname, router]);
+  }, [isFetched, profile, pathname, router]);
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginRequest) => await authService.login(data),
@@ -165,6 +170,53 @@ export function useAuth(): UseAuthReturn {
     }
   });
 
+  const changeEmailMutation = useMutation({
+    mutationFn: async (data: any) => await authService.changeEmail(data),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: authKeys.profile() });
+      const previous = queryClient.getQueryData<LoginResponse>(authKeys.profile());
+      if (previous) {
+        queryClient.setQueryData<LoginResponse>(authKeys.profile(), {
+          ...previous,
+          user: {
+            ...previous.user,
+            email: data.newEmail
+          }
+        });
+      }
+      return { previous };
+    },
+    onSuccess: (res) => {
+      if (res.success) {
+        notifSuccess("Email updated successfully!");
+      } else {
+        notifError(res.message || "Failed to update email");
+      }
+    },
+    onError: (error: any, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(authKeys.profile(), context.previous);
+      }
+      notifError(error.message || "Failed to update email");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.profile() });
+    }
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: any) => await authService.changePassword(data),
+    onSuccess: (res) => {
+      if (res.success) {
+        notifSuccess("Password updated successfully!");
+      } else {
+        notifError(res.message || "Failed to update password");
+      }
+    },
+    onError: (error: any) => {
+      notifError(error.message || "Failed to update password");
+    }
+  });
 
   return {
     profile,
@@ -179,5 +231,9 @@ export function useAuth(): UseAuthReturn {
     isUploadingAvatar: uploadAvatarMutation.isPending,
     deleteAccount: () => deleteAccountMutation.mutateAsync(),
     isDeletingAccount: deleteAccountMutation.isPending,
+    changeEmail: (data: any) => changeEmailMutation.mutateAsync(data),
+    isChangingEmail: changeEmailMutation.isPending,
+    changePassword: (data: any) => changePasswordMutation.mutateAsync(data),
+    isChangingPassword: changePasswordMutation.isPending,
   };
 }

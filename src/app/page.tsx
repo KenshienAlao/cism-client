@@ -1,13 +1,23 @@
 "use client";
+
 import { CategoryChips } from "@/components/categorychips";
 import { useEnrichedItems } from "@/hooks/use-enriched-items";
 import { HorizontalScrollSection } from "@/components/horizontalscrollsection";
-import { VIEW_TYPE, CATEGORY_MAP } from "@/config/app.config";
+import { CATEGORY_MAP } from "@/config/app.config";
 import { useItem } from "@/hooks/use-item";
 import { useAuth } from "@/hooks/use-auth";
-import { useCart } from "@/hooks/use-cart";
 import Loading from "@/components/ui/loading";
-import { Coffee, CookingPot, CupSoda, DollarSign, Hamburger, Inbox, School, Sparkles, TrendingUp } from "lucide-react";
+import { 
+  Coffee, 
+  CookingPot, 
+  CupSoda, 
+  DollarSign, 
+  Hamburger, 
+  Inbox, 
+  School, 
+  Sparkles, 
+  TrendingUp 
+} from "lucide-react";
 import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -16,25 +26,27 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const { items, isLoading, isFetching } = useItem();
   const allFlattenedItems = useEnrichedItems(items);
-  const { addToCart } = useCart();
   const search = searchParams.get('q') || "";
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   if (isAuthLoading || isLoading || isFetching) return <Loading />;
 
   const isSpecialCategory = ['all', 'popular', 'fresh', 'budget'].includes(selectedCategory);
-  const scopedItems = (search.trim() !== ''
-    ? allFlattenedItems
-    : isSpecialCategory
+  
+  const scopedItems = useMemo(() => {
+    return (search.trim() !== ''
       ? allFlattenedItems
-      : allFlattenedItems.filter(i => i.category === CATEGORY_MAP[selectedCategory]))
-    .filter(item => {
-      if (!search.trim()) return true;
-      const s = search.toUpperCase();
-      return item.name?.toUpperCase().includes(s) ||
-        item.category?.toUpperCase().includes(s) ||
-        item.stallName?.toUpperCase().includes(s);
-    });
+      : isSpecialCategory
+        ? allFlattenedItems
+        : allFlattenedItems.filter(i => i.category === CATEGORY_MAP[selectedCategory]))
+      .filter(item => {
+        if (!search.trim()) return true;
+        const s = search.toUpperCase();
+        return item.name?.toUpperCase().includes(s) ||
+          item.category?.toUpperCase().includes(s) ||
+          item.stallName?.toUpperCase().includes(s);
+      });
+  }, [allFlattenedItems, search, selectedCategory, isSpecialCategory]);
 
   const schoolItems = useMemo(() =>
     allFlattenedItems.filter(i => i.category !== 'MEAL' && i.category !== 'DRINK' && i.category !== 'SNACK'),
@@ -66,18 +78,18 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Category Navigation */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="py-4 overflow-x-auto no-scrollbar">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navigation Header */}
+      <nav className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-3 overflow-x-auto no-scrollbar">
             <CategoryChips onCategoryChange={setSelectedCategory} />
           </div>
         </div>
-      </div>
+      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="space-y-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <div className="space-y-12 md:space-y-16">
           
           {(selectedCategory === 'all' || selectedCategory === 'popular') && (
             <HorizontalScrollSection
@@ -88,6 +100,7 @@ function HomeContent() {
               emptyIcon={TrendingUp}
               emptyTitle="Nothing trending yet"
               emptyDescription="No popular items found at the moment."
+              priorityFirstItem
             />
           )}
 
@@ -115,69 +128,73 @@ function HomeContent() {
             />
           )}
 
-          {(selectedCategory === 'all' || selectedCategory === 'meals') && (
-            <HorizontalScrollSection
-              icon={<CookingPot className="w-5 h-5 text-orange-500" />}
-              title="Meals"
-              subtitle="Explore all available meals"
-              items={allFlattenedItems.filter(i => i.category === 'MEAL')}
-              emptyIcon={Inbox}
-              emptyTitle="No meals found"
-              emptyDescription="No meals available at the moment!"
-            />
-          )}
+          <div className="space-y-12 pt-4 border-t border-border">
+            {(selectedCategory === 'all' || selectedCategory === 'meals') && (
+              <HorizontalScrollSection
+                icon={<CookingPot className="w-5 h-5 text-orange-500" />}
+                title="Meals"
+                subtitle="Explore all available meals"
+                items={allFlattenedItems.filter(i => i.category === 'MEAL')}
+                emptyIcon={Inbox}
+                emptyTitle="No meals found"
+                emptyDescription="No meals available at the moment!"
+              />
+            )}
 
-          {(selectedCategory === 'all' || selectedCategory === 'drinks') && (
-            <HorizontalScrollSection
-              icon={<CupSoda className="w-5 h-5 text-orange-500" />}
-              title="Drinks"
-              subtitle="Explore all available drinks"
-              items={allFlattenedItems.filter(i => i.category === 'DRINK')}
-              emptyIcon={Inbox}
-              emptyTitle="No drinks found"
-              emptyDescription="No drinks available at the moment!"
-            />
-          )}
+            {(selectedCategory === 'all' || selectedCategory === 'drinks') && (
+              <HorizontalScrollSection
+                icon={<CupSoda className="w-5 h-5 text-orange-500" />}
+                title="Drinks"
+                subtitle="Explore all available drinks"
+                items={allFlattenedItems.filter(i => i.category === 'DRINK')}
+                emptyIcon={Inbox}
+                emptyTitle="No drinks found"
+                emptyDescription="No drinks available at the moment!"
+              />
+            )}
 
-          {(selectedCategory === 'all' || selectedCategory === 'snacks') && (
-            <HorizontalScrollSection
-              icon={<Hamburger className="w-5 h-5 text-orange-500" />}
-              title="Snacks"
-              subtitle="Explore all available snacks"
-              items={allFlattenedItems.filter(i => i.category === 'SNACK')}
-              emptyIcon={Inbox}
-              emptyTitle="No snacks found"
-              emptyDescription="No snacks available at the moment!"
-            />
-          )}
+            {(selectedCategory === 'all' || selectedCategory === 'snacks') && (
+              <HorizontalScrollSection
+                icon={<Hamburger className="w-5 h-5 text-orange-500" />}
+                title="Snacks"
+                subtitle="Explore all available snacks"
+                items={allFlattenedItems.filter(i => i.category === 'SNACK')}
+                emptyIcon={Inbox}
+                emptyTitle="No snacks found"
+                emptyDescription="No snacks available at the moment!"
+              />
+            )}
+          </div>
 
           {(selectedCategory === 'all' || selectedCategory === 'business') && (
-            selectedCategory === 'business' ? (
-              <div className="space-y-16">
-                {Object.entries(schoolItemsByCategory).map(([category, catItems]) => (
-                  <HorizontalScrollSection
-                    key={category}
-                    icon={<School className="w-5 h-5 text-orange-500" />}
-                    title={category.replace(/_/g, ' ')}
-                    subtitle={`Explore all available ${category.replace(/_/g, ' ')} items.`}
-                    items={catItems}
-                    emptyIcon={Inbox}
-                    emptyTitle="No items found"
-                    emptyDescription="Nothing available in this category."
-                  />
-                ))}
-              </div>
-            ) : (
-              <HorizontalScrollSection
-                icon={<School className="w-5 h-5 text-orange-500" />}
-                title="School Items"
-                subtitle="Uniforms, IDs, and campus essentials"
-                items={schoolItems}
-                emptyIcon={Inbox}
-                emptyTitle="No school items found"
-                emptyDescription="No school items available at the moment!"
-              />
-            )
+            <div className="pt-4 border-t border-border">
+              {selectedCategory === 'business' ? (
+                <div className="space-y-12">
+                  {Object.entries(schoolItemsByCategory).map(([category, catItems]) => (
+                    <HorizontalScrollSection
+                      key={category}
+                      icon={<School className="w-5 h-5 text-orange-500" />}
+                      title={category.replace(/_/g, ' ')}
+                      subtitle={`Explore all available ${category.replace(/_/g, ' ')} items.`}
+                      items={catItems}
+                      emptyIcon={Inbox}
+                      emptyTitle="No items found"
+                      emptyDescription="Nothing available in this category."
+                    />
+                  ))}
+                </div>
+              ) : (
+                <HorizontalScrollSection
+                  icon={<School className="w-5 h-5 text-orange-500" />}
+                  title="School Items"
+                  subtitle="Uniforms, IDs, and campus essentials"
+                  items={schoolItems}
+                  emptyIcon={Inbox}
+                  emptyTitle="No school items found"
+                  emptyDescription="No school items available at the moment!"
+                />
+              )}
+            </div>
           )}
         </div>
       </main>

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-modern-black: #1a1a1a;
   --color-modern-black-hover: #000000;
@@ -30,25 +32,39 @@
   --font-serif: var(--font-playfair), ui-serif, Georgia;
 }
 
-.dark {
-  --color-background: #0a0a0a;
-  --color-foreground: #ededed;
-  --color-card: #141414;
-  --color-card-foreground: #ededed;
-  --color-primary: #ededed;
-  --color-primary-foreground: #0a0a0a;
-  --color-secondary: #262626;
-  --color-secondary-foreground: #ededed;
-  --color-muted: #a1a1a1;
-  --color-muted-foreground: #a1a1a1;
-  --color-accent: #171717;
-  --color-accent-foreground: #ededed;
-  --color-border: #262626;
-  --color-input: #141414;
-  --color-ring: #ededed;
+@layer base {
+  * {
+    @apply border-border selection:bg-primary selection:text-primary-foreground;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+
+  h1 {
+    @apply text-[36px] font-extrabold tracking-tight leading-tight text-foreground font-serif;
+  }
 }
 
-/* --- Utilities --- */
+.dark {
+  --color-background: #0c0c0e;
+  --color-foreground: #f0ece6;
+  --color-card: #141318;
+  --color-card-foreground: #f0ece6;
+
+  --color-primary: #f97316;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #1e1b22;
+  --color-secondary-foreground: #c4bfb8;
+  --color-muted: #6b6460;
+  --color-muted-foreground: #9e9892;
+  --color-accent: #1f1812;
+  --color-accent-foreground: #f97316;
+  --color-border: #2a2520;
+  --color-input: #181519;
+  --color-ring: #f97316;
+}
 
 @layer utilities {
   .meta-card {
@@ -74,33 +90,38 @@
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   }
 
+  .dark .glass-card {
+    background-color: rgba(20, 19, 24, 0.72);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(249, 115, 22, 0.12);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  }
+
   .neo-shadow {
     box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
   }
 
+  .dark .neo-shadow {
+    box-shadow: 20px 20px 60px #07060a, -20px -20px 60px #1e1b22;
+  }
+
   .smart-card {
-    @apply rounded-2xl border border-black/5 overflow-hidden bg-white;
+    @apply rounded-2xl border border-black/5 overflow-hidden bg-white dark:bg-[#141318] dark:border-[#2a2520];
   }
 
   .smart-header {
-    @apply px-5 py-4 bg-neutral-50/50 flex items-center gap-3;
+    @apply px-5 py-4 bg-neutral-50/50 dark:bg-[#1e1b22]/60 flex items-center gap-3;
   }
 
   .smart-textarea {
-    @apply w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-xs text-black placeholder:text-neutral-300 outline-none focus:border-orange-300 transition-colors resize-none;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border selection:bg-primary selection:text-primary-foreground;
+    @apply w-full bg-neutral-50 dark:bg-[#181519] border border-neutral-200 dark:border-[#2a2520] rounded-xl px-4 py-3 text-xs text-black dark:text-[#f0ece6] placeholder:text-neutral-300 dark:placeholder:text-[#6b6460] outline-none focus:border-orange-400 dark:focus:border-orange-500 transition-colors resize-none;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased font-sans;
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-
-  h1 {
-    @apply text-[36px] font-extrabold tracking-tight leading-tight text-foreground font-serif;
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

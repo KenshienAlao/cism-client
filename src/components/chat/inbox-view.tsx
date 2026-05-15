@@ -39,7 +39,7 @@ function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, 
             })}
             className="w-full flex items-center gap-3 p-3.5 bg-white border-b border-neutral-50 active:bg-neutral-50 transition-colors text-left"
         >
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
                 <Avatar src={image} name={name} size="md" className="rounded-md" />
                 {presence?.isOnline && (
                     <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
@@ -50,7 +50,7 @@ function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, 
                     <h4 className="text-[11px] font-bold text-neutral-900 uppercase tracking-widest truncate">
                         {name}
                     </h4>
-                    <span className="text-[9px] font-bold text-neutral-400 tracking-widest flex-shrink-0 ml-2">
+                    <span className="text-[9px] font-bold text-neutral-400 tracking-widest shrink-0 ml-2">
                         {formatDate(thread.lastMessageAt)}
                     </span>
                 </div>
@@ -59,7 +59,7 @@ function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, 
                 </p>
             </div>
             {thread.isUnread && (
-                <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-orange-500 rounded-full shrink-0"></div>
             )}
         </button>
     );
@@ -137,7 +137,7 @@ export function InboxView() {
                                             }}
                                             className="w-full flex items-center gap-3 p-3.5 bg-white border-b border-neutral-50 active:bg-neutral-50 transition-colors text-left"
                                         >
-                                            <Avatar src={stall.image} name={stall.name} size="md" className="flex-shrink-0 rounded-md" />
+                                            <Avatar src={stall.image} name={stall.name} size="md" className="shrink-0 rounded-md" />
                                             <div className="flex-1 overflow-hidden">
                                                 <h4 className="text-[11px] font-bold text-neutral-900 uppercase tracking-widest truncate">{stall.name}</h4>
                                                 <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-widest truncate">Start conversation</p>

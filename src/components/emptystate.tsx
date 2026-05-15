@@ -1,3 +1,5 @@
+"use client";
+
 import { LucideIcon } from 'lucide-react';
 
 interface EmptyStateProps {
@@ -9,12 +11,14 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, className = "" }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-6 text-center bg-white border border-neutral-100 rounded-md ${className}`}>
-      <div className="w-12 h-12 bg-neutral-50 rounded-md flex items-center justify-center border border-neutral-100 mb-5">
-        <Icon className="w-5 h-5 text-neutral-200" />
+    <div className={`flex flex-col items-center justify-center py-10 px-4 text-center transition-colors bg-card border border-border rounded-md ${className}`}>
+      <div className="w-10 h-10 bg-accent rounded-md flex items-center justify-center border border-border mb-4">
+        <Icon className="w-4 h-4 text-accent-foreground" />
       </div>
-      <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-widest mb-1">{title}</h3>
-      <p className="text-[10px] font-medium text-neutral-400 max-w-[200px] leading-relaxed">
+      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
+        {title}
+      </h3>
+      <p className="text-[11px] font-medium text-muted-foreground max-w-[220px] leading-relaxed">
         {description}
       </p>
     </div>

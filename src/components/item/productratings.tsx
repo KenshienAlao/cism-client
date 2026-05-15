@@ -1,8 +1,11 @@
-import { Star, MessageSquare, ChevronDown } from 'lucide-react';
+'use client';
+
+import { Star, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { Review } from "@/model/review.model";
 import { useState, useMemo } from 'react';
 import { formatDate } from '@/lib/utils/formatDate';
+import { Button } from "@/components/ui/button";
 
 export function ProductRatings({ reviews }: { reviews: Review[], category?: string }) {
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'media' | 5 | 4 | 3 | 2 | 1>('all');
@@ -28,16 +31,6 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
         return result;
     }, [reviews, selectedFilter]);
 
-    const filterOptions: { id: 'all' | 'media' | 5 | 4 | 3 | 2 | 1, label: string }[] = [
-        { id: 'all', label: 'All' },
-        { id: 'media', label: 'With Photo' },
-        { id: 5, label: '5 Star' },
-        { id: 4, label: '4 Star' },
-        { id: 3, label: '3 Star' },
-        { id: 2, label: '2 Star' },
-        { id: 1, label: '1 Star' },
-    ];
-
     const avgRating = useMemo(() => {
         if (reviews.length === 0) return 0;
         const sum = reviews.reduce((acc, r) => acc + r.star, 0);
@@ -45,119 +38,104 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
     }, [reviews]);
 
     return (
-        <section className="mt-8 bg-white border-t border-neutral-100 p-0 md:p-6 mb-12">
-            <div className="px-4 py-6 md:px-0 max-w-4xl mx-auto">
-                <h2 className="text-xs font-bold text-neutral-900 mb-6 uppercase tracking-widest">Product Ratings</h2>
-
-                {/* Simplified Summary & Filter Bar */}
-                <div className="bg-neutral-50 rounded-lg border border-neutral-100 overflow-hidden mb-8">
-                    <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-neutral-100">
-                        {/* Rating Summary */}
-                        <div className="p-6 md:w-1/3 flex flex-col items-center justify-center text-center">
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-4xl font-bold text-orange-500">{avgRating}</span>
-                                <span className="text-sm font-bold text-neutral-400">/ 5</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 mt-1">
+        <section className="py-12 border-t border-neutral-100">
+            <div className="max-w-4xl">
+                {/* Header Summary */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-medium text-neutral-900 tracking-tight">Verified Reviews</h2>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-0.5">
                                 {[...Array(5)].map((_, i) => (
                                     <Star
                                         key={i}
-                                        className={`w-4 h-4 ${i < Math.round(Number(avgRating)) ? 'fill-orange-500 text-orange-500' : 'fill-neutral-200 text-neutral-200'}`}
-                                        strokeWidth={2}
+                                        className={`w-4 h-4 ${i < Math.round(Number(avgRating)) ? 'fill-orange-500 text-orange-500' : 'fill-neutral-100 text-neutral-100'}`}
+                                        strokeWidth={1.5}
                                     />
                                 ))}
                             </div>
-                            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-2">{reviews.length} reviews</p>
+                            <span className="text-sm text-neutral-500">
+                                Based on <span className="font-medium text-neutral-900">{reviews.length}</span> reviews
+                            </span>
                         </div>
+                    </div>
 
-                        {/* Filters */}
-                        <div className="p-6 md:flex-1 flex flex-col justify-center">
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-2 px-1">Filter Reviews</label>
-                            <div className="relative group">
-                                <select
-                                    value={selectedFilter}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setSelectedFilter(val === 'all' || val === 'media' ? val : Number(val) as any);
-                                        setShowAllReviews(false);
-                                    }}
-                                    className="w-full bg-white border border-neutral-200 rounded-md px-4 py-3 text-xs font-bold text-neutral-700 appearance-none outline-none focus:border-orange-500 accent-orange-500 transition-colors cursor-pointer pr-10"
-                                >
-                                    {filterOptions.map((opt) => (
-                                        <option key={opt.id} value={opt.id}>
-                                            {opt.label} ({counts[opt.id]})
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                    <ChevronDown className="w-4 h-4 text-neutral-400" />
-                                </div>
-                            </div>
-                        </div>
+                    {/* Minimalist Filter Pills */}
+                    <div className="flex flex-wrap gap-2">
+                        {(['all', 'media', 5, 4, 3, 2, 1] as const).map((id) => (
+                            <button
+                                key={id}
+                                onClick={() => setSelectedFilter(id)}
+                                className={`px-3 py-1.5 rounded text-[11px] font-medium transition-all border ${
+                                    selectedFilter === id
+                                        ? 'bg-orange-500 border-orange-500 text-white shadow-sm'
+                                        : 'bg-white border-neutral-200 text-neutral-500 hover:border-neutral-300'
+                                }`}
+                            >
+                                {id === 'all' ? 'All' : id === 'media' ? 'Photos' : `${id} ★`}
+                                <span className={`ml-1.5 opacity-60`}>({counts[id]})</span>
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 {filteredReviews.length > 0 ? (
-                    <div className="space-y-8">
+                    <div className="space-y-10">
                         {(showAllReviews ? filteredReviews : filteredReviews.slice(0, 5)).map((review, index) => (
-                            <div key={review.id || index} className="flex gap-4">
-                                {/* Avatar */}
-                                <div className="w-10 h-10 rounded-full bg-neutral-100 flex-shrink-0 relative overflow-hidden border border-neutral-200">
-                                    {review.user?.avatar ? (
-                                        <Image
-                                            src={review.user.avatar as string}
-                                            alt={review.user.clientName || 'User'}
-                                            fill
-                                            className="object-cover"
-                                            sizes="40px"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-neutral-400 font-bold text-xs">
-                                            {review.user?.clientName?.charAt(0) || 'U'}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 space-y-3 min-w-0">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-neutral-900">
-                                                    {review.user?.clientName || "Buyer"}
-                                                </span>
-                                                <div className="flex items-center gap-2 mt-0.5">
-                                                    <div className="flex items-center gap-0.5">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star
-                                                                key={i}
-                                                                className={`w-2.5 h-2.5 ${i < review.star ? 'fill-orange-500 text-orange-500' : 'fill-neutral-100 text-neutral-100'}`}
-                                                                strokeWidth={2}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-[9px] text-neutral-400 font-bold uppercase">Verified</span>
+                            <div key={review.id || index} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-8 group">
+                                {/* Left Side: User Meta */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded bg-neutral-50 flex-shrink-0 relative overflow-hidden border border-neutral-100">
+                                            {review.user?.avatar ? (
+                                                <Image
+                                                    src={review.user.avatar as string}
+                                                    alt={review.user.clientName || 'User'}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="32px"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-neutral-400 text-[10px] font-medium uppercase">
+                                                    {review.user?.clientName?.charAt(0) || 'U'}
                                                 </div>
-                                            </div>
-                                            <span className="text-[9px] text-neutral-400 font-bold uppercase whitespace-nowrap">{formatDate(review.createdAt || review.create_at || review.createAt)}</span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-neutral-900 truncate">
+                                                {review.user?.clientName || "Anonymous Buyer"}
+                                            </p>
+                                            <p className="text-[10px] text-neutral-400 uppercase tracking-tighter">
+                                                {formatDate(review.createdAt || review.create_at || review.createAt)}
+                                            </p>
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star
+                                                key={i}
+                                                className={`w-2.5 h-2.5 ${i < review.star ? 'fill-orange-500 text-orange-500' : 'fill-neutral-100 text-neutral-100'}`}
+                                                strokeWidth={1}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
 
-                                    <p className="text-sm text-neutral-600 leading-normal">
+                                {/* Right Side: Comment & Media */}
+                                <div className="space-y-4">
+                                    <p className="text-sm text-neutral-600 leading-relaxed max-w-2xl">
                                         {review.comment}
                                     </p>
 
                                     {review.image && (
-                                        <div className="mt-2">
-                                            <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-neutral-200 cursor-default">
-                                                <Image
-                                                    src={review.image}
-                                                    alt="Review proof"
-                                                    fill
-                                                    className="object-cover"
-                                                    sizes="96px"
-                                                />
-                                            </div>
+                                        <div className="relative w-20 h-20 rounded border border-neutral-100 overflow-hidden bg-neutral-50 group-hover:border-neutral-200 transition-colors">
+                                            <Image
+                                                src={review.image}
+                                                alt="Review"
+                                                fill
+                                                className="object-cover"
+                                                sizes="80px"
+                                            />
                                         </div>
                                     )}
                                 </div>
@@ -165,20 +143,21 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
                         ))}
 
                         {filteredReviews.length > 5 && !showAllReviews && (
-                            <div className="pt-4 text-center">
-                                <button
+                            <div className="pt-6">
+                                <Button
+                                    variant="outline"
                                     onClick={() => setShowAllReviews(true)}
-                                    className="w-full py-3 text-[10px] font-bold text-orange-500 border border-neutral-200 rounded-lg transition-colors uppercase tracking-widest"
+                                    className="h-10 text-xs font-medium text-neutral-500 border-neutral-200 hover:text-orange-500 hover:border-orange-500 transition-all px-8 rounded"
                                 >
-                                    View All {filteredReviews.length} Reviews
-                                </button>
+                                    Read all {filteredReviews.length} reviews
+                                </Button>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="py-16 text-center flex flex-col items-center justify-center bg-neutral-50 rounded-xl border border-dashed border-neutral-200">
-                        <MessageSquare className="w-10 h-10 text-neutral-200 mb-4" />
-                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">No matching reviews</p>
+                    <div className="py-20 text-center border-2 border-dashed border-neutral-50 rounded-lg">
+                        <MessageSquare className="w-8 h-8 text-neutral-200 mx-auto mb-3" />
+                        <p className="text-xs text-neutral-400">No reviews found for this selection.</p>
                     </div>
                 )}
             </div>

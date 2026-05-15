@@ -1,15 +1,26 @@
-import { ChevronDown, CupSoda, DollarSign, Hamburger, School, Sparkles, TrendingUp, Utensils } from 'lucide-react';
+"use client";
+
+import { 
+    CupSoda, 
+    DollarSign, 
+    Hamburger, 
+    School, 
+    Sparkles, 
+    TrendingUp, 
+    Utensils, 
+    LayoutGrid 
+} from 'lucide-react';
 import { useState } from 'react';
 
 const categories = [
-    { id: 'all', label: 'All', emoji: null },
-    { id: 'meals', label: 'Meals', emoji: Utensils },
-    { id: 'drinks', label: 'Drinks', emoji: CupSoda },
-    { id: 'snacks', label: 'Snacks', emoji: Hamburger },
-    { id: 'business', label: 'School Item', emoji: School },
-    { id: 'popular', label: 'Popular', emoji: TrendingUp },
-    { id: 'fresh', label: 'Fresh Drop', emoji: Sparkles },
-    { id: 'budget', label: 'Budget', emoji: DollarSign }
+    { id: 'all', label: 'All', Icon: LayoutGrid },
+    { id: 'meals', label: 'Meals', Icon: Utensils },
+    { id: 'drinks', label: 'Drinks', Icon: CupSoda },
+    { id: 'snacks', label: 'Snacks', Icon: Hamburger },
+    { id: 'business', label: 'School', Icon: School },
+    { id: 'popular', label: 'Popular', Icon: TrendingUp },
+    { id: 'fresh', label: 'Fresh', Icon: Sparkles },
+    { id: 'budget', label: 'Budget', Icon: DollarSign }
 ];
 
 interface CategoryChipsProps {
@@ -25,19 +36,26 @@ export function CategoryChips({ onCategoryChange }: CategoryChipsProps) {
     };
 
     return (
-        <div className="relative max-w-[200px]">
-            <select
-                value={selected}
-                onChange={(e) => handleSelect(e.target.value)}
-                className="w-full appearance-none bg-white border border-neutral-100 rounded-md px-4 py-3 pr-10 text-[10px] font-bold uppercase tracking-widest text-neutral-500 outline-none active:border-orange-500 transition-colors cursor-pointer"
-            >
-                {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                        {cat.label.toUpperCase()}
-                    </option>
-                ))}
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-300 pointer-events-none" />
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+            {categories.map((cat) => {
+                const isActive = selected === cat.id;
+                const Icon = cat.Icon;
+
+                return (
+                    <button
+                        key={cat.id}
+                        onClick={() => handleSelect(cat.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 whitespace-nowrap text-xs font-medium tracking-tight ${
+                            isActive 
+                                ? "bg-accent border-orange-500 text-orange-500 shadow-sm" 
+                                : "bg-card border-border text-muted-foreground hover:border-orange-500/50 hover:text-foreground"
+                        }`}
+                    >
+                        <Icon className={`w-3.5 h-3.5 ${isActive ? "text-orange-500" : "text-muted-foreground"}`} />
+                        {cat.label}
+                    </button>
+                );
+            })}
         </div>
     );
 }

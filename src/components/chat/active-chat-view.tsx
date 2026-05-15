@@ -237,7 +237,7 @@ export function ActiveChatView() {
                 <button
                     type="submit"
                     disabled={!content.trim() || sendMessage.isPending}
-                    className="bg-orange-500 text-white p-3 rounded-md active:bg-orange-600 transition-colors disabled:opacity-50 flex-shrink-0"
+                    className="bg-orange-500 text-white p-3 rounded-md active:bg-orange-600 transition-colors disabled:opacity-50 shrink-0"
                 >
                     <Send className="w-4 h-4" />
                 </button>

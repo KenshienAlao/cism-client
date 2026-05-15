@@ -19,10 +19,7 @@ interface SearchResult {
     metadata: any;
 }
 
-const RECENT_SEARCHES_KEY = 'cism_recent_searches';
-const MAX_RECENT_SEARCHES = 5;
-
-export function SearchBar({ placeholder = "Search...", liveSearch = false }) {
+export function SearchBar({ placeholder = "Search items or vendors..." }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -44,7 +41,7 @@ export function SearchBar({ placeholder = "Search...", liveSearch = false }) {
     useEffect(() => { setMounted(true); }, []);
     useEffect(() => { setQuery(searchParams.get('q') || ''); }, [searchParams]);
 
-    const calculateScore = useCallback((text: string, search: string, isStall = false) => {
+    const calculateScore = useCallback((text: string, search: string) => {
         if (!text || !search) return 0;
         const t = text.toLowerCase();
         const s = search.toLowerCase();
@@ -59,13 +56,13 @@ export function SearchBar({ placeholder = "Search...", liveSearch = false }) {
         if (!s) return [];
         const stallResults: SearchResult[] = stalls.map(stall => ({
             id: String(stall.id), name: stall.name, type: 'stall' as const,
-            score: calculateScore(stall.name, s, true), metadata: stall
+            score: calculateScore(stall.name, s), metadata: stall
         })).filter(r => r.score > 0);
         const productResults: SearchResult[] = allItems.map(item => ({
             id: String(item.id), name: item.name, type: 'product' as const,
-            score: calculateScore(item.name, s) * 1.2, metadata: item
+            score: calculateScore(item.name, s) * 1.1, metadata: item
         })).filter(r => r.score > 0);
-        return [...stallResults, ...productResults].sort((a, b) => b.score - a.score).slice(0, 5);
+        return [...stallResults, ...productResults].sort((a, b) => b.score - a.score).slice(0, 6);
     }, [query, stalls, allItems, calculateScore]);
 
     const navigateToResult = (result: SearchResult) => {
@@ -83,32 +80,47 @@ export function SearchBar({ placeholder = "Search...", liveSearch = false }) {
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (results.length === 0) return;
-        if (e.key === 'ArrowDown') setActiveIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
-        else if (e.key === 'ArrowUp') setActiveIndex(prev => (prev > -1 ? prev - 1 : prev));
-        else if (e.key === 'Enter' && activeIndex > -1) navigateToResult(results[activeIndex]);
-        else if (e.key === 'Escape') setIsFocused(false);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev > -1 ? prev - 1 : prev));
+        } else if (e.key === 'Enter') {
+            if (activeIndex > -1) navigateToResult(results[activeIndex]);
+            else handleSubmit();
+        } else if (e.key === 'Escape') {
+            setIsFocused(false);
+        }
     };
 
     useEffect(() => {
-        const out = (e: MouseEvent) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsFocused(false); };
-        document.addEventListener('mousedown', out);
-        return () => document.removeEventListener('mousedown', out);
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsFocused(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     if (isNoNavRoute) return null;
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-neutral-100 h-14 flex items-center">
-            <div className="max-w-4xl mx-auto w-full px-4 flex items-center gap-3">
+        <header className="sticky top-0 z-50 h-14 border-b border-border bg-background flex items-center">
+            <div className="max-w-5xl mx-auto w-full px-4 flex items-center gap-4">
                 {!isHome && (
-                    <button onClick={() => router.back()} className="p-1.5 text-neutral-400 hover:text-orange-500 transition-colors">
+                    <button 
+                        onClick={() => router.back()} 
+                        className="p-2 -ml-2 text-muted-foreground hover:text-primary transition-colors"
+                    >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                 )}
 
                 <div className="flex-1 relative" ref={dropdownRef}>
-                    <form onSubmit={handleSubmit} className="relative group">
-                        <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${isFocused ? 'text-orange-500' : 'text-neutral-400'}`} />
+                    <form onSubmit={handleSubmit} className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <Search className={`w-4 h-4 transition-colors ${isFocused ? 'text-primary' : 'text-muted-foreground'}`} />
+                        </div>
                         <input
                             ref={inputRef}
                             type="text"
@@ -117,100 +129,91 @@ export function SearchBar({ placeholder = "Search...", liveSearch = false }) {
                             onFocus={() => setIsFocused(true)}
                             onKeyDown={handleKeyDown}
                             placeholder={placeholder}
-                            className="w-full bg-neutral-50 border border-neutral-100 rounded-md pl-9 pr-8 py-2 text-sm outline-none focus:border-orange-500/50 focus:bg-white transition-all placeholder:text-neutral-400"
+                            className="w-full h-9 bg-input border border-border rounded-md pl-10 pr-8 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring transition-all placeholder:text-muted-foreground"
                         />
                         {query && (
-                            <button type="button" onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-neutral-500">
+                            <button 
+                                type="button" 
+                                onClick={() => { setQuery(''); inputRef.current?.focus(); }} 
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
                                 <X className="w-4 h-4" />
                             </button>
                         )}
                     </form>
 
+                    {/* Results Dropdown */}
                     {isFocused && query.trim() !== '' && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-sm overflow-hidden z-[60]">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-sm overflow-hidden z-60">
                             <div className="py-1">
-                                {results.map((res, idx) => (
-                                    <button
-                                        key={res.id}
-                                        onMouseEnter={() => setActiveIndex(idx)}
-                                        onClick={() => navigateToResult(res)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${activeIndex === idx ? 'bg-orange-500 text-white' : 'text-neutral-700'}`}
-                                    >
-                                        <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 border overflow-hidden relative ${activeIndex === idx ? 'border-white/20 bg-white/10' : 'bg-neutral-50 border-neutral-100'}`}>
-                                            {res.metadata.image ? (
-                                                <Image src={res.metadata.image} alt={res.name} fill className="object-cover" sizes="32px" />
-                                            ) : (
-                                                res.type === 'stall' ? <Store className="w-4 h-4" /> : <UtensilsCrossed className="w-4 h-4" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-xs font-bold uppercase tracking-tight truncate">{res.name}</div>
-                                            <div className={`text-[10px] uppercase tracking-wider ${activeIndex === idx ? 'text-orange-100' : 'text-neutral-400'}`}>
-                                                {res.type === 'stall' ? 'Vendor' : res.metadata.stallName}
+                                {results.length > 0 ? (
+                                    results.map((res, idx) => (
+                                        <button
+                                            key={`${res.type}-${res.id}`}
+                                            onMouseEnter={() => setActiveIndex(idx)}
+                                            onClick={() => navigateToResult(res)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
+                                                activeIndex === idx ? 'bg-primary text-primary-foreground' : 'text-foreground'
+                                            }`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-sm flex items-center justify-center shrink-0 border overflow-hidden relative ${
+                                                activeIndex === idx ? 'border-white/20 bg-white/10' : 'bg-secondary border-border'
+                                            }`}>
+                                                {res.metadata.image ? (
+                                                    <Image src={res.metadata.image} alt="" fill className="object-cover" sizes="32px" />
+                                                ) : (
+                                                    res.type === 'stall' ? <Store className="w-4 h-4" /> : <UtensilsCrossed className="w-4 h-4" />
+                                                )}
                                             </div>
-                                        </div>
-                                        {res.type === 'product' && (
-                                            <div className="text-xs font-medium pr-1">₱{res.metadata.price}</div>
-                                        )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-medium truncate">{res.name}</div>
+                                                <div className={`text-[10px] uppercase tracking-wider font-semibold ${
+                                                    activeIndex === idx ? 'text-primary-foreground/80' : 'text-secondary-foreground'
+                                                }`}>
+                                                    {res.type === 'stall' ? 'Vendor' : res.metadata.stallName}
+                                                </div>
+                                            </div>
+                                            {res.type === 'product' && res.metadata.price && (
+                                                <div className="text-xs font-mono font-bold">₱{res.metadata.price}</div>
+                                            )}
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-4 py-3 text-xs text-muted-foreground text-center">
+                                        No matches for "{query}"
+                                    </div>
+                                )}
+                                
+                                {results.length > 0 && (
+                                    <button 
+                                        onClick={() => handleSubmit()} 
+                                        className="w-full px-3 py-2 text-[10px] font-bold text-center uppercase tracking-widest text-primary border-t border-border hover:bg-accent transition-colors"
+                                    >
+                                        See all results
                                     </button>
-                                ))}
-                                <button onClick={() => handleSubmit()} className="w-full px-3 py-2 text-[10px] font-bold text-center uppercase tracking-widest text-orange-500 border-t border-neutral-50 hover:bg-neutral-50 transition-colors">
-                                    View all results
-                                </button>
+                                )}
                             </div>
                         </div>
                     )}
                 </div>
 
-<Link 
-    href="/account" 
-    className="shrink-0 transition-transform duration-75 active:scale-95"
->
-    <div className="
-        /* Size & Shape */
-        w-9 h-9 
-        md:w-10 md:h-10 
-        rounded-md 
-        
-        /* Layout */
-        flex items-center justify-center 
-        overflow-hidden 
-        relative
-        
-        /* Styling */
-        bg-neutral-50 
-        border border-neutral-100 
-        hover:border-orange-500/30 
-        hover:bg-white
-        transition-all
-    ">
-        {mounted && profile?.user?.avatar ? (
-            <Image 
-                src={profile.user.avatar} 
-                alt="Profile" 
-                fill 
-                className="object-cover" 
-                sizes="(max-width: 768px) 36px, 40px"
-            />
-        ) : (
-            <div className="flex flex-col items-center justify-center bg-orange-50/50 w-full h-full">
-                <span className="
-                    text-[10px] 
-                    md:text-[11px] 
-                    font-bold 
-                    text-orange-600 
-                    tracking-tighter 
-                    uppercase
-                ">
-                    {mounted && profile?.user?.clientName 
-                        ? profile.user.clientName.slice(0, 2) 
-                        : '??'
-                    }
-                </span>
-            </div>
-        )}
-    </div>
-</Link>
+                <Link href="/account" className="shrink-0 group">
+                    <div className="w-9 h-9 rounded-md flex items-center justify-center overflow-hidden relative bg-secondary border border-border group-hover:border-primary/50 transition-all">
+                        {mounted && profile?.user?.avatar ? (
+                            <Image 
+                                src={profile.user.avatar} 
+                                alt="Profile" 
+                                fill 
+                                className="object-cover" 
+                                sizes="36px"
+                            />
+                        ) : (
+                            <span className="text-xs font-bold text-primary uppercase">
+                                {mounted && profile?.user?.clientName ? profile.user.clientName.slice(0, 2) : '??'}
+                            </span>
+                        )}
+                    </div>
+                </Link>
             </div>
         </header>
     );

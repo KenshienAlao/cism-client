@@ -17,6 +17,7 @@ interface HorizontalScrollSectionProps {
   emptyIcon: LucideIcon;
   emptyTitle: string;
   emptyDescription: string;
+  priorityFirstItem?: boolean;
 }
 
 export function HorizontalScrollSection({
@@ -27,6 +28,7 @@ export function HorizontalScrollSection({
   emptyIcon,
   emptyTitle,
   emptyDescription,
+  priorityFirstItem = false,
 }: HorizontalScrollSectionProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -56,9 +58,9 @@ export function HorizontalScrollSection({
   const hasMore = visibleCount < items.length;
 
   return (
-    <section className="space-y-4">
-      {/* Header */}
-      <div className="flex items-end justify-between px-1">
+    <section className="space-y-6">
+      {/* Header - Balanced for both mobile and desktop */}
+      <div className="px-1">
         <SectionHeader 
           icon={icon} 
           title={title} 
@@ -67,38 +69,40 @@ export function HorizontalScrollSection({
       </div>
 
       {items.length > 0 ? (
-        <div className="scroll-container relative">
-          <div className="flex overflow-x-auto gap-4 pb-2 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth">
-            {visibleItems.map((product) => (
+        <div className="scroll-container relative group">
+          <div className="flex overflow-x-auto gap-3 md:gap-5 pb-4 -mx-4 px-4 no-scrollbar scroll-smooth">
+            {visibleItems.map((product, index) => (
               <div 
                 key={product.id} 
-                className="w-[160px] md:w-[180px] shrink-0 transition-opacity duration-300"
+                className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0"
               >
                 <ProductCard
                   item={product as any}
                   image={product.image}
                   stallImage={product.stallImage}
+                  priority={priorityFirstItem && index === 0}
                 />
               </div>
             ))}
             
             {hasMore && (
-              <div ref={sentinelRef} className="flex gap-4">
-                <div className="w-[160px] md:w-[180px] shrink-0">
+              <div ref={sentinelRef} className="flex gap-3 md:gap-5">
+                <div className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0">
                   <SkeletonCard />
                 </div>
-                <div className="w-[160px] md:w-[180px] shrink-0">
+                <div className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0">
                   <SkeletonCard />
                 </div>
               </div>
             )}
             
-            {/* Minimalist spacer for end-of-scroll balance */}
-            <div className="w-1 shrink-0" />
+            {/* Visual Spacer for scroll-end */}
+            <div className="w-4 shrink-0" />
           </div>
         </div>
       ) : (
-        <div className="border border-dashed border-neutral-200 rounded-lg bg-neutral-50/30">
+        /* Minimalist Empty State with subtle border */
+        <div className="border border-border rounded-lg bg-card/50 py-10">
           <EmptyState 
             icon={emptyIcon} 
             title={emptyTitle} 
@@ -112,15 +116,15 @@ export function HorizontalScrollSection({
 
 function SkeletonCard() {
   return (
-    <div className="bg-white border border-neutral-100 rounded-lg overflow-hidden h-full">
-      <div className="aspect-square bg-neutral-100 animate-pulse" />
+    <div className="bg-card border border-border rounded-lg overflow-hidden h-full">
+      <div className="aspect-square bg-secondary animate-pulse" />
       <div className="p-3 space-y-3">
         <div className="space-y-2">
-          <div className="h-2.5 bg-neutral-100 rounded-md w-3/4 animate-pulse" />
-          <div className="h-2 bg-neutral-50 rounded-md w-1/2 animate-pulse" />
+          <div className="h-2 bg-secondary rounded w-3/4 animate-pulse" />
+          <div className="h-2 bg-secondary/60 rounded w-1/2 animate-pulse" />
         </div>
-        <div className="pt-2">
-          <div className="h-4 bg-neutral-100 rounded-md w-1/3 animate-pulse" />
+        <div className="pt-1">
+          <div className="h-3 bg-secondary rounded w-1/4 animate-pulse" />
         </div>
       </div>
     </div>

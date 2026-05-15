@@ -122,10 +122,11 @@ export function WriteReviewForm({
                                         alt="Preview"
                                         fill
                                         className="object-cover"
+                                        sizes="80px"
                                     />
                                     <button
                                         onClick={removeImage}
-                                        className="absolute top-1 right-1 bg-black/70 text-white p-1 rounded-sm hover:bg-black transition-colors"
+                                        className="absolute top-1 right-1 bg-black/70 text-clwhite p-1 rounded-sm hover:bg-black transition-colors"
                                     >
                                         <X className="w-3 h-3" />
                                     </button>

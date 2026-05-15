@@ -35,4 +35,10 @@ export const authService = {
 
   updateProfile: (data: UpdateUserRequest) =>
     apiClient.patch<void>(API_ENDPOINTS.AUTH.UPDATE_PROFILE, data),
+
+  changePassword: (data: any) =>
+    apiClient.patch<void>(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
+
+  changeEmail: (data: any) =>
+    apiClient.patch<void>(API_ENDPOINTS.AUTH.CHANGE_EMAIL, data),
 };

@@ -2,6 +2,7 @@ import { StallItems } from "@/model/stall.model";
 import { Calendar, Clock, MessageCircle, ShoppingBag, Star, UserPlus } from "lucide-react";
 import { formatTime } from '@/lib/utils/formatTime';
 import { formatDate } from '@/lib/utils/formatDate';
+import Image from 'next/image';
 
 interface StallProfileProps {
     stall: StallItems,
@@ -27,12 +28,14 @@ export function StallProfile({ stall, openChat }: StallProfileProps) {
         <div className="bg-white rounded-3xl shadow-sm border border-neutral-100 overflow-hidden transition-all hover:shadow-md p-6 md:p-12">
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start text-center md:text-left">
                 {/* Avatar */}
-                <div className="w-32 h-32 md:w-40 md:h-40 bg-neutral-50 rounded-3xl border border-neutral-100 shadow-sm flex items-center justify-center shrink-0 overflow-hidden hover:scale-[1.02] transition-transform duration-300">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 bg-neutral-50 rounded-3xl border border-neutral-100 shadow-sm flex items-center justify-center shrink-0 overflow-hidden hover:scale-[1.02] transition-transform duration-300">
                     {stall.image ? (
-                        <img
+                        <Image
                             src={stall.image}
                             alt={stall.name}
-                            className="w-full h-full object-cover rounded-2xl"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 128px, 160px"
                         />
                     ) : (
                         <div className="w-full h-full bg-neutral-50 rounded-2xl flex items-center justify-center text-4xl font-bold text-neutral-300">
