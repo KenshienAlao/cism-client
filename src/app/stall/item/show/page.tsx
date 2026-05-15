@@ -3,7 +3,8 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from 'react';
 import { useItemDetail } from "@/hooks/use-item";
-import { ShoppingCart, ArrowLeft, Star } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { ShoppingCart, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { ProductDetails } from "@/components/item/productdetails";
 import { WriteReviewForm } from "@/components/item/writereviewform";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 function StallItemDetailContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { profile } = useAuth();
 
     const id = searchParams.get('id');
     const stallAccount = searchParams.get('a');
@@ -40,6 +42,10 @@ function StallItemDetailContent() {
         </div>
     );
 
+    const hasReviewed = itemDetails.reviews.some(r => 
+        (r.userId === profile?.user.id || r.users_id === profile?.user.id)
+    );
+
     return (
         <div className="min-h-screen bg-white text-neutral-900 antialiased">
             <main className="max-w-7xl mx-auto px-4 py-6 md:py-12">
@@ -58,12 +64,19 @@ function StallItemDetailContent() {
                         </header>
                         
                         <div className="grid gap-12">
-                            <div className="bg-neutral-50/50 p-6 border border-neutral-100 rounded-lg">
-                                <WriteReviewForm
-                                    stallId={itemDetails.stallId!}
-                                    itemId={itemDetails.id!}
-                                />
-                            </div>
+                            {!hasReviewed ? (
+                                <div className="bg-neutral-50/50 p-6 border border-neutral-100 rounded-lg">
+                                    <WriteReviewForm
+                                        stallId={itemDetails.stallId!}
+                                        itemId={itemDetails.id!}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 bg-orange-50/50 p-4 border border-orange-100 rounded-lg text-orange-700">
+                                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                                    <p className="text-sm font-medium">You've already reviewed this item. Thank you for your feedback!</p>
+                                </div>
+                            )}
                             
                             <ProductRatings
                                 reviews={itemDetails.reviews}

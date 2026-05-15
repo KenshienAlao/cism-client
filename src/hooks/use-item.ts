@@ -40,11 +40,22 @@ export function useItem(): UseItemReturn {
     mutationFn: async (review: ReviewRequest) => await itemService.createReview(review),
 
     onMutate: async (newReview) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ITEM_QUERY_KEY });
 
       // Snapshot the previous value
       const previousItems = queryClient.getQueryData<StallItems[]>(ITEM_QUERY_KEY);
+
+      // Check if user already reviewed this item to prevent "false" update
+      const targetStall = previousItems?.find(s => s.id === newReview.stallId);
+      const hasExistingReview = targetStall?.reviews.some(r => 
+        (r.itemId === newReview.itemId || r.stall_item_id === newReview.itemId) && 
+        (r.userId === profile?.user.id || r.users_id === profile?.user.id)
+      );
+
+      if (hasExistingReview) {
+        return { previousItems };
+      }
 
       // update to the new value
       if (previousItems && profile) {
@@ -71,15 +82,14 @@ export function useItem(): UseItemReturn {
           return stall;
         });
         queryClient.setQueryData(ITEM_QUERY_KEY, updatedItems);
+        notifSuccess("Review posted!");
       }
 
       return { previousItems };
     },
 
     onSuccess: (res: ApiResponse<Review>) => {
-      if (res.success) {
-        notifSuccess("Review submitted successfully!");
-      } else {
+      if (!res.success) {
         notifError(res.message);
       }
     },
