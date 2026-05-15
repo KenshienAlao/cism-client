@@ -4,6 +4,7 @@ import { itemService } from "@/service/item.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notifError, notifSuccess } from "@/lib/toast";
 import { ApiResponse } from "@/lib/api";
+import { useAuth } from "@/hooks/use-auth";
 
 export const ITEM_QUERY_KEY = ["items"];
 
@@ -33,8 +34,47 @@ export function useItem(): UseItemReturn {
   const data = query.data ?? [];
 
 
+  const { profile } = useAuth();
+
   const createReviewMutation = useMutation({
     mutationFn: async (review: ReviewRequest) => await itemService.createReview(review),
+
+    onMutate: async (newReview) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ITEM_QUERY_KEY });
+
+      // Snapshot the previous value
+      const previousItems = queryClient.getQueryData<StallItems[]>(ITEM_QUERY_KEY);
+
+      // update to the new value
+      if (previousItems && profile) {
+        const updatedItems = previousItems.map(stall => {
+          if (stall.id === newReview.stallId) {
+            const optimisticReview: Review = {
+              id: Math.random(), // Temporary ID
+              itemId: newReview.itemId,
+              stall_item_id: newReview.itemId,
+              star: newReview.star,
+              comment: newReview.comment || "",
+              image: typeof newReview.image === 'string' ? newReview.image : undefined,
+              createdAt: new Date().toISOString(),
+              user: {
+                clientName: profile.user.clientName,
+                avatar: profile.user.avatar,
+              }
+            };
+            return {
+              ...stall,
+              reviews: [optimisticReview, ...stall.reviews]
+            };
+          }
+          return stall;
+        });
+        queryClient.setQueryData(ITEM_QUERY_KEY, updatedItems);
+      }
+
+      return { previousItems };
+    },
 
     onSuccess: (res: ApiResponse<Review>) => {
       if (res.success) {
@@ -43,9 +83,14 @@ export function useItem(): UseItemReturn {
         notifError(res.message);
       }
     },
-    onError: (err: Error) => {
+
+    onError: (err: Error, __, context) => {
+      if (context?.previousItems) {
+        queryClient.setQueryData(ITEM_QUERY_KEY, context.previousItems);
+      }
       notifError(err.message || "Failed to submit review");
     },
+
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
     }

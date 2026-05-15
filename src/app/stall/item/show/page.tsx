@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from 'react';
 import { useItemDetail } from "@/hooks/use-item";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Star } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { ProductDetails } from "@/components/item/productdetails";
 import { WriteReviewForm } from "@/components/item/writereviewform";
@@ -15,41 +15,63 @@ function StallItemDetailContent() {
     const router = useRouter();
 
     const id = searchParams.get('id');
-    const stallAccount = searchParams.get('a'); // Stall Name
-    const queryName = searchParams.get('q'); // Item Name 
+    const stallAccount = searchParams.get('a');
+    const queryName = searchParams.get('q');
 
     const { data: itemDetails, isLoading } = useItemDetail(id, stallAccount, queryName);
 
     if (isLoading) return <Loading />;
 
     if (!itemDetails) return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-20 h-20 bg-neutral-50 rounded-full flex items-center justify-center mb-6">
-                <ShoppingCart className="w-8 h-8 text-neutral-200" />
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-16 h-16 bg-neutral-50 flex items-center justify-center mb-4 border border-neutral-100">
+                <ShoppingCart className="w-6 h-6 text-neutral-300" />
             </div>
-            <h1 className="text-3xl font-black text-neutral-900 mb-3">Item Not Found</h1>
-            <p className="text-neutral-400 mb-10 max-w-xs mx-auto">We couldn't find the specific item from {stallAccount || 'this stall'}. It may have been removed or renamed.</p>
+            <h1 className="text-xl font-medium text-neutral-900 mb-2">Item not found</h1>
+            <p className="text-sm text-neutral-500 mb-8 max-w-xs">
+                This item may have been moved or is no longer available in {stallAccount}'s inventory.
+            </p>
             <Button
                 onClick={() => router.push('/')}
-                className="px-8 py-4 bg-orange-500 text-xs text-white font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                className="h-11 px-6 bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 rounded-md transition-colors"
             >
-                Start Browsing
+                Return to Shop
             </Button>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-white flex flex-col font-sans text-neutral-900">
-            <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-8 md:py-16">
-                <ProductDetails itemDetails={itemDetails} />
-                <WriteReviewForm
-                    stallId={itemDetails.stallId!}
-                    itemId={itemDetails.id!}
-                />
-                <ProductRatings
-                    reviews={itemDetails.reviews}
-                    category={itemDetails.category}
-                />
+        <div className="min-h-screen bg-white text-neutral-900 antialiased">
+            <main className="max-w-7xl mx-auto px-4 py-6 md:py-12">
+                <div className="mb-20">
+                    <ProductDetails itemDetails={itemDetails} />
+                </div>
+
+                <hr className="border-neutral-100 mb-16" />
+
+                {/* Review Section */}
+                <div className="max-w-3xl">
+                    <section id="reviews" className="space-y-12">
+                        <header className="space-y-1">
+                            <h2 className="text-2xl font-medium tracking-tight">Customer Reviews</h2>
+                            <p className="text-sm text-neutral-500">Feedback from recent purchases.</p>
+                        </header>
+                        
+                        <div className="grid gap-12">
+                            <div className="bg-neutral-50/50 p-6 border border-neutral-100 rounded-lg">
+                                <WriteReviewForm
+                                    stallId={itemDetails.stallId!}
+                                    itemId={itemDetails.id!}
+                                />
+                            </div>
+                            
+                            <ProductRatings
+                                reviews={itemDetails.reviews}
+                                category={itemDetails.category}
+                            />
+                        </div>
+                    </section>
+                </div>
             </main>
         </div>
     );
