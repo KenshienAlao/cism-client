@@ -181,8 +181,6 @@ function HomeContent() {
           )}
         </div>
       </main>
-
-      <div className="h-24 md:h-12" />
     </div>
   );
 }
