@@ -67,7 +67,7 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Refined Header for Category Navigation */}
+      {/* Category Navigation */}
       <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="py-4 overflow-x-auto no-scrollbar">
@@ -182,7 +182,6 @@ function HomeContent() {
         </div>
       </main>
 
-      {/* Spacing for mobile bottom navigation if present */}
       <div className="h-24 md:h-12" />
     </div>
   );
