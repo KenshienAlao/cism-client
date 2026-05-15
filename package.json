@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
+    "@tanstack/query-sync-storage-persister": "^5.100.10",
     "@tanstack/react-query": "^5.100.5",
+    "@tanstack/react-query-persist-client": "^5.100.10",
     "axios": "^1.15.2",
     "lucide-react": "^1.11.0",
     "next": "16.2.4",

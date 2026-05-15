@@ -239,7 +239,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                                         >
                                             <div className="h-9 w-9 shrink-0 rounded-md bg-neutral-50 flex items-center justify-center overflow-hidden relative border border-neutral-100">
                                                 {result.metadata.image ? (
-                                                    <Image src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} fill className="h-full w-full object-cover" />
+                                                    <Image src={typeof result.metadata.image === 'string' ? result.metadata.image : ''} alt={result.name} fill className="h-full w-full object-cover" sizes="36px" />
                                                 ) : (
                                                     result.type === 'stall' ? <Store className="w-4 h-4 text-orange-500" /> : <UtensilsCrossed className="w-4 h-4 text-neutral-300" />
                                                 )}
@@ -274,7 +274,7 @@ export function SearchBar({ placeholder = "Search for food, shops, or school sup
                             {!mounted ? (
                                 <div className="h-full w-full bg-neutral-50 animate-pulse" />
                             ) : avatar ? (
-                                <Image src={avatar} alt="avatar" fill className="object-cover" />
+                                <Image src={avatar} alt="avatar" fill className="object-cover" sizes="40px" />
                             ) : initials ? (
                                 <div className="h-full w-full flex items-center justify-center bg-orange-500">
                                     <span className="text-xs font-bold text-white tracking-widest">{initials}</span>

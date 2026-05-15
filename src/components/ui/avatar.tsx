@@ -28,6 +28,7 @@ export function Avatar({ src, name, className = '', size = 'md' }: AvatarProps) 
                     alt={name || 'Avatar'}
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 40px, 64px"
                 />
             ) : (
                 <div className="h-full w-full bg-gradient-to-br from-orange-400 to-rose-400 flex items-center justify-center">

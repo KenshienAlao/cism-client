@@ -22,7 +22,7 @@ export const API_ENDPOINTS = {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
     REGISTER: "/api/auth/register",
-    VALIDATE_COOKIE: "/api/auth/validate-cookie",
+    VALIDATE_COOKIE: "/api/auth/validate-cookie", 
     REFRESH: "/api/auth/refresh",
     DELETE_ACCOUNT: "/api/auth/delete-account",
     UPLOAD_AVATAR: "/api/auth/avatar",
@@ -32,9 +32,10 @@ export const API_ENDPOINTS = {
     GET_ALL: "/api/user/stall/get-all-item",
   },
   REVIEW: {
-    CREATE: "/api/client/review/review-item"
+    CREATE: "/api/client/review/review-item",
+    DELETE: "/api/client/review/review-delete/{userId}/{reviewId}"
   },
-  CART: {
+  CART: { 
     GET_ALL: "/api/customer/cart/get-cart",
     ADD: "/api/customer/cart/add-item-to-cart",
     UPDATE: "/api/customer/cart/update-cart-item",

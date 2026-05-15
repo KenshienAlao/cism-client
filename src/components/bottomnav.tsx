@@ -7,16 +7,54 @@ import { useCart } from '@/hooks/use-cart';
 import { useOrder } from '@/hooks/use-order';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { orderService } from '@/service/order.service';
+import { cartService } from '@/service/cart.service';
+import { authService } from '@/service/auth.service';
+import { authKeys } from '@/hooks/use-auth';
+import { MY_ORDERS_QUERY_KEY } from '@/hooks/use-order';
 
 export function BottomNav() {
     const pathname = usePathname();
     const { cartCount } = useCart();
     const { useMyOrders } = useOrder();
     const { count: notifCount } = useNotifications();
+    const queryClient = useQueryClient();
 
     const { data: orders } = useMyOrders({
         refetchInterval: 30000
     });
+
+    const handlePrefetch = (href: string) => {
+        switch (href) {
+            case '/':
+            case '/account':
+                queryClient.prefetchQuery({
+                    queryKey: authKeys.profile(),
+                    queryFn: () => authService.validateCookie().then(res => res.data),
+                });
+                break;
+            case '/orders':
+                queryClient.prefetchQuery({
+                    queryKey: MY_ORDERS_QUERY_KEY,
+                    queryFn: () => orderService.getMyOrders().then(res => res.data),
+                });
+                break;
+            case '/cart':
+                queryClient.prefetchQuery({
+                    queryKey: ['cart'],
+                    queryFn: () => cartService.getCart().then(res => res.data),
+                });
+                break;
+            case '/notifications':
+                // Notifications are derived from orders, so prefetch orders
+                queryClient.prefetchQuery({
+                    queryKey: MY_ORDERS_QUERY_KEY,
+                    queryFn: () => orderService.getMyOrders().then(res => res.data),
+                });
+                break;
+        }
+    };
 
     const activeOrdersCount = useMemo(() => {
         if (!orders) return 0;
@@ -50,6 +88,7 @@ export function BottomNav() {
                         <Link
                             key={item.label}
                             href={item.href}
+                            onMouseEnter={() => handlePrefetch(item.href)}
                             className="flex-1 h-full flex flex-col items-center justify-center gap-1 group active:opacity-70 transition-opacity"
                         >
                             <div className="relative">

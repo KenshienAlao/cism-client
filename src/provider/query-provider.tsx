@@ -1,7 +1,8 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ReactNode, useState } from "react";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { ReactNode, useState, useEffect } from "react";
 import { WebSocketListener } from "@/components/websocket-listener";
 import { ChatProvider } from "./chat-provider";
 import { GlobalChatbox } from "@/components/global-chatbox";
@@ -11,19 +12,50 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5,
+        gcTime: 1000 * 60 * 60 * 24,
         retry: 1,
+        refetchOnWindowFocus: true,
       },
     },
   }));
 
+  const [persister, setPersister] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const p = createSyncStoragePersister({
+        storage: window.localStorage,
+        key: 'CISM_CLIENT_OFFLINE_CACHE',
+      });
+      setPersister(p);
+    }
+  }, []);
+
+  if (!persister) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ChatProvider>
+          <WebSocketListener />
+          {children}
+          <GlobalChatbox />
+        </ChatProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ 
+        persister,
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      }}
+    >
       <ChatProvider>
         <WebSocketListener />
         {children}
         <GlobalChatbox />
       </ChatProvider>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

@@ -30,6 +30,7 @@ export function ProductCard({
                         alt={name}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center bg-neutral-100 p-4 text-center">

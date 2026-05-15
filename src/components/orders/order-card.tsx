@@ -32,7 +32,7 @@ export function OrderCard({ order, onCancel, onReceive, onDelete, onReview }: Or
                 <div className="flex items-center gap-3">
                     <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0 bg-neutral-100 flex items-center justify-center overflow-hidden border border-neutral-200">
                         {order.stallImage ? (
-                            <Image src={order.stallImage} alt={order.stallName} fill className="object-cover" />
+                            <Image src={order.stallImage} alt={order.stallName} fill className="object-cover" sizes="40px" />
                         ) : (
                             <Store className="w-4 h-4 text-neutral-300" />
                         )}
@@ -64,7 +64,7 @@ export function OrderCard({ order, onCancel, onReceive, onDelete, onReview }: Or
                 {order.orderItems.map((item: any) => (
                     <div key={item.id} className="flex items-center gap-4">
                         <div className="relative w-12 h-12 md:w-16 md:h-16 shrink-0 bg-neutral-100 border border-neutral-200 overflow-hidden">
-                            {item.image && <Image src={item.image} alt={item.itemName} fill className="object-cover" />}
+                            {item.image && <Image src={item.image} alt={item.itemName} fill className="object-cover" sizes="64px" />}
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="text-sm md:text-base font-black text-neutral-900 truncate">{item.itemName}</h4>

@@ -68,7 +68,7 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                         fill 
                         className="object-cover" 
                         priority 
-                        sizes="(max-w-768px) 100vw, 50vw"
+                        sizes="(max-width: 768px) 100vw, 50vw"
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">

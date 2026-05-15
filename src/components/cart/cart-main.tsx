@@ -83,7 +83,7 @@ export default function CartMain({stalledItems, selectedIds, stagedQuantities, g
                                         {/* Product Image */}
                                         <div className="relative w-20 h-20 md:w-32 md:h-32 bg-neutral-100 shrink-0 border border-neutral-200 overflow-hidden">
                                             {item.image ? (
-                                                <Image src={item.image} alt={item.name} fill className="object-cover grayscale-[0.2]" />
+                                                <Image src={item.image} alt={item.name} fill className="object-cover grayscale-[0.2]" sizes="(max-width: 768px) 80px, 128px" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-neutral-50">
                                                     <Inbox className="w-8 h-8 text-neutral-200" />

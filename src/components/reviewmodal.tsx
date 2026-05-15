@@ -125,7 +125,7 @@ export function ReviewModal({ isOpen, onClose, orderId, itemName, onSubmitReview
 
                             {imagePreview && (
                                 <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 overflow-hidden border border-neutral-200">
-                                    <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                                    <Image src={imagePreview} alt="Preview" fill className="object-cover" sizes="96px" />
                                     <button
                                         onClick={() => { setImageFile(null); setImagePreview(null); }}
                                         className="absolute top-1 right-1 w-5 h-5 bg-black/70 flex items-center justify-center text-white"
