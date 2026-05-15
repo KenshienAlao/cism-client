@@ -10,7 +10,6 @@ import { MY_ORDERS_QUERY_KEY } from './use-order';
 import { ITEM_QUERY_KEY } from './use-item';
 import { CHAT_QUERY_KEY } from './use-chat';
 import { STATUS } from '@/config/track.config';
-import { Order } from '@/model/order.model';
 import { notifSuccess } from '@/lib/toast';
 
 const getWsUrl = () => {
@@ -43,18 +42,29 @@ export function useWebSocket() {
     const profileId = profile?.user?.id;
 
     const patchOrderInCache = useCallback((order: any) => {
-        const updateList = (prev: Order[] | undefined) => {
+        // Update all queries that match orders (list and detail)
+        queryClient.setQueriesData<any>({ 
+            predicate: (query) => {
+                const [key] = query.queryKey as any[];
+                return key === MY_ORDERS_QUERY_KEY[0] || key === 'stall-orders';
+            }
+        }, (prev: any) => {
             if (!prev) return prev;
-            const exists = prev.some(o => o.id === order.id);
-            if (!exists) return [order, ...prev];
-            return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
-        };
-
-        queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY, updateList);
-        queryClient.setQueryData<Order[]>(['stall-orders'], updateList);
-        queryClient.setQueryData([...MY_ORDERS_QUERY_KEY, order.id], (prev: any) =>
-            prev ? { ...prev, ...order } : order
-        );
+            
+            // If it's a list (array)
+            if (Array.isArray(prev)) {
+                const exists = prev.some(o => o.id === order.id);
+                if (!exists) return [order, ...prev];
+                return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
+            }
+            
+            // If it's a single object (detail view)
+            if (prev.id === order.id) {
+                return { ...prev, ...order };
+            }
+            
+            return prev;
+        });
 
         // Only invalidate cart if order status changed to COMPLETED or CANCELLED to sync stock/cart
         if (['COMPLETED', 'CANCELLED'].includes(order.status?.toUpperCase())) {
@@ -136,9 +146,9 @@ export function useWebSocket() {
 
                     if (chat.type === 'READ_RECEIPT') {
                         const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
-                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
+                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev: any) => {
                             if (!prev) return prev;
-                            return prev.map(msg => {
+                            return prev.map((msg: any) => {
                                 if (chat.sentByStall) {
                                     return msg.sentByStall === false ? { ...msg, readByStall: true } : msg;
                                 } else {
@@ -151,9 +161,9 @@ export function useWebSocket() {
 
                     if (chat.type === 'MESSAGE_DELETED') {
                         const baseKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
-                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev) => {
+                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev: any) => {
                             if (!prev) return prev;
-                            return prev.map(msg =>
+                            return prev.map((msg: any) =>
                                 msg.id === chat.messageId
                                     ? { ...msg, content: 'Message has been removed', isDeleted: true }
                                     : msg
@@ -164,11 +174,11 @@ export function useWebSocket() {
 
                     // message logic
                     const chatListKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
-                    queryClient.setQueryData<any[]>(chatListKey, (prev) => {
+                    queryClient.setQueryData<any[]>(chatListKey, (prev: any) => {
                         if (!prev) return [chat];
-                        if (prev.some(m => m.id === chat.id)) return prev;
+                        if (prev.some((m: any) => m.id === chat.id)) return prev;
 
-                        const optimisticIdx = prev.findIndex(m => m.status === 'sending' && m.content === chat.content);
+                        const optimisticIdx = prev.findIndex((m: any) => m.status === 'sending' && m.content === chat.content);
                         if (optimisticIdx !== -1) {
                             const updated = [...prev];
                             updated[optimisticIdx] = { ...chat, status: 'sent' };
@@ -179,7 +189,7 @@ export function useWebSocket() {
 
                     // Thread list update
                     const threadListKey = [...CHAT_QUERY_KEY, 'threads', profileId];
-                    queryClient.setQueryData<any[]>(threadListKey, (prev) => {
+                    queryClient.setQueryData<any[]>(threadListKey, (prev: any) => {
                         if (!prev) return prev;
                         const updated = [...prev];
                         const threadIdx = updated.findIndex(

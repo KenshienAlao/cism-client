@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAuth } from './use-auth';
 import { useConfirmation } from '@/context/confirmation.context';
 import { trackMutation, clearMutation } from './use-websocket';
+import { CART_QUERY_KEY } from './use-cart';
 
 export const MY_ORDERS_QUERY_KEY = ['orders'];
 
@@ -16,13 +17,35 @@ export function useOrder() {
 
     const addOrder = useMutation({
         mutationFn: (request: OrderRequest) => orderService.addOrder(request),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-            queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
-            // notifSuccess('Order placed successfully!');
+        onMutate: async () => {
+            // Cancel outgoing queries
+            await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
+            await queryClient.cancelQueries({ queryKey: MY_ORDERS_QUERY_KEY });
+
+            // Snapshot previous data
+            const previousCart = queryClient.getQueryData<any[]>(CART_QUERY_KEY);
+            const previousOrders = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY);
+
+            // Optimistically clear cart
+            queryClient.setQueryData(CART_QUERY_KEY, []);
+
+            return { previousCart, previousOrders };
         },
-        onError: (error: any) => {
+        onSuccess: (response) => {
+            if (response.success) {
+                // Keep the success response data in cache
+                queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+                queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
+            }
+        },
+        onError: (error: any, _, context) => {
+            if (context?.previousCart) queryClient.setQueryData(CART_QUERY_KEY, context.previousCart);
+            if (context?.previousOrders) queryClient.setQueryData(MY_ORDERS_QUERY_KEY, context.previousOrders);
             notifError(error.response?.data?.message || 'Failed to place order');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
         }
     });
 
@@ -41,7 +64,7 @@ export function useOrder() {
             return { previousOrders };
         },
         onSuccess: (_, { id }) => {
-            // Success logic
+            // Success handled by WS or settled
         },
         onError: (error: any, { id }, context) => {
             clearMutation(`order-${id}-CANCELLED`);
@@ -127,12 +150,27 @@ export function useOrder() {
 
     const receiveOrder = useMutation({
         mutationFn: (orderId: string) => orderService.receiveOrder(orderId),
+        onMutate: async (orderId) => {
+            await queryClient.cancelQueries({ queryKey: MY_ORDERS_QUERY_KEY });
+            const previousOrders = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY);
+            if (previousOrders) {
+                queryClient.setQueryData<Order[]>(MY_ORDERS_QUERY_KEY,
+                    previousOrders.map(o => o.id === orderId ? { ...o, status: 'COMPLETED' } : o)
+                );
+            }
+            return { previousOrders };
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
             notifSuccess('Order received!');
         },
-        onError: (error: any) => {
+        onError: (error: any, _, context) => {
+            if (context?.previousOrders) {
+                queryClient.setQueryData(MY_ORDERS_QUERY_KEY, context.previousOrders);
+            }
             notifError(error.response?.data?.message || 'Failed to mark as received');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
         }
     });
 
