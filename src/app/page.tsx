@@ -14,26 +14,13 @@ import { useSearchParams } from "next/navigation";
 function HomeContent() {
   const { isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
-  const { items, isLoading, isFetching } = useItem()
+  const { items, isLoading, isFetching } = useItem();
   const allFlattenedItems = useEnrichedItems(items);
-  const { cartCount, addToCart } = useCart();
-  const [view, setView] = useState<(typeof VIEW_TYPE)[keyof typeof VIEW_TYPE]>(VIEW_TYPE.FEED);
+  const { addToCart } = useCart();
   const search = searchParams.get('q') || "";
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   if (isAuthLoading || isLoading || isFetching) return <Loading />;
-
-  const handleAddToCart = (id: string) => {
-    const item = allFlattenedItems.find(i => i.id === id);
-    if (!item) return;
-
-    addToCart({
-      stallId: Number(item.stallId),
-      stallItemId: Number(item.id),
-      variationId: 0,
-      quantity: 1
-    });
-  };
 
   const isSpecialCategory = ['all', 'popular', 'fresh', 'budget'].includes(selectedCategory);
   const scopedItems = (search.trim() !== ''
@@ -69,7 +56,7 @@ function HomeContent() {
   );
 
   const freshDrops = useMemo(() => {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     return scopedItems.filter(item => item.createdAt && new Date(item.createdAt) >= twentyFourHoursAgo);
   }, [scopedItems]);
 
@@ -79,113 +66,124 @@ function HomeContent() {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50 pb-32">
-
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-12">
-        <CategoryChips onCategoryChange={setSelectedCategory} />
-
-        {(selectedCategory === 'all' || selectedCategory === 'popular') && (
-          <HorizontalScrollSection
-            icon={<TrendingUp className="w-5 h-5 text-orange-500" />}
-            title="Trending Now"
-            subtitle="Most popular items on campus"
-            items={trendingItems}
-            emptyIcon={TrendingUp}
-            emptyTitle="Nothing trending yet"
-            emptyDescription="No popular items found at the moment."
-          />
-
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'fresh') && (
-          <HorizontalScrollSection
-            icon={<Sparkles className="w-5 h-5 text-orange-500" />}
-            title="Fresh Drops"
-            subtitle="New items added today"
-            items={freshDrops}
-            emptyIcon={Coffee}
-            emptyTitle="No fresh drops found"
-            emptyDescription="No items added today. Check back later!"
-          />
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'budget') && (
-          <HorizontalScrollSection
-            icon={<DollarSign className="w-5 h-5 text-orange-500" />}
-            title="Budget Picks"
-            subtitle="Delicious finds under Php 50"
-            items={budgetPicks}
-            emptyIcon={Inbox}
-            emptyTitle="No budget picks found"
-            emptyDescription="No items under Php 50 right now."
-          />
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'meals') && (
-          <HorizontalScrollSection
-            icon={<CookingPot className="w-5 h-5 text-orange-500" />}
-            title="Meals"
-            subtitle="Explore all available meals"
-            items={allFlattenedItems.filter(i => i.category === 'MEAL')}
-            emptyIcon={Inbox}
-            emptyTitle="No meals found"
-            emptyDescription="No meals available at the moment!"
-          />
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'drinks') && (
-          <HorizontalScrollSection
-            icon={<CupSoda className="w-5 h-5 text-orange-500" />}
-            title="Drinks"
-            subtitle="Explore all available drinks"
-            items={allFlattenedItems.filter(i => i.category === 'DRINK')}
-            emptyIcon={Inbox}
-            emptyTitle="No drinks found"
-            emptyDescription="No drinks available at the moment!"
-          />
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'snacks') && (
-          <HorizontalScrollSection
-            icon={<Hamburger className="w-5 h-5 text-orange-500" />}
-            title="Snacks"
-            subtitle="Explore all available snacks"
-            items={allFlattenedItems.filter(i => i.category === 'SNACK')}
-            emptyIcon={Inbox}
-            emptyTitle="No snacks found"
-            emptyDescription="No snacks available at the moment!"
-          />
-        )}
-
-        {(selectedCategory === 'all' || selectedCategory === 'business') && (
-          selectedCategory === 'business' ? (
-            <div className="space-y-12">
-              {Object.entries(schoolItemsByCategory).map(([category, catItems]) => (
-                <HorizontalScrollSection
-                  key={category}
-                  icon={<School className="w-5 h-5 text-orange-500" />}
-                  title={category.replace(/_/g, ' ')}
-                  subtitle={`Explore all available ${category.replace(/_/g, ' ')} items.`}
-                  items={catItems}
-                  emptyIcon={Inbox}
-                  emptyTitle="No items found"
-                  emptyDescription="Nothing available in this category."
-                />
-              ))}
-            </div>
-          ) : (
-            <HorizontalScrollSection
-              icon={<School className="w-5 h-5 text-orange-500" />}
-              title="School Items"
-              subtitle="Uniforms, IDs, and campus essentials"
-              items={schoolItems}
-              emptyIcon={Inbox}
-              emptyTitle="No school items found"
-              emptyDescription="No school items available at the moment!"
-            />
-          )
-        )}
+    <div className="min-h-screen bg-white">
+      {/* Refined Header for Category Navigation */}
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="py-4 overflow-x-auto no-scrollbar">
+            <CategoryChips onCategoryChange={setSelectedCategory} />
+          </div>
+        </div>
       </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="space-y-16">
+          
+          {(selectedCategory === 'all' || selectedCategory === 'popular') && (
+            <HorizontalScrollSection
+              icon={<TrendingUp className="w-5 h-5 text-orange-500" />}
+              title="Trending Now"
+              subtitle="Most popular items on campus"
+              items={trendingItems}
+              emptyIcon={TrendingUp}
+              emptyTitle="Nothing trending yet"
+              emptyDescription="No popular items found at the moment."
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'fresh') && (
+            <HorizontalScrollSection
+              icon={<Sparkles className="w-5 h-5 text-orange-500" />}
+              title="Fresh Drops"
+              subtitle="New items added today"
+              items={freshDrops}
+              emptyIcon={Coffee}
+              emptyTitle="No fresh drops found"
+              emptyDescription="No items added today. Check back later!"
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'budget') && (
+            <HorizontalScrollSection
+              icon={<DollarSign className="w-5 h-5 text-orange-500" />}
+              title="Budget Picks"
+              subtitle="Delicious finds under Php 50"
+              items={budgetPicks}
+              emptyIcon={Inbox}
+              emptyTitle="No budget picks found"
+              emptyDescription="No items under Php 50 right now."
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'meals') && (
+            <HorizontalScrollSection
+              icon={<CookingPot className="w-5 h-5 text-orange-500" />}
+              title="Meals"
+              subtitle="Explore all available meals"
+              items={allFlattenedItems.filter(i => i.category === 'MEAL')}
+              emptyIcon={Inbox}
+              emptyTitle="No meals found"
+              emptyDescription="No meals available at the moment!"
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'drinks') && (
+            <HorizontalScrollSection
+              icon={<CupSoda className="w-5 h-5 text-orange-500" />}
+              title="Drinks"
+              subtitle="Explore all available drinks"
+              items={allFlattenedItems.filter(i => i.category === 'DRINK')}
+              emptyIcon={Inbox}
+              emptyTitle="No drinks found"
+              emptyDescription="No drinks available at the moment!"
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'snacks') && (
+            <HorizontalScrollSection
+              icon={<Hamburger className="w-5 h-5 text-orange-500" />}
+              title="Snacks"
+              subtitle="Explore all available snacks"
+              items={allFlattenedItems.filter(i => i.category === 'SNACK')}
+              emptyIcon={Inbox}
+              emptyTitle="No snacks found"
+              emptyDescription="No snacks available at the moment!"
+            />
+          )}
+
+          {(selectedCategory === 'all' || selectedCategory === 'business') && (
+            selectedCategory === 'business' ? (
+              <div className="space-y-16">
+                {Object.entries(schoolItemsByCategory).map(([category, catItems]) => (
+                  <HorizontalScrollSection
+                    key={category}
+                    icon={<School className="w-5 h-5 text-orange-500" />}
+                    title={category.replace(/_/g, ' ')}
+                    subtitle={`Explore all available ${category.replace(/_/g, ' ')} items.`}
+                    items={catItems}
+                    emptyIcon={Inbox}
+                    emptyTitle="No items found"
+                    emptyDescription="Nothing available in this category."
+                  />
+                ))}
+              </div>
+            ) : (
+              <HorizontalScrollSection
+                icon={<School className="w-5 h-5 text-orange-500" />}
+                title="School Items"
+                subtitle="Uniforms, IDs, and campus essentials"
+                items={schoolItems}
+                emptyIcon={Inbox}
+                emptyTitle="No school items found"
+                emptyDescription="No school items available at the moment!"
+              />
+            )
+          )}
+        </div>
+      </main>
+
+      {/* Spacing for mobile bottom navigation if present */}
+      <div className="h-24 md:h-12" />
     </div>
   );
 }
