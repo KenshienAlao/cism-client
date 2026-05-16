@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
 import { StallItems } from '@/model/stall.model';
 import { ItemResponse } from '@/model/product.model';
+import { useItem } from './use-item';
 
-export function useEnrichedItems(stalls: StallItems[]) {
-    return useMemo(() => {
+export function useEnrichedItems() {
+    const { items: stalls, isLoading, isFetching, refetch } = useItem();
+
+    const items = useMemo(() => {
+        if (!stalls) return [];
         return stalls.flatMap(stall => {
             return stall.items.map(item => {
                 const itemReviews = stall.reviews.filter(r => r.itemId === item.id);
@@ -37,6 +41,13 @@ export function useEnrichedItems(stalls: StallItems[]) {
             });
         });
     }, [stalls]);
+
+    return {
+        items,
+        isLoading,
+        isFetching,
+        refetch
+    };
 }
 
 export function enrichStall(stall: StallItems): ItemResponse[] {

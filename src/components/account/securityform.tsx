@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { notifError } from "@/lib/toast";
-import { Eye, EyeOff, ShieldCheck, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, AlertTriangle } from "lucide-react";
+import { DangerZone } from "./dangerzone";
 
 export function SecurityForm() {
     const { changeEmail, isChangingEmail, changePassword, isChangingPassword } = useAuth();
@@ -39,73 +40,73 @@ export function SecurityForm() {
         setPassForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
     };
 
-    const inputStyles = "w-full bg-input border border-border rounded-md px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/40";
-    const labelStyles = "text-[10px] font-bold text-muted-foreground uppercase tracking-widest";
-    const sectionHeaderStyles = "flex items-center gap-2 mb-6";
+    const inputStyles = "w-full bg-input border border-border rounded-md pl-3 pr-9 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors placeholder:text-secondary-foreground/40";
+    const labelStyles = "text-xs font-medium text-foreground mb-1.5 block";
+    const sectionHeaderStyles = "flex items-center gap-2 border-b border-border pb-2 mb-4";
+    const sectionTitleStyles = "text-sm font-medium text-foreground";
+    const actionBtnStyles = "px-3 py-1.5 rounded-md text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-orange-500";
+
+    const isEmailFormValid = emailForm.newEmail && emailForm.password;
+    const isPassFormValid = passForm.oldPassword && passForm.newPassword && passForm.confirmPassword;
 
     return (
-        <div className="space-y-12 max-w-2xl">
+        <div className="space-y-8 w-full">
             {/* Email Section */}
-            <section className="space-y-6">
+            <section>
                 <div className={sectionHeaderStyles}>
-                    <div className="p-1.5 rounded bg-accent/50">
-                        <Mail size={14} className="text-primary" />
-                    </div>
-                    <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">
-                        Email Address
-                    </h3>
+                    <Mail size={15} className="text-orange-500" />
+                    <h3 className={sectionTitleStyles}>Email Address</h3>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="grid grid-cols-1 gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                    <div>
                         <label className={labelStyles}>New Email Address</label>
                         <input
                             type="email"
                             value={emailForm.newEmail}
                             onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
-                            className={inputStyles}
+                            className={inputStyles.replace("pr-9", "pr-3")}
                             placeholder="new.email@example.com"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-1.5">
+                    <div>
                         <label className={labelStyles}>Current Password</label>
                         <input
                             type="password"
                             value={emailForm.password}
                             onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-                            className={inputStyles}
-                            placeholder="Verify your identity"
+                            className={inputStyles.replace("pr-9", "pr-3")}
+                            placeholder="Verify identity"
                         />
                     </div>
 
-                    <div className="pt-2">
+                    <div className="sm:col-span-2 flex justify-end pt-1">
                         <button
+                            type="button"
                             onClick={handleEmailUpdate}
-                            disabled={isChangingEmail || !emailForm.newEmail || !emailForm.password}
-                            className="px-5 py-2 bg-primary text-primary-foreground rounded-md text-[10px] font-bold uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:bg-secondary disabled:text-secondary-foreground disabled:cursor-not-allowed"
+                            disabled={isChangingEmail || !isEmailFormValid}
+                            className={`${actionBtnStyles} ${
+                                isEmailFormValid && !isChangingEmail
+                                    ? "bg-orange-500 text-white hover:bg-orange-600"
+                                    : "bg-secondary text-secondary-foreground/40 cursor-not-allowed"
+                            }`}
                         >
-                            {isChangingEmail ? "Processing..." : "Update Email"}
+                            {isChangingEmail ? "Updating..." : "Update email"}
                         </button>
                     </div>
                 </div>
             </section>
 
-            <hr className="border-border/50" />
-
             {/* Password Section */}
-            <section className="space-y-6">
+            <section>
                 <div className={sectionHeaderStyles}>
-                    <div className="p-1.5 rounded bg-accent/50">
-                        <Lock size={14} className="text-primary" />
-                    </div>
-                    <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">
-                        Password Update
-                    </h3>
+                    <Lock size={15} className="text-orange-500" />
+                    <h3 className={sectionTitleStyles}>Password Update</h3>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="grid grid-cols-1 gap-1.5">
+                <div className="space-y-3">
+                    <div>
                         <label className={labelStyles}>Current Password</label>
                         <div className="relative">
                             <input
@@ -117,7 +118,7 @@ export function SecurityForm() {
                             />
                             <button 
                                 onClick={() => setShowPass({...showPass, old: !showPass.old})}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary-foreground/60 hover:text-foreground focus:outline-none transition-colors"
                                 type="button"
                             >
                                 {showPass.old ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -125,8 +126,8 @@ export function SecurityForm() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="grid grid-cols-1 gap-1.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
                             <label className={labelStyles}>New Password</label>
                             <div className="relative">
                                 <input
@@ -138,7 +139,7 @@ export function SecurityForm() {
                                 />
                                 <button 
                                     onClick={() => setShowPass({...showPass, new: !showPass.new})}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary-foreground/60 hover:text-foreground focus:outline-none transition-colors"
                                     type="button"
                                 >
                                     {showPass.new ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -146,7 +147,7 @@ export function SecurityForm() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-1.5">
+                        <div>
                             <label className={labelStyles}>Confirm New Password</label>
                             <div className="relative">
                                 <input
@@ -158,7 +159,7 @@ export function SecurityForm() {
                                 />
                                 <button 
                                     onClick={() => setShowPass({...showPass, confirm: !showPass.confirm})}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary-foreground/60 hover:text-foreground focus:outline-none transition-colors"
                                     type="button"
                                 >
                                     {showPass.confirm ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -167,15 +168,31 @@ export function SecurityForm() {
                         </div>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="flex justify-end pt-1">
                         <button
+                            type="button"
                             onClick={handlePasswordUpdate}
-                            disabled={isChangingPassword || !passForm.newPassword}
-                            className="px-5 py-2 bg-primary text-primary-foreground rounded-md text-[10px] font-bold uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:bg-secondary disabled:text-secondary-foreground disabled:cursor-not-allowed"
+                            disabled={isChangingPassword || !isPassFormValid}
+                            className={`${actionBtnStyles} ${
+                                isPassFormValid && !isChangingPassword
+                                    ? "bg-orange-500 text-white hover:bg-orange-600"
+                                    : "bg-secondary text-secondary-foreground/40 cursor-not-allowed"
+                            }`}
                         >
-                            {isChangingPassword ? "Securing..." : "Update Password"}
+                            {isChangingPassword ? "Updating..." : "Update password"}
                         </button>
                     </div>
+                </div>
+            </section>
+                
+            {/* Danger Zone Section */}
+            <section className="pt-2">
+                <div className={sectionHeaderStyles.replace("border-b", "border-b border-border/60")}>
+                    <AlertTriangle size={15} className="text-red-500" />
+                    <h3 className={`${sectionTitleStyles} text-red-500`}>Danger Zone</h3>
+                </div>
+                <div className="bg-red-500/5 border border-red-500/10 rounded-md p-3.5">
+                    <DangerZone />
                 </div>
             </section>
         </div>

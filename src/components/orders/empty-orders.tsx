@@ -11,7 +11,7 @@ export function EmptyOrders() {
             icon={ShoppingBag}
             actionLabel="Start Shopping"
             actionHref="/"
-            className="min-h-screen bg-neutral-50"
+            className="min-h-[calc(100vh-65px)] bg-background"
         />
     );
 }

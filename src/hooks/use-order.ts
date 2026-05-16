@@ -101,13 +101,16 @@ export function useOrder() {
         }
     });
 
-    const useMyOrders = (options?: { refetchInterval?: number | false }) => useQuery({
+    const useMyOrders = (options?: { refetchInterval?: number | false; staleTime?: number }) => useQuery({
         queryKey: MY_ORDERS_QUERY_KEY,
         queryFn: async () => {
             const response = await orderService.getMyOrders();
             return response.data || [];
         },
         enabled: !!profile,
+        staleTime: 1000 * 60,
+        refetchOnWindowFocus: true,
+        refetchInterval: 1000 * 60,
         ...options
     });
 
@@ -174,7 +177,7 @@ export function useOrder() {
         }
     });
 
-    const useTrackOrder = (orderId: string | null) => useQuery({
+    const useTrackOrder = (orderId: string | null, options?: { staleTime?: number; refetchInterval?: number | false }) => useQuery({
         queryKey: [...MY_ORDERS_QUERY_KEY, orderId],
         queryFn: async () => {
             if (!orderId) return null;
@@ -182,9 +185,17 @@ export function useOrder() {
             return response.data;
         },
         enabled: !!orderId,
+        initialData: () => {
+            if (!orderId) return undefined;
+            return queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY)?.find(o => o.id === orderId);
+        },
         refetchInterval: (query) => {
-            return query.state.data?.status?.toLowerCase() !== 'completed' ? 10000 : false;
-        }
+            if (options?.refetchInterval !== undefined) return options.refetchInterval;
+            const status = query.state.data?.status?.toUpperCase();
+            return (status !== 'COMPLETED' && status !== 'CANCELLED') ? 10000 : false;
+        },
+        refetchOnWindowFocus: true,
+        ...options
     });
 
     const handleDeleteOrder = (orderId: string) => {

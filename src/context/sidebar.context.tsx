@@ -10,19 +10,14 @@ interface SidebarContextType {
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export function SidebarProvider({ children }: { children: React.ReactNode }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    useEffect(() => {
-        const saved = localStorage.getItem('sidebar-collapsed');
-        if (saved !== null) {
-            setIsCollapsed(saved === 'true');
-        }
-    }, []);
+export function SidebarProvider({ children, defaultCollapsed = false }: { children: React.ReactNode, defaultCollapsed?: boolean }) {
+    const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
     const toggleSidebar = () => {
         const newValue = !isCollapsed;
         setIsCollapsed(newValue);
         localStorage.setItem('sidebar-collapsed', String(newValue));
+        document.cookie = `sidebar-collapsed=${newValue}; path=/; max-age=31536000`; // 1 year expiry
     };
 
     return (

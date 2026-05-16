@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, AlertCircle } from 'lucide-react';
 
 interface CancelReasonModalProps {
@@ -33,93 +34,117 @@ export function CancelReasonModal({ isOpen, onClose, onConfirm, isPending }: Can
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
-
     const handleConfirm = () => {
-        if (!reason.trim()) return;
+        if (!reason.trim() || isPending) return;
         onConfirm(reason);
     };
 
     return (
-        <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-0 md:p-4">
-            {/* Backdrop */}
-            <div 
-                className="absolute inset-0 bg-neutral-900/60 transition-opacity"
-                onClick={onClose}
-            />
-
-            {/* Modal Content */}
-            <div className="relative w-full md:max-w-md bg-white border-t md:border border-neutral-200 shadow-2xl overflow-hidden flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 bg-neutral-50">
-                    <div className="flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5 text-orange-500" />
-                        <h2 className="text-sm md:text-base font-black uppercase tracking-[0.2em] text-neutral-900">
-                            Cancel Order
-                        </h2>
-                    </div>
-                    <button 
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-1000 flex items-end md:items-center justify-center p-0 md:p-4 overflow-hidden">
+                    
+                    {/* Backdrop */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15, ease: 'linear' }}
+                        className="absolute inset-0 bg-black/60 backdrop-blur-none"
                         onClick={onClose}
-                        className="p-1 text-neutral-400 hover:text-neutral-900 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+                    />
 
-                {/* Body */}
-                <div className="p-6 space-y-6">
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block">
-                            Reason for Cancellation
-                        </label>
-                        
-                        {/* Preset Reasons (Auto-generate text tabs) */}
-                        <div className="flex flex-wrap gap-2">
-                            {PRESET_REASONS.map((preset) => (
-                                <button
-                                    key={preset}
-                                    onClick={() => setReason(preset)}
-                                    className={`px-3 py-2 text-[10px] font-bold uppercase tracking-wider border transition-all ${
-                                        reason === preset 
-                                            ? 'bg-orange-500 border-orange-500 text-white' 
-                                            : 'bg-white border-neutral-200 text-neutral-500'
-                                    }`}
-                                >
-                                    {preset}
-                                </button>
-                            ))}
+                    <motion.div 
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0 }}
+                        transition={{ type: 'spring', damping: 16, stiffness: 160 }}
+                        className="relative w-full md:max-w-md bg-card border-t md:border border-border rounded-t-lg md:rounded-lg shadow-none overflow-hidden flex flex-col text-foreground max-h-[92dvh]"
+                    >
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-secondary/40">
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 text-orange-500" />
+                                <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                                    Cancel Order
+                                </h2>
+                            </div>
+                            <button 
+                                onClick={onClose}
+                                className="p-1 text-foreground/40 hover:text-foreground transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
 
-                        <textarea
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="Tell us why you're cancelling..."
-                            className="w-full h-32 p-4 text-sm bg-neutral-50 border border-neutral-200 focus:border-orange-500 focus:ring-0 outline-none resize-none placeholder:text-neutral-300 font-medium"
-                        />
-                    </div>
-                </div>
+                        {/* Body Input Content */}
+                        <div className="p-5 space-y-5 overflow-y-auto no-scrollbar">
+                            <div className="space-y-2.5">
+                                <label className="text-[10px] font-semibold text-foreground/40 uppercase tracking-wider block">
+                                    Reason for Cancellation
+                                </label>
+                                
+                                {/* Selectors */}
+                                <div className="flex flex-wrap gap-1.5">
+                                    {PRESET_REASONS.map((preset) => {
+                                        const isSelected = reason === preset;
+                                        return (
+                                            <button
+                                                key={preset}
+                                                type="button"
+                                                onClick={() => setReason(preset)}
+                                                className={`px-2.5 py-1.5 text-xs font-medium transition-colors border rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                                    isSelected 
+                                                        ? 'bg-accent border-orange-500/30 text-orange-500' 
+                                                        : 'bg-input border-border text-foreground/60 hover:text-foreground hover:bg-secondary'
+                                                }`}
+                                            >
+                                                {preset}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
 
-                {/* Footer */}
-                <div className="p-6 pt-0 flex gap-3">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 py-4 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-neutral-400 border border-neutral-200"
-                    >
-                        Keep Order
-                    </button>
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!reason.trim() || isPending}
-                        className="flex-1 py-4 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] bg-orange-500 text-white disabled:bg-neutral-100 disabled:text-neutral-300 transition-colors flex items-center justify-center gap-2"
-                    >
-                        {isPending ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            "Confirm Cancel"
-                        )}
-                    </button>
+                                {/* Custom Text Area */}
+                                <textarea
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    placeholder="Tell us why you're cancelling..."
+                                    rows={4}
+                                    className="w-full p-3 text-sm bg-input border border-border text-foreground placeholder:text-foreground/30 rounded-md outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 resize-none transition-all font-normal"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Action Buttons Footer */}
+                        <div className="p-5 pt-0 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="flex-1 py-2 text-xs font-semibold uppercase tracking-wider text-foreground/60 bg-input border border-border rounded-md hover:bg-secondary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                Keep Order
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirm}
+                                disabled={!reason.trim() || isPending}
+                                className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider rounded-md flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors ${
+                                    reason.trim() && !isPending
+                                        ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                        : 'bg-secondary text-foreground/30 cursor-not-allowed'
+                                }`}
+                            >
+                                {isPending ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    "Confirm Cancel"
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
                 </div>
-            </div>
-        </div>
+            )}
+        </AnimatePresence>
     );
 }

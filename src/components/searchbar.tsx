@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, X, Store, UtensilsCrossed, ArrowLeft } from 'lucide-react';
+import { Search, X, Store, UtensilsCrossed, ArrowLeft, Loader2 } from 'lucide-react';
 import { useItem } from '@/hooks/use-item';
 import { useEnrichedItems } from '@/hooks/use-enriched-items';
 import { useAuth } from '@/hooks/use-auth';
@@ -37,8 +37,8 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
 
     const isNoNavRoute = useMemo(() => isPathInRoutes(pathname, NO_NAV_ROUTES as unknown as string[]), [pathname]);
     const isHome = pathname === '/';
-    const { profile } = useAuth();
-    const { items: stalls = [] } = useItem();
+    const { profile, isLoading: isAuthLoading } = useAuth();
+    const { items: stalls = [], isFetching } = useItem();
     const allItems = useEnrichedItems(stalls);
     const { isCollapsed } = useSidebar();
 
@@ -117,7 +117,7 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
 
     return (
         <header
-            className="sticky top-0 z-40 h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center transition-[padding] duration-300 ease-in-out"
+            className="sticky top-0 z-100 h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center transition-[padding] duration-300 ease-in-out"
             style={{ paddingLeft: (mounted && isDesktop && !isNoNavRoute) ? (isCollapsed ? 72 : 256) : undefined }}
         >
             <div className="flex-1 w-full px-4 flex items-center gap-4">
@@ -160,7 +160,12 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
                     {isFocused && query.trim() !== '' && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-sm overflow-hidden z-60">
                             <div className="py-1">
-                                {results.length > 0 ? (
+                                {isFetching && results.length === 0 ? (
+                                    <div className="px-4 py-3 text-xs text-muted-foreground text-center flex items-center justify-center gap-2">
+                                        <Loader2 className="w-3 h-3 animate-spin text-orange-500" />
+                                        <span className="animate-pulse">Searching inventory...</span>
+                                    </div>
+                                ) : results.length > 0 ? (
                                     results.map((res, idx) => (
                                         <button
                                             key={`${res.type}-${res.id}`}
@@ -213,7 +218,11 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
 
                 <Link href="/account" className="shrink-0 group">
                     <div className="w-9 h-9 rounded-md flex items-center justify-center overflow-hidden relative bg-secondary border border-border group-hover:border-primary/50 transition-all">
-                        {mounted && profile?.user?.avatar ? (
+                        {isAuthLoading ? (
+                             <div className="absolute inset-0 flex items-center justify-center bg-secondary">
+                                <div className="w-4 h-4 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                             </div>
+                        ) : mounted && profile?.user?.avatar ? (
                             <Image 
                                 src={profile.user.avatar} 
                                 alt="Profile" 

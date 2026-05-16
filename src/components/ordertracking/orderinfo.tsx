@@ -1,19 +1,30 @@
+'use client';
+
+import React from 'react';
 import { formatDate } from "@/lib/utils/formatDate";
 import { Order } from "@/model/order.model";
 import { Receipt } from "lucide-react";
 
 export default function Orderinfo({ order }: { order: Order }) {
     return (
-        <div className="text-center py-4">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-50 text-orange-500 mb-4">
-                <Receipt className="w-5 h-5" strokeWidth={2.5} />
+        <div className="flex items-start gap-3.5 w-full text-left">
+            <div className="shrink-0 flex items-center justify-center w-9 h-9 rounded-md bg-secondary border border-border text-orange-500">
+                <Receipt className="w-4 h-4" strokeWidth={2} />
             </div>
-            <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">Order No.</p>
-            <h2 className="text-3xl font-black text-neutral-900 tracking-tighter mb-2">{order.orderCode}</h2>
-            <p className="text-xs font-medium text-neutral-500">
-                {formatDate((order.createdAt))}
-            </p>
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="text-xs font-medium text-secondary-foreground uppercase tracking-wider font-mono">
+                        Order
+                    </span>
+                    <h2 className="text-sm font-semibold tracking-tight text-foreground font-mono truncate">
+                        #{order.orderCode}
+                    </h2>
+                </div>
+                
+                <p className="text-xs text-secondary-foreground/80 mt-0.5">
+                    {formatDate(order.createdAt)}
+                </p>
+            </div>
         </div>
-
-    )
+    );
 }

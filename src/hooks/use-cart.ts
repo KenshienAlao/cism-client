@@ -20,11 +20,13 @@ export function useCart() {
   const { items: allStalls } = useItem();
   const { profile } = useAuth();
 
-  const { data: rawCartItems = [], isLoading } = useQuery<CartResponse[]>({
+  const { data: rawCartItems = [], isLoading, isFetching } = useQuery<CartResponse[]>({
     queryKey: CART_QUERY_KEY,
     queryFn: async () => (await cartService.getCart()).data || [],
     enabled: !!profile,
     staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 2,
   });
 
   const getStock = useCallback((itemId: number, variationId?: number | null) => {
@@ -110,16 +112,58 @@ export function useCart() {
     });
   };
 
-  const addMutation = useMutation({
-    mutationFn: (item: CartRequest) => cartService.addToCart(item),
-    onSuccess: (res) => {
-      notifSuccess(res.message || "Added to cart");
+  const addMutation = useOptimisticMutation(
+    (item: CartRequest) => cartService.addToCart(item),
+    (old, vars) => {
+      // Find stall info from allStalls
+      let stallName = "Store";
+      let itemName = "Product";
+      let price = 0;
+      let image = "";
+
+      for (const stall of allStalls) {
+        const item = stall.items.find(i => Number(i.id) === Number(vars.stallItemId));
+        if (item) {
+          stallName = stall.name;
+          itemName = item.name;
+          price = item.price;
+          image = typeof item.image === 'string' ? item.image : "";
+          
+          if (vars.variationId) {
+            const variation = item.variations?.find(v => Number(v.id) === Number(vars.variationId));
+            if (variation) {
+              price = variation.price;
+              if (typeof variation.image === 'string') image = variation.image;
+            }
+          }
+          break;
+        }
+      }
+
+      const existingIndex = old.findIndex(i => 
+        Number(i.itemId) === Number(vars.stallItemId) && 
+        (vars.variationId ? Number(i.variationId) === Number(vars.variationId) : !i.variationId)
+      );
+
+      if (existingIndex > -1) {
+        const next = [...old];
+        next[existingIndex] = { ...next[existingIndex], quantity: next[existingIndex].quantity + vars.quantity };
+        return next;
+      }
+
+      return [...old, {
+        id: Date.now(),
+        itemId: Number(vars.stallItemId),
+        variationId: vars.variationId || null,
+        name: itemName,
+        stallName,
+        price,
+        image,
+        quantity: vars.quantity
+      } as CartResponse];
     },
-    onError: (err: any) => {
-      notifError(err.message || "Failed to add");
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY }),
-  });
+    "Added to cart"
+  );
 
   const updateMutation = useOptimisticMutation(
     ({ id, quantity }: { id: number, quantity: number }) => cartService.updateToCart(id, quantity),
@@ -141,6 +185,7 @@ export function useCart() {
     cartItems,
     stalledItems,
     isLoading,
+    isFetching,
     isMutating: addMutation.isPending || updateMutation.isPending || removeMutation.isPending || clearMutation.isPending,
     addToCart: async (item: CartRequest) => {
       const existing = cartItems.find(i =>

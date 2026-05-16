@@ -27,7 +27,9 @@ export function useItem(): UseItemReturn {
       if (!res.success) throw new Error(res.message);
       return res.data;
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 mins
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 5,
     retry: 1,
   });
 
@@ -127,6 +129,8 @@ export function useItemDetail(id: string | null, stallName?: string | null, item
       return res.data;
     },
     staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 5,
     select: (stalls) => {
       if (!stalls.length) return null;
 

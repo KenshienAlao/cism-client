@@ -4,22 +4,26 @@ interface OptionCardProps {
     icon: React.ElementType;
     label: string;
     subtitle: string;
+    className?: string;
 }
 
-export function OptionCard({ active, onClick, icon: Icon, label, subtitle }: OptionCardProps) {
+export function OptionCard({ active, onClick, icon: Icon, label, subtitle, className }: OptionCardProps) {
     return (
         <button
+            type="button"
             onClick={onClick}
-            className={`flex flex-col p-5 md:p-8 text-left border-2 w-full ${
-                active ? 'border-orange-500 bg-white' : 'border-neutral-200 bg-neutral-50'
-            }`}
+            className={`flex flex-col text-left w-full p-4 border rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-ring ${
+                active 
+                    ? 'border-orange-500 bg-secondary' 
+                    : 'border-border bg-card hover:bg-secondary/50'
+            } ${className || ''}`}
         >
-            <Icon className={`w-6 h-6 md:w-8 md:h-8 mb-5 md:mb-7 ${active ? 'text-orange-500' : 'text-neutral-300'}`} />
-            <div className="space-y-1">
-                <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] block ${active ? 'text-neutral-900' : 'text-neutral-400'}`}>
+            <Icon className={`w-5 h-5 mb-2 transition-colors ${active ? 'text-orange-500' : 'text-muted-foreground'}`} />
+            <div className="space-y-0.5">
+                <span className="text-sm font-medium text-foreground block">
                     {label}
                 </span>
-                <p className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest block ${active ? 'text-orange-500' : 'text-neutral-300'}`}>
+                <p className={`text-xs block transition-colors ${active ? 'text-orange-500' : 'text-muted-foreground'}`}>
                     {subtitle}
                 </p>
             </div>

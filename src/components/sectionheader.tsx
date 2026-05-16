@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SectionHeaderProps {
     icon?: React.ReactNode;
@@ -11,36 +12,36 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ icon, title, subtitle, onViewAll }: SectionHeaderProps) {
     return (
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
                 {icon && (
-                    <div className="w-10 h-10 rounded-md bg-accent flex items-center justify-center border border-border text-accent-foreground transition-colors">
+                    <div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center border border-border text-secondary-foreground shrink-0 select-none">
                         {icon}
                     </div>
                 )}
                 
-                <div className="flex flex-col">
-                    <h2 className="text-sm font-semibold text-foreground tracking-tight leading-none mb-1">
+                <div className="flex flex-col min-w-0">
+                    <h2 className="text-sm font-semibold text-foreground tracking-tight truncate">
                         {title}
                     </h2>
                     {subtitle && (
-                        <p className="text-[11px] font-medium text-muted-foreground leading-none">
+                        <p className="text-xs text-secondary-foreground/70 truncate mt-0.5">
                             {subtitle}
                         </p>
                     )}
                 </div>
             </div>
-
             {onViewAll && (
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.97 }}
                     onClick={onViewAll}
-                    className="group flex items-center gap-1 py-1.5 px-2 rounded-md hover:bg-accent transition-colors"
+                    className="flex items-center gap-1 py-1 px-2 rounded-md bg-secondary text-secondary-foreground hover:text-orange-500 border border-transparent active:border-border transition-colors shrink-0"
                 >
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                        View All
+                    <span className="text-[11px] font-medium tracking-tight">
+                        View all
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-primary transition-transform group-hover:translate-x-0.5" />
-                </button>
+                    <ChevronRight className="w-3.5 h-3.5 text-orange-500" />
+                </motion.button>
             )}
         </div>
     );

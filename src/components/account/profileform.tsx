@@ -8,7 +8,7 @@ import { notifError } from "@/lib/toast";
 import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 
-export function ProfileForm() {
+export function ProfileForm({ logout }: { logout: () => void }) {
     const { profile, updateProfile, isUpdatingProfile } = useAuth();
     const [form, setForm] = useState<UpdateUserRequest>(initUpdateUserRequest);
 
@@ -35,15 +35,17 @@ export function ProfileForm() {
         (profile?.user?.studentId || "") !== form.studentId ||
         (profile?.user?.role || "STUDENT") !== form.role;
 
-    // Common input styling based on theme tokens
-    const inputStyles = "w-full bg-input border border-border rounded-md px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/50";
-    const labelStyles = "text-[10px] font-bold text-muted-foreground uppercase tracking-widest";
+    // Strict UI token system bindings 
+    const inputStyles = "w-full bg-input border border-border rounded-md px-3 py-1.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors placeholder:text-secondary-foreground/40";
+    const labelStyles = "text-xs font-medium text-foreground mb-1.5 block";
 
     return (
-        <div className="space-y-6 max-w-2xl">
-            {/* Identity Fields Group */}
-            <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-1.5">
+        <div className="space-y-5">
+            {/* Structured Compact Grid - Smooth transformation across iPhone SE and 1080p */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                
+                {/* Full Name field container */}
+                <div>
                     <label className={labelStyles}>Full Name</label>
                     <input
                         type="text"
@@ -54,22 +56,19 @@ export function ProfileForm() {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 gap-1.5">
+                {/* Email Address field container */}
+                <div>
                     <label className={labelStyles}>Email Address</label>
                     <input
                         type="email"
                         value={profile?.user?.email || ""}
                         readOnly
-                        className={`${inputStyles} bg-secondary/50 text-secondary-foreground cursor-not-allowed border-transparent`}
+                        className={`${inputStyles} bg-secondary/40 text-secondary-foreground/70 cursor-not-allowed`}
                     />
                 </div>
-            </div>
 
-            <hr className="border-border/50" />
-
-            {/* Verification Fields Group */}
-            <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-1.5">
+                {/* Student ID field container */}
+                <div>
                     <label className={labelStyles}>Student ID</label>
                     <input
                         type="text"
@@ -80,50 +79,65 @@ export function ProfileForm() {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 gap-3">
+                {/* Account Role dynamic multi-select box container */}
+                <div>
                     <label className={labelStyles}>Account Role</label>
-                    <div className="flex flex-wrap gap-2">
-                        {Object.values(ROLES).map((r) => (
-                            <button
-                                key={r}
-                                type="button"
-                                onClick={() => setForm({ ...form, role: r as any })}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
-                                    form.role === r
-                                        ? "border-primary bg-accent text-accent-foreground"
-                                        : "border-border bg-card text-muted-foreground hover:border-muted hover:text-foreground"
-                                }`}
-                            >
-                                {form.role === r && <Check size={12} />}
-                                {r}
-                            </button>
-                        ))}
+                    <div className="flex flex-wrap gap-1.5">
+                        {Object.values(ROLES).map((r) => {
+                            const isSelected = form.role === r;
+                            return (
+                                <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => setForm({ ...form, role: r as any })}
+                                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors focus:outline-none focus:ring-1 focus:ring-orange-500 ${
+                                        isSelected
+                                            ? "border-orange-500 bg-orange-500/10 text-orange-500"
+                                            : "border-border bg-card text-secondary-foreground/80 hover:bg-secondary/50"
+                                    }`}
+                                >
+                                    {isSelected && <Check size={12} strokeWidth={2.5} />}
+                                    <span>{r}</span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* Action Bar */}
-            <div className="pt-6 flex items-center justify-between border-t border-border/50">
-                <div className="flex items-center gap-2">
+            {/* Micro Action Layout footer separation */}
+            <div className="pt-4 flex items-center justify-between border-t border-border mt-1">
+                <div className="min-h-[16px] flex items-center">
                     {hasChanges && (
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-tight text-primary">
-                            <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-                            Unsaved Changes
-                        </span>
+                        <div className="flex items-center gap-1.5 text-xs text-orange-500 font-medium">
+                            <span className="h-1.5 w-1.5 rounded-sm bg-orange-500" />
+                            <span>Unsaved changes</span>
+                        </div>
                     )}
                 </div>
                 
-                <button
-                    onClick={handleUpdateProfile}
-                    disabled={isUpdatingProfile || !hasChanges}
-                    className={`px-5 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${
-                        hasChanges 
-                            ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm active:scale-95" 
-                            : "bg-secondary text-secondary-foreground cursor-not-allowed"
-                    }`}
-                >
-                    {isUpdatingProfile ? "Updating..." : "Save Profile"}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button 
+                        type="button"
+                        onClick={logout}
+                        className="px-3 py-1.5 text-xs font-medium text-foreground hover:bg-accent/80 rounded-md transition-colors"
+                    >
+                        Sign Out
+                    </button>
+                    
+                    <button
+                        type="button"
+                        onClick={handleUpdateProfile}
+                        disabled={isUpdatingProfile || !hasChanges}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-orange-500 ${
+                            hasChanges 
+                                ? "bg-orange-500 text-white hover:bg-orange-600" 
+                                : "bg-secondary text-secondary-foreground/40 cursor-not-allowed"
+                        }`}
+                    >
+                        {isUpdatingProfile ? "Saving..." : "Save changes"}
+                    </button>
+                </div>
             </div>
         </div>
     );

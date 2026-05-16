@@ -3,7 +3,9 @@
 import { Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
-import { CreditCard, Truck, Store, ShoppingBag, MapPin, Wallet, MessageSquare } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { CreditCard, Truck, Store, MapPin, Wallet, MessageSquare } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Loading from '@/components/ui/loading';
 import { CheckoutSection } from '@/components/ui/checkout-section';
 import { OptionCard } from '@/components/ui/option-card';
@@ -18,14 +20,33 @@ import { CheckoutEmpty } from '@/components/checkout/checkout-empty';
 
 const DELIVERY_FEE_PER_ITEM = 2;
 
+const containerVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.3,
+            ease: 'easeOut',
+            staggerChildren: 0.05
+        } as const
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 4 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+};
+
 function CheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { profile, isLoading: isAuthLoading } = useAuth();
     const { cartItems, stalledItems, isLoading: isCartLoading } = useCart();
     const { items: allStalls, isLoading: isItemsLoading } = useItem();
 
-    const isLoading = isCartLoading || isItemsLoading;
     const isBuyNow = searchParams.get('buyNow') === 'true';
+    const isLoading = isBuyNow ? isItemsLoading : (isCartLoading || isItemsLoading);
 
     const {
         deliveryMethod, setDeliveryMethod,
@@ -113,7 +134,7 @@ function CheckoutContent() {
         }
     };
 
-    if (isLoading) return <Loading />;
+    if (isAuthLoading || (isLoading && !checkoutItems.length)) return <Loading />;
 
     const handleCloseReceipt = () => {
         setIsReceiptOpen(false);
@@ -131,120 +152,141 @@ function CheckoutContent() {
     if (!checkoutItems.length && !isReceiptOpen && completedOrders.length === 0) return <CheckoutEmpty receipt={receipt}/>
 
     return (
-        <div className="min-h-screen bg-neutral-50 flex flex-col">
+        <div className="min-h-screen bg-background text-foreground antialiased selection:bg-orange-500/20">
             {receipt}
 
-            <main className="flex-1 max-w-4xl mx-auto w-full px-4 md:px-8 py-8 md:py-14 space-y-10 md:space-y-16">
-
-                {/* Page header */}
-                <header className="space-y-1">
-                    <h1 className="text-3xl md:text-4xl font-black text-neutral-900 tracking-tighter uppercase leading-none">
+            <motion.main 
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="max-w-6xl mx-auto px-4 lg:px-8 py-6 md:py-12"
+            >
+                {/* Top Header */}
+                <motion.header variants={itemVariants} className="mb-6 md:mb-10 pb-4 border-b border-border">
+                    <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
                         Checkout
                     </h1>
-                </header>
+                </motion.header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+                {/* Checkout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                    {/* Left column */}
-                    <div className="lg:col-span-7 space-y-8 md:space-y-10">
+                    {/* Input Stream */}
+                    <div className="lg:col-span-7 space-y-6">
 
-                        {/* Delivery method */}
-                        <CheckoutSection icon={MapPin} color="text-orange-500" title="Delivery">
-                            <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                <OptionCard
-                                    active={isDeliver}
-                                    onClick={() => setDeliveryMethod('deliver')}
-                                    icon={Truck}
-                                    label="Deliver"
-                                    subtitle="To your location"
-                                />
-                                <OptionCard
-                                    active={!isDeliver}
-                                    onClick={() => setDeliveryMethod('pickup')}
-                                    icon={Store}
-                                    label="Pick Up"
-                                    subtitle="Collect at stall"
-                                />
-                            </div>
-                        </CheckoutSection>
+                        {/* Fulfillment Picker */}
+                        <motion.div variants={itemVariants}>
+                            <CheckoutSection icon={MapPin} color="text-orange-500" title="Fulfillment Method">
+                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                    <OptionCard
+                                        active={isDeliver}
+                                        onClick={() => setDeliveryMethod('deliver')}
+                                        icon={Truck}
+                                        label="Delivery"
+                                        subtitle="To your coordinates"
+                                        className={`rounded-lg border bg-card p-4 transition-colors ${
+                                            isDeliver ? 'border-orange-500 ring-1 ring-orange-500' : 'border-border'
+                                        }`}
+                                    />
+                                    <OptionCard
+                                        active={!isDeliver}
+                                        onClick={() => setDeliveryMethod('pickup')}
+                                        icon={Store}
+                                        label="Pickup"
+                                        subtitle="Collect at merchant"
+                                        className={`rounded-lg border bg-card p-4 transition-colors ${
+                                            !isDeliver ? 'border-orange-500 ring-1 ring-orange-500' : 'border-border'
+                                        }`}
+                                    />
+                                </div>
+                            </CheckoutSection>
+                        </motion.div>
 
                         {/* Payment */}
-                        <CheckoutSection icon={CreditCard} color="text-orange-500" title="Payment">
-                            <div className="flex items-center gap-5 p-5 md:p-6 border-2 border-orange-500 bg-white">
-                                <div className="w-12 h-12 md:w-14 md:h-14 bg-orange-50 border border-orange-200 flex items-center justify-center shrink-0">
-                                    <Wallet className="w-6 h-6 md:w-7 md:h-7 text-orange-500" />
+                        <motion.div variants={itemVariants}>
+                            <CheckoutSection icon={CreditCard} color="text-orange-500" title="Payment Method">
+                                <div className="mt-2 flex items-center gap-4 p-4 rounded-lg border border-border bg-card">
+                                    <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center shrink-0 border border-border">
+                                        <Wallet className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <span className="text-sm font-medium text-foreground block">
+                                            {isDeliver ? 'Cash on Delivery' : 'Pay at Counter'}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground block">
+                                            Settlement prioritized upon item transfer
+                                        </span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="text-sm md:text-lg font-black text-neutral-900 block uppercase tracking-tight">
-                                        {isDeliver ? 'Cash on Delivery' : 'Cash on Site'}
-                                    </span>
-                                    <span className="text-[9px] md:text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em]">
-                                        Settlement upon fulfillment
-                                    </span>
+                            </CheckoutSection>
+                        </motion.div>
+
+                        {/* Delivery Notes */}
+                        <motion.div variants={itemVariants}>
+                            <CheckoutSection
+                                icon={MessageSquare}
+                                color={isDeliver && !message ? 'text-orange-500' : 'text-muted-foreground'}
+                                title="Order Notes"
+                                badge={isDeliver ? 'Required' : 'Optional'}
+                            >
+                                <div className="mt-2 space-y-1.5">
+                                    <textarea
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder={
+                                            isDeliver
+                                                ? 'Specify building, room, or delivery instructions...'
+                                                : 'Special requests or preferences...'
+                                        }
+                                        maxLength={200}
+                                        rows={3}
+                                        className={`w-full bg-input border rounded-lg p-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all resize-none focus:ring-1 ${
+                                            isDeliver && !message
+                                                ? 'border-orange-500/60 focus:ring-orange-500 focus:border-orange-500'
+                                                : 'border-border focus:ring-ring focus:border-border'
+                                        }`}
+                                    />
+                                    <div className="flex justify-end">
+                                        <span className={`text-xs font-mono tracking-wide ${
+                                            message.length > 180 || (isDeliver && !message) ? 'text-orange-500' : 'text-muted-foreground'
+                                        }`}>
+                                            {message.length}/200
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        </CheckoutSection>
+                            </CheckoutSection>
+                        </motion.div>
 
-                        {/* Notes */}
-                        <CheckoutSection
-                            icon={MessageSquare}
-                            color={isDeliver && !message ? 'text-orange-500' : 'text-neutral-400'}
-                            title="Notes"
-                            badge={isDeliver ? 'Required' : 'Optional'}
-                        >
-                            <textarea
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder={
-                                    isDeliver
-                                        ? 'Describe your location or room on campus…'
-                                        : 'Add specific requirements or special notes…'
-                                }
-                                maxLength={200}
-                                rows={4}
-                                className={`w-full bg-white border p-4 md:p-5 text-sm font-bold text-neutral-900 placeholder:text-neutral-300 focus:outline-none resize-none ${
-                                    isDeliver && !message
-                                        ? 'border-orange-500'
-                                        : 'border-neutral-200 focus:border-orange-500'
-                                }`}
-                            />
-                            <div className="flex justify-end mt-2">
-                                <span className={`text-[9px] font-black tracking-[0.2em] uppercase ${
-                                    message.length > 180 || (isDeliver && !message) ? 'text-orange-500' : 'text-neutral-400'
-                                }`}>
-                                    {message.length} / 200
-                                </span>
+                        {/* Inline Mobile Only Structured */}
+                        <motion.section variants={itemVariants} className="lg:hidden space-y-2.5">
+                            <div className="flex items-center justify-between px-1">
+                                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order Items</h2>
+                                <span className="text-xs font-medium text-muted-foreground">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
                             </div>
-                        </CheckoutSection>
-
-                        {/* Mobile item manifest */}
-                        <section className="lg:hidden space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-[10px] font-black text-neutral-900 uppercase tracking-[0.3em]">Manifest</h2>
-                                <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</span>
-                            </div>
-                            <div className="bg-white border border-neutral-200 p-4">
+                            <div className="bg-card border border-border rounded-lg p-4">
                                 <CheckoutItemList groups={checkoutGroups} />
                             </div>
-                        </section>
+                        </motion.section>
                     </div>
 
-                    {/* Right column — order summary */}
-                    <div className="lg:col-span-5 lg:sticky lg:top-8">
-                        <OrderSummary
-                            groups={checkoutGroups}
-                            itemCount={itemCount}
-                            subtotal={subtotal}
-                            deliveryFee={deliveryFee}
-                            grandTotal={grandTotal}
-                            isDeliver={isDeliver}
-                            deliveryFeePerItem={DELIVERY_FEE_PER_ITEM}
-                            onPlaceOrder={handleCheckout}
-                            isPending={isPending}
-                        />
-                    </div>
+                    {/* Summary Card */}
+                    <motion.div variants={itemVariants} className="lg:col-span-5 lg:sticky lg:top-6">
+                        <div className="bg-card border border-border rounded-lg p-4 md:p-5">
+                            <OrderSummary
+                                groups={checkoutGroups}
+                                itemCount={itemCount}
+                                subtotal={subtotal}
+                                deliveryFee={deliveryFee}
+                                grandTotal={grandTotal}
+                                isDeliver={isDeliver}
+                                deliveryFeePerItem={DELIVERY_FEE_PER_ITEM}
+                                onPlaceOrder={handleCheckout}
+                                isPending={isPending}
+                            />
+                        </div>
+                    </motion.div>
                 </div>
-            </main>
+            </motion.main>
         </div>
     );
 }

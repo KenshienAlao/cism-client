@@ -5,6 +5,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './use-auth';
+import { useGlobalChat } from '@/provider/chat-provider';
 import { CART_QUERY_KEY } from './use-cart';
 import { MY_ORDERS_QUERY_KEY } from './use-order';
 import { ITEM_QUERY_KEY } from './use-item';
@@ -35,14 +36,23 @@ export function clearMutation(key: string) {
 export function useWebSocket() {
     const queryClient = useQueryClient();
     const { profile } = useAuth();
+    const { activeChat, isOpen } = useGlobalChat();
+
     const clientRef = useRef<Client | null>(null);
     const reconnectAttempts = useRef(0);
     const maxReconnectAttempts = 10;
 
+    const activeChatRef = useRef(activeChat);
+    const isChatOpenRef = useRef(isOpen);
+
+    useEffect(() => {
+        activeChatRef.current = activeChat;
+        isChatOpenRef.current = isOpen;
+    }, [activeChat, isOpen]);
+
     const profileId = profile?.user?.id;
 
     const patchOrderInCache = useCallback((order: any) => {
-        // Update all queries that match orders (list and detail)
         queryClient.setQueriesData<any>({ 
             predicate: (query) => {
                 const [key] = query.queryKey as any[];
@@ -112,14 +122,13 @@ export function useWebSocket() {
             debug: () => { },
             onConnect: () => {
                 reconnectAttempts.current = 0;
-
-                // Orders Subscription
                 client.subscribe('/user/queue/orders', (message) => {
                     const event = JSON.parse(message.body);
                     const { data: order } = event;
                     const mutationKey = `order-${order.id}-${order.status}`;
 
                     patchOrderInCache(order);
+                    queryClient.invalidateQueries({ queryKey: [...MY_ORDERS_QUERY_KEY, String(order.id)] });
 
                     if (pendingMutations.has(mutationKey)) {
                         pendingMutations.delete(mutationKey);
@@ -128,16 +137,13 @@ export function useWebSocket() {
 
                     notifSuccess(getToastMessage(order));
                 });
-
-                // Inventory Subscription
                 client.subscribe('/topic/inventory', () => {
                     queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
                 });
-
-                // Presence Subscription
                 client.subscribe('/topic/presence', (message) => {
                     const presence = JSON.parse(message.body);
                     queryClient.setQueryData(['presence', presence.id, presence.userType], presence);
+                    queryClient.invalidateQueries({ queryKey: ['presence'], exact: false });
                 });
 
                 // Chat Subscription
@@ -173,8 +179,8 @@ export function useWebSocket() {
                     }
 
                     // message logic
-                    const chatListKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
-                    queryClient.setQueryData<any[]>(chatListKey, (prev: any) => {
+                    const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
+                    queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev: any) => {
                         if (!prev) return [chat];
                         if (prev.some((m: any) => m.id === chat.id)) return prev;
 
@@ -219,7 +225,17 @@ export function useWebSocket() {
                     });
 
                     if (chat.sentByStall) {
-                        notifSuccess(`New message from ${chat.senderName}`);
+                        const currentActiveChat = activeChatRef.current;
+                        const activeCustomerId = currentActiveChat?.customerId || profileId;
+
+                        const isCurrentlyViewing = isChatOpenRef.current && 
+                            currentActiveChat && 
+                            Number(currentActiveChat.stallId) === Number(chat.stallId) && 
+                            Number(activeCustomerId) === Number(chat.customerId);
+
+                        if (!isCurrentlyViewing) {
+                            notifSuccess(`New message from ${chat.senderName}`);
+                        }
                     }
                 });
             },

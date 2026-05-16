@@ -1,29 +1,46 @@
 import { useState, useCallback, useEffect, RefObject } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Position {
     x: number;
     y: number;
 }
 
-export function useDraggable(ref: RefObject<HTMLElement | null>, storageKey?: string) {
-    const [position, setPosition] = useState<Position>(() => {
-        if (typeof window !== 'undefined' && storageKey) {
-            const saved = localStorage.getItem(storageKey);
-            if (saved) return JSON.parse(saved);
-        }
-        return { x: 0, y: 0 };
+export function useDraggable(ref: RefObject<HTMLElement | null>, storageKey: string) {
+    const queryClient = useQueryClient();
+    const queryKey = ['ui', 'draggable', storageKey];
+
+    const { data: cachedPosition } = useQuery<Position>({
+        queryKey,
+        queryFn: () => {
+            if (typeof window !== 'undefined') {
+                const saved = localStorage.getItem(storageKey);
+                if (saved) return JSON.parse(saved);
+            }
+            return { x: 0, y: 0 };
+        },
+        staleTime: Infinity,
+        gcTime: Infinity,
     });
+
+    const [position, setPosition] = useState<Position>(cachedPosition || { x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
     const [hasMoved, setHasMoved] = useState(false);
     const [isSnapping, setIsSnapping] = useState(false);
 
-    // Save position to localStorage
     useEffect(() => {
-        if (storageKey && !isDragging && !isSnapping) {
-            localStorage.setItem(storageKey, JSON.stringify(position));
+        if (cachedPosition && !isDragging) {
+            setPosition(cachedPosition);
         }
-    }, [position, storageKey, isDragging, isSnapping]);
+    }, [cachedPosition, isDragging]);
+
+    const persistPosition = useCallback((pos: Position) => {
+        if (storageKey) {
+            localStorage.setItem(storageKey, JSON.stringify(pos));
+            queryClient.setQueryData(queryKey, pos);
+        }
+    }, [queryClient, queryKey, storageKey]);
 
     const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
         if (!ref.current) return;
@@ -81,12 +98,16 @@ export function useDraggable(ref: RefObject<HTMLElement | null>, storageKey?: st
 
         if (centerX < screenWidth / 2) {
             const targetX = position.x - rect.left + 16;
-            setPosition(prev => ({ ...prev, x: targetX }));
+            const newPos = { ...position, x: targetX };
+            setPosition(newPos);
+            persistPosition(newPos);
         } else {
             const targetX = position.x + (screenWidth - rect.right - 16);
-            setPosition(prev => ({ ...prev, x: targetX }));
+            const newPos = { ...position, x: targetX };
+            setPosition(newPos);
+            persistPosition(newPos);
         }
-    }, [isDragging, ref, position]);
+    }, [isDragging, ref, position, persistPosition]);
 
     // Handle window resize
     useEffect(() => {
@@ -98,16 +119,19 @@ export function useDraggable(ref: RefObject<HTMLElement | null>, storageKey?: st
 
             // Re-snap to closest side on resize
             setIsSnapping(true);
+            let newPos: Position;
             if (rect.left + rect.width / 2 < screenWidth / 2) {
-                setPosition(prev => ({ ...prev, x: prev.x - rect.left + padding }));
+                newPos = { ...position, x: position.x - rect.left + padding };
             } else {
-                setPosition(prev => ({ ...prev, x: prev.x + (screenWidth - rect.right - padding) }));
+                newPos = { ...position, x: position.x + (screenWidth - rect.right - padding) };
             }
+            setPosition(newPos);
+            persistPosition(newPos);
         };
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [ref, isDragging]);
+    }, [ref, isDragging, position, persistPosition]);
 
     useEffect(() => {
         if (isDragging) {
@@ -141,7 +165,7 @@ export function useDraggable(ref: RefObject<HTMLElement | null>, storageKey?: st
             cursor: isDragging ? 'grabbing' : 'auto',
             touchAction: 'none',
             transition: isSnapping ? 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)' : 'none',
-            zIndex: isDragging ? 100000 : 99999
+            zIndex: isDragging ? 200 : 150
         }
     };
 }

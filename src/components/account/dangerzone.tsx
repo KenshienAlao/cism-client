@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirmation } from "@/context/confirmation.context";
-import { AlertTriangle } from "lucide-react";
 
 export function DangerZone() {
     const { deleteAccount, isDeletingAccount } = useAuth();
@@ -22,30 +21,24 @@ export function DangerZone() {
     };
 
     return (
-        <section className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md transition-colors">
-            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-2">
-                <AlertTriangle size={14} className="text-red-500" />
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-500">
-                    Security & Access
-                </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5">
+                <h4 className="text-sm font-medium text-foreground">
+                    Delete account
+                </h4>
+                <p className="text-xs text-secondary-foreground/60 max-w-md leading-normal">
+                    Permanently remove your account profile and all associated data. This action is completely irreversible.
+                </p>
             </div>
-
-            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100">Delete Account</p>
-                    <p className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 max-w-md leading-relaxed">
-                        Permanently remove your account and all associated data. This action cannot be undone.
-                    </p>
-                </div>
-                
-                <button
-                    onClick={handleDeleteAccount}
-                    disabled={isDeletingAccount}
-                    className="w-fit border border-red-200 dark:border-red-900/50 px-5 py-2 rounded-md text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-[0.98] disabled:opacity-50"
-                >
-                    {isDeletingAccount ? "Processing..." : "Delete Account"}
-                </button>
-            </div>
-        </section>
+            
+            <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+                className="sm:w-auto px-3 py-1.5 rounded-md border border-red-500/20 bg-card text-xs font-medium text-red-500 hover:bg-red-500/10 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap self-start sm:self-center"
+            >
+                {isDeletingAccount ? "Deleting..." : "Delete account"}
+            </button>
+        </div>
     );
 }

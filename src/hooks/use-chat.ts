@@ -60,14 +60,15 @@ export const useChatHistory = (stallId?: number, customerId?: number, conversati
             const params = new URLSearchParams();
             if (customerId) params.append('customerId', customerId.toString());
             if (conversationId && conversationId !== 'undefined' && conversationId !== 'null') params.append('conversationId', conversationId);
-            params.append('_t', Date.now().toString()); // Cache-buster
+            params.append('_t', Date.now().toString());
 
             const res = await apiClient.get<ChatMessage[]>(`${url}?${params.toString()}`);
             if (!res.success) throw new Error(res.message);
             return res.data;
         },
         enabled: !!stallId || !!conversationId,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
+        refetchInterval: 1000 * 10,
         staleTime: 30_000,
     });
 };
@@ -82,6 +83,8 @@ export const useChatThreads = () => {
             return res.data;
         },
         enabled: !!profile,
+        refetchOnWindowFocus: true,
+        refetchInterval: 1000 * 30,
         staleTime: 30_000,
     });
 };
@@ -162,10 +165,19 @@ export const useSendMessage = () => {
             const queryKey = getChatKey(variables.stallId, finalCustomerId, variables.conversationId);
             queryClient.setQueryData<ChatMessage[]>(queryKey, (prev) => {
                 if (!prev) return [{ ...newMsg, status: 'sent' as const }];
-                const filtered = prev.filter(m => m.status !== 'sending');
-                const alreadyExists = filtered.some(m => m.id === newMsg.id);
-                if (alreadyExists) return filtered;
-                return [...filtered, { ...newMsg, status: 'sent' as const }];
+                
+                if (prev.some(m => m.id === newMsg.id)) {
+                    return prev.map(m => m.id === newMsg.id ? { ...m, status: 'sent' as const } : m);
+                }
+
+                const updated = [...prev];
+                const optimisticIdx = updated.findIndex(m => m.status === 'sending' && m.content === newMsg.content);
+                if (optimisticIdx !== -1) {
+                    updated[optimisticIdx] = { ...newMsg, status: 'sent' as const };
+                    return updated;
+                }
+                
+                return [...prev, { ...newMsg, status: 'sent' as const }];
             });
         },
         onError: (error: any, variables, context) => {

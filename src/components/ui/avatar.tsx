@@ -1,3 +1,5 @@
+"use client";
+
 import Image from 'next/image';
 
 interface AvatarProps {
@@ -8,31 +10,50 @@ interface AvatarProps {
 }
 
 export function Avatar({ src, name, className = '', size = 'md' }: AvatarProps) {
-    const initials = name?.slice(0, 1).toUpperCase() || '?';
+    const initials = name?.trim().slice(0, 1).toUpperCase() || '?';
 
     const sizeMap = {
-        xs: 'w-5 h-5 text-[8px]',
+        xs: 'w-3.5 h-3.5 text-[8px]',
         sm: 'w-6 h-6 text-[10px]',
-        md: 'w-10 h-10 text-xs',
-        lg: 'w-16 h-16 text-base',
-        xl: 'w-24 h-24 text-xl'
+        md: 'w-8 h-8 text-xs',
+        lg: 'w-10 h-10 text-sm',
+        xl: 'w-12 h-12 text-base'
     };
 
-    const containerClasses = `relative rounded-full overflow-hidden border border-black/5 bg-neutral-50 flex items-center justify-center shrink-0 ${sizeMap[size]} ${className}`;
-
     return (
-        <div className={containerClasses}>
+        <div 
+            className={`
+                relative 
+                ${sizeMap[size]} 
+                rounded-md 
+                overflow-hidden 
+                border 
+                border-border 
+                bg-secondary 
+                flex 
+                items-center 
+                justify-center 
+                shrink-0 
+                select-none
+                ${className}
+            `.trim()}
+        >
             {src ? (
                 <Image
                     src={src}
-                    alt={name || 'Avatar'}
+                    alt={name || 'User avatar'}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 40px, 64px"
+                    sizes={
+                        size === 'xs' ? '14px' :
+                        size === 'sm' ? '24px' :
+                        size === 'md' ? '32px' :
+                        size === 'lg' ? '40px' : '48px'
+                    }
                 />
             ) : (
-                <div className="h-full w-full bg-gradient-to-br from-orange-400 to-rose-400 flex items-center justify-center">
-                    <span className="font-black text-white leading-none uppercase tracking-tighter">
+                <div className="w-full h-full flex items-center justify-center bg-secondary">
+                    <span className="font-semibold text-secondary-foreground/90 tracking-tight leading-none">
                         {initials}
                     </span>
                 </div>

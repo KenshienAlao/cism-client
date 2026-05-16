@@ -32,18 +32,23 @@ export function AvatarUpload() {
         }
     };
 
-    const initials = profile?.user?.clientName?.split(" ")[0][0] || "";
+    const initials = profile?.user?.clientName?.trim().split(/\s+/)[0]?.[0] || "";
 
     return (
-        <div className="flex flex-col items-center lg:items-start gap-6">
+        <div className="flex flex-row lg:flex-col items-center gap-4 w-full">
             {/* Image Frame */}
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <div className="h-24 w-24 overflow-hidden rounded-md border border-border bg-secondary flex items-center justify-center transition-colors group-hover:border-primary/50">
-                    {isUploadingAvatar ? (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <div 
+                className="relative cursor-pointer group shrink-0 focus-within:ring-1 focus-within:ring-orange-500 rounded-md outline-none" 
+                onClick={() => fileInputRef.current?.click()}
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+            >
+                <div className="h-16 w-16 lg:h-20 lg:w-20 overflow-hidden rounded-md border border-border bg-secondary/40 flex items-center justify-center transition-colors group-hover:border-orange-500/50">
+                    {isUploadingAvatar && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/70">
+                            <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
                         </div>
-                    ) : null}
+                    )}
                     
                     {avatarPreview || profile?.user?.avatar ? (
                         <img
@@ -52,26 +57,26 @@ export function AvatarUpload() {
                             className="h-full w-full object-cover"
                         />
                     ) : (
-                        <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center justify-center">
                             {initials ? (
-                                <span className="text-xl font-bold text-secondary-foreground uppercase">
+                                <span className="text-base font-semibold text-secondary-foreground uppercase tracking-tight">
                                     {initials}
                                 </span>
                             ) : (
-                                <User className="text-muted-foreground" size={24} />
+                                <User className="text-secondary-foreground/60" size={18} />
                             )}
                         </div>
                     )}
 
-                    {/* Camera Overlay */}
-                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Camera className="text-primary" size={20} />
+                    {/* Simple Camera Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera className="text-white" size={16} />
                     </div>
                 </div>
             </div>
 
             {/* Upload Controls */}
-            <div className="flex flex-col items-center lg:items-start gap-4">
+            <div className="flex flex-col items-start gap-2 flex-1 w-full">
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -80,22 +85,19 @@ export function AvatarUpload() {
                     onChange={handleAvatarChange}
                 />
                 
-                <div className="text-center lg:text-left space-y-1.5">
-                    <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">
-                        Profile Image
-                    </p>
-                    <p className="text-[9px] text-muted-foreground uppercase leading-relaxed tracking-wide">
-                        JPG, PNG or WebP <br />
-                        Maximum size 2MB
+                <div className="text-left hidden lg:block">
+                    <p className="text-xs text-secondary-foreground/60 leading-normal">
+                        Supports JPEG, PNG, or WebP. Max size of 2MB.
                     </p>
                 </div>
 
                 <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploadingAvatar}
-                    className="px-4 py-1.5 border border-border bg-card rounded-md text-[10px] font-bold text-secondary-foreground uppercase tracking-widest hover:bg-secondary hover:text-foreground transition-all disabled:opacity-50"
+                    className="px-2.5 py-1.5 border border-border bg-card rounded-md text-xs font-medium text-foreground hover:bg-secondary/60 transition-colors focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                    {isUploadingAvatar ? "Uploading..." : "Upload New"}
+                    {isUploadingAvatar ? "Uploading..." : "Change avatar"}
                 </button>
             </div>
         </div>

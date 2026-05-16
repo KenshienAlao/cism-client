@@ -6,16 +6,16 @@ interface NavTabsProps {
 
 export function NavTabs({ tabs, activeTab, onTabChange }: NavTabsProps) {
     return (
-        <div className="sticky top-20 z-40 bg-neutral-50/90 backdrop-blur-xl pt-4 pb-4">
-            <div className="flex items-center gap-2 px-2 overflow-x-auto no-scrollbar">
+        <div className="sticky top-0 z-40 bg-card border-b border-border">
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-3">
                 {tabs.map(tab => (
                     <button
                         key={tab}
                         onClick={() => onTabChange(tab)}
-                        className={`px-6 py-3 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-ring ${
                             activeTab === tab
-                                ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-                                : 'text-neutral-500 hover:text-neutral-900 hover:bg-white'
+                                ? 'bg-orange-500 text-white font-bold'
+                                : 'text-foreground/70 bg-secondary hover:text-foreground'
                         }`}
                     >
                         {tab.replace('_', ' ')}

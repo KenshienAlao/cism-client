@@ -16,25 +16,29 @@ export function Emptystatetab({
     icon: Icon, 
     actionLabel, 
     actionHref,
-    className = "min-h-screen bg-neutral-50"
+    className = "min-h-[200px] bg-background"
 }: EmptyStateProps) {
     return (
-        <div className={`flex flex-col items-center justify-center p-8 text-center ${className}`}>
-            <div className="w-24 h-24 bg-neutral-50 rounded-[2.5rem] border border-neutral-100 flex items-center justify-center mb-8">
-                <Icon className="w-10 h-10 text-neutral-200" />
+        <div className={`flex flex-col items-center justify-center p-5 text-center gap-3 ${className}`}>
+            <div className="bg-secondary border border-border rounded-lg p-4 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-secondary-foreground/60" />
             </div>
-            <h1 className="text-2xl font-bold text-neutral-900 mb-3 tracking-tight">{title}</h1>
-            <p className="text-neutral-400 text-sm mb-12 max-w-xs leading-relaxed">
-                {description}
-            </p>
+            
+            <div className="space-y-1 max-w-xs">
+                <h2 className="text-base font-medium text-foreground">{title}</h2>
+                <p className="text-sm text-secondary-foreground/70">
+                    {description}
+                </p>
+            </div>
+            
             {actionLabel && actionHref && (
                 <Link
                     href={actionHref}
-                    className="px-12 py-5 bg-orange-500 text-white font-semibold uppercase text-xs tracking-widest transition-colors hover:bg-orange-600"
+                    className="mt-3 px-5 py-2 bg-orange-500 text-white text-sm font-medium rounded-md transition-colors duration-150 hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                     {actionLabel}
                 </Link>
             )}
         </div>
-    )
+    );
 }

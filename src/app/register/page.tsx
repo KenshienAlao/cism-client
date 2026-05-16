@@ -1,7 +1,10 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/use-auth";
 import { authService } from "@/service/auth.service";
 import { initRegisterForm, RegisterRequest } from "@/model/auth.model";
 import { notifError, notifSuccess } from "@/lib/toast";
@@ -10,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
-    const [isLoading, setIsLoading] = useState(false);
+    const { register, isRegistering } = useAuth();
     const [form, setForm] = useState<RegisterRequest>(initRegisterForm);
     const router = useRouter();
 
@@ -20,32 +23,31 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        setIsLoading(true);
-
-        const response = await authService.register(form);
-
-        if (!response.success) {
-            notifError(response.message);
-        } else {
-            notifSuccess("Account created successfully!");
-            router.push(ROUTES.LOGIN);
-        }
-
-        setIsLoading(false);
+        await register(form);
     };
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-10">
-            <div className="w-full max-w-90">
-                <div className="mb-8 text-center">
-                    <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{APP_NAME}</h1>
-                    <p className="mt-1.5 text-sm text-neutral-500">Create a new account</p>
+        <main className="fixed inset-0 z-9999 flex overflow-hidden items-center justify-center bg-background text-foreground px-4 py-6 sm:py-12 antialiased selection:bg-orange-500/20">
+            <motion.div 
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="w-full max-w-[360px] sm:max-w-[400px]"
+            >
+                {/* Header Section */}
+                <div className="mb-5 text-center">
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+                        {APP_NAME}
+                    </h1>
+                    <p className="mt-1 text-xs sm:text-sm text-foreground/60">
+                        Create a new account
+                    </p>
                 </div>
 
-                <div className="rounded-xl bg-card p-6 shadow-sm ring-1 ring-neutral-200">
-                    <form onSubmit={handleSubmit} className="space-y-3">
-                        <fieldset disabled={isLoading} className="space-y-3">
+                {/* Form Card Container */}
+                <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
+                    <form onSubmit={handleSubmit}>
+                        <fieldset disabled={isRegistering} className="flex flex-col gap-3 group">
                             <Input
                                 type="text"
                                 id="username"
@@ -55,6 +57,7 @@ export default function RegisterPage() {
                                 value={form.username}
                                 onChange={setField("username")}
                                 placeholder="Full name"
+                                className="h-9 text-sm bg-input border-border focus-visible:ring-ring focus-visible:border-orange-500/50 rounded-md transition-colors"
                             />
 
                             <Input
@@ -65,6 +68,7 @@ export default function RegisterPage() {
                                 value={form.studentId}
                                 onChange={setField("studentId")}
                                 placeholder="Student ID (optional)"
+                                className="h-9 text-sm bg-input border-border focus-visible:ring-ring focus-visible:border-orange-500/50 rounded-md transition-colors"
                             />
 
                             <Input
@@ -76,6 +80,7 @@ export default function RegisterPage() {
                                 value={form.email}
                                 onChange={setField("email")}
                                 placeholder="Email address"
+                                className="h-9 text-sm bg-input border-border focus-visible:ring-ring focus-visible:border-orange-500/50 rounded-md transition-colors"
                             />
 
                             <Input
@@ -87,22 +92,31 @@ export default function RegisterPage() {
                                 value={form.password}
                                 onChange={setField("password")}
                                 placeholder="New password"
+                                className="h-9 text-sm bg-input border-border focus-visible:ring-ring focus-visible:border-orange-500/50 rounded-md transition-colors"
                             />
 
-                            <Button type="submit" isLoading={isLoading} className="w-full">
+                            <Button 
+                                type="submit" 
+                                isLoading={isRegistering} 
+                                className="w-full h-9 mt-1 text-sm font-medium rounded-md bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white transition-colors duration-150 shadow-none border-none focus-visible:ring-orange-500"
+                            >
                                 Sign up
                             </Button>
                         </fieldset>
                     </form>
                 </div>
 
-                <p className="mt-5 text-center text-sm text-neutral-500">
+                {/* Footer Section */}
+                <p className="mt-4 text-center text-xs sm:text-sm text-foreground/60">
                     Already have an account?{" "}
-                    <Link href={ROUTES.LOGIN} className="font-medium text-neutral-900 underline-offset-4 hover:underline">
+                    <Link 
+                        href={ROUTES.LOGIN} 
+                        className="font-medium text-orange-500 hover:text-orange-600 transition-colors underline-offset-4 hover:underline"
+                    >
                         Log in
                     </Link>
                 </p>
-            </div>
+            </motion.div>
         </main>
     );
 }

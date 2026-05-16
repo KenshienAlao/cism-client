@@ -11,14 +11,26 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, className = "" }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center py-10 px-4 text-center transition-colors bg-card border border-border rounded-md ${className}`}>
-      <div className="w-10 h-10 bg-accent rounded-md flex items-center justify-center border border-border mb-4">
-        <Icon className="w-4 h-4 text-accent-foreground" />
+    <div 
+      className={`
+        flex 
+        flex-col 
+        items-center 
+        justify-center 
+        p-6 
+        text-center 
+        bg-card 
+        w-full
+        ${className}
+      `.trim()}
+    >
+      <div className="w-8 h-8 bg-secondary rounded-md flex items-center justify-center border border-border mb-2.5 select-none shrink-0">
+        <Icon className="w-4 h-4 text-secondary-foreground/80" />
       </div>
-      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
+      <h3 className="text-xs font-semibold text-foreground tracking-tight mb-1">
         {title}
-      </h3>
-      <p className="text-[11px] font-medium text-muted-foreground max-w-[220px] leading-relaxed">
+      </h3> 
+      <p className="text-[11px] text-secondary-foreground/70 max-w-[200px] leading-normal font-normal">
         {description}
       </p>
     </div>

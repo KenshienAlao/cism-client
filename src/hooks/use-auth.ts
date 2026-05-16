@@ -15,8 +15,11 @@ export const authKeys = {
 interface UseAuthReturn {
   profile: LoginResponse | null;
   isLoading: boolean;
+  isFetching: boolean;
   isLoggingIn: boolean;
   login: (data: LoginRequest) => void;
+  register: (data: any) => Promise<any>;
+  isRegistering: boolean;
   logout: () => void;
   refreshUser: () => void;
   updateProfile: (data: UpdateUserRequest) => Promise<any>;
@@ -36,7 +39,7 @@ export function useAuth(): UseAuthReturn {
   const pathname = usePathname();
   const queryClient = useQueryClient();
 
-  const { data: profile = null, isLoading, isFetched } = useQuery<LoginResponse | null>({
+  const { data: profile = null, isLoading, isFetched, isFetching } = useQuery<LoginResponse | null>({
     queryKey: authKeys.profile(),
     queryFn: async () => {
       const res = await authService.validateCookie();
@@ -45,6 +48,8 @@ export function useAuth(): UseAuthReturn {
     retry: false,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 15,
   });
 
   useEffect(() => {
@@ -67,6 +72,21 @@ export function useAuth(): UseAuthReturn {
         router.replace(ROUTES.HOME);
       } else {
         notifError(res.message || "Login failed");
+      }
+    },
+    onError: (error: any) => {
+      notifError(error.message || "An unexpected error occurred");
+    }
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data: any) => await authService.register(data),
+    onSuccess: (res) => {
+      if (res.success) {
+        notifSuccess("Account created successfully!");
+        router.push(ROUTES.LOGIN);
+      } else {
+        notifError(res.message || "Registration failed");
       }
     },
     onError: (error: any) => {
@@ -221,8 +241,11 @@ export function useAuth(): UseAuthReturn {
   return {
     profile,
     isLoading,
+    isFetching,
     isLoggingIn: loginMutation.isPending,
     login: (data: LoginRequest) => loginMutation.mutate(data),
+    register: (data: any) => registerMutation.mutateAsync(data),
+    isRegistering: registerMutation.isPending,
     logout: () => logoutMutation.mutate(),
     refreshUser: () => queryClient.invalidateQueries({ queryKey: authKeys.profile() }),
     updateProfile: (data: UpdateUserRequest) => updateProfileMutation.mutateAsync(data),

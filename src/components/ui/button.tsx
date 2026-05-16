@@ -10,13 +10,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "bg-neutral-900 text-white hover:bg-black disabled:opacity-50",
+    "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700 focus:ring-orange-500 disabled:bg-secondary disabled:text-secondary-foreground/40",
   outline:
-    "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 disabled:text-neutral-400",
+    "border border-border bg-background text-foreground hover:bg-secondary active:bg-secondary/80 focus:ring-ring disabled:opacity-50",
   ghost:
-    "text-neutral-500 hover:text-neutral-900 disabled:text-neutral-300",
+    "text-secondary-foreground hover:bg-secondary hover:text-foreground active:bg-secondary/80 focus:ring-ring disabled:opacity-30",
   danger:
-    "border border-neutral-100 text-neutral-400 hover:border-red-100 hover:text-red-500 disabled:opacity-50",
+    "border border-border bg-card text-destructive hover:bg-destructive/10 active:bg-destructive/20 focus:ring-destructive disabled:opacity-50",
 };
 
 export function Button({
@@ -30,7 +30,7 @@ export function Button({
   return (
     <button
       disabled={disabled || isLoading}
-      className={`inline-flex items-center justify-center rounded-[--radius] transition-all active:scale-[0.99] ${variant === 'primary' ? 'meta-button' : variantClass[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-150 focus:outline-none focus:ring-1 disabled:pointer-events-none h-9 px-4 ${variantClass[variant]} ${className}`}
       {...props}
     >
       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}

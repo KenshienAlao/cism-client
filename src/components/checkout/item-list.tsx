@@ -4,47 +4,59 @@ import { StalledCart } from '@/hooks/use-cart';
 
 export function CheckoutItemList({ groups }: { groups: StalledCart[] }) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {groups.map((group) => (
-                <div key={group.stallName} className="space-y-4">
+                <div key={group.stallName} className="space-y-2.5">
                     {/* Stall header */}
-                    <div className="flex items-center gap-2">
-                        <Store className="w-3 h-3 text-orange-500 shrink-0" />
-                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400">
+                    <div className="flex items-center gap-1.5 px-0.5">
+                        <Store className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                        <span className="text-xs font-medium text-muted-foreground">
                             {group.stallName}
                         </span>
                     </div>
 
-                    {/* Items */}
-                    <div className="space-y-3">
+                    {/* Items Stack */}
+                    <div className="space-y-2">
                         {group.items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-3 md:gap-4">
-                                <div className="relative w-12 h-12 md:w-14 md:h-14 bg-neutral-100 shrink-0 border border-neutral-200 overflow-hidden">
-                                    {item.image && (
+                            <div 
+                                key={item.id} 
+                                className="flex items-center gap-3 p-2 rounded-lg border border-border bg-secondary/30"
+                            >
+                                {/* Thumbnail Container */}
+                                <div className="relative w-12 h-12 bg-input shrink-0 rounded-md border border-border overflow-hidden flex items-center justify-center">
+                                    {item.image ? (
                                         <Image
                                             src={item.image}
                                             alt={item.name}
                                             fill
-                                            className="object-cover"
-                                            sizes="(max-width: 768px) 48px, 56px"
+                                            className="object-cover mix-blend-multiply dark:mix-blend-normal"
+                                            sizes="48px"
                                         />
+                                    ) : (
+                                        <span className="text-[8px] font-medium text-muted-foreground uppercase tracking-widest text-center leading-tight">
+                                            No<br/>Image
+                                        </span>
                                     )}
                                 </div>
+
+                                {/* Breakdown */}
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="text-xs md:text-sm font-black text-neutral-900 truncate uppercase tracking-tight">
+                                    <h4 className="text-sm font-medium text-foreground truncate">
                                         {item.name}
                                     </h4>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-                                            ×{item.quantity}
+                                    <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                                        <span className="font-medium">
+                                            qty: {item.quantity}
                                         </span>
-                                        <span className="w-px h-3 bg-neutral-200" />
-                                        <span className="text-[9px] md:text-[10px] font-bold text-neutral-300 uppercase tracking-widest">
+                                        <span className="w-px h-2.5 bg-border" />
+                                        <span>
                                             ₱{item.price.toLocaleString()} ea.
                                         </span>
                                     </div>
                                 </div>
-                                <span className="text-sm md:text-base font-black text-neutral-900 shrink-0 tracking-tight">
+
+                                {/* Summation Output */}
+                                <span className="text-sm font-medium text-foreground shrink-0 tab-nums">
                                     ₱{(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </span>
                             </div>

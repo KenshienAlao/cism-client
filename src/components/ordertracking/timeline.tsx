@@ -1,33 +1,54 @@
+'use client';
+
+import React from 'react';
 import { STATUS, STATUS_ORDER } from "@/config/track.config";
 import { Order } from "@/model/order.model";
 import { Clock } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface TimelineProps {
-    order: Order,
-    currentStatusIndex: number
+    order: Order;
+    currentStatusIndex: number;
 }
 
 export default function Timeline({ order, currentStatusIndex }: TimelineProps) {
     return (
-        <div className="bg-white p-6 border border-neutral-100 rounded-lg">
+        <div className="w-full text-sm">
             <div className="relative">
                 {order.status === 'CANCELLED' ? (
-                    <div className="flex flex-col items-center text-center py-6">
-                        <div className="w-14 h-14 rounded-md bg-rose-50 flex items-center justify-center mb-4">
-                            <Clock className="w-6 h-6 text-rose-500" strokeWidth={2.5} />
+                    <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="flex flex-col items-start text-left p-1"
+                    >
+                        <div className="w-8 h-8 rounded-md bg-secondary border border-border flex items-center justify-center mb-2.5">
+                            <Clock className="w-4 h-4 text-destructive" strokeWidth={2} />
                         </div>
-                        <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-widest">Order Cancelled</h3>
-                        <p className="text-[11px] font-medium text-neutral-400 mt-2 max-w-[240px] leading-relaxed">
+                        <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                            Order Cancelled
+                        </h3>
+                        <p className="text-xs text-secondary-foreground mt-1 max-w-sm leading-normal">
                             {order.cancelledBy === 'CUSTOMER'
                                 ? "This order was cancelled by you."
-                                : "This order was cancelled by the stall. See the reason below in the details."}
+                                : "This order was cancelled by the stall. See details below."}
                         </p>
-                    </div>
+                    </motion.div>
                 ) : (
                     <>
-                        <div className="absolute left-5 top-5 bottom-5 w-px bg-neutral-100" />
+                        <div className="absolute left-4 top-4 bottom-4 w-px bg-border -translate-x-1/2" />
+                        <motion.div
+                            className="absolute left-4 top-4 bottom-4 w-px bg-orange-500 origin-top -translate-x-1/2"
+                            initial={{ scaleY: 0 }}
+                            animate={{
+                                scaleY: currentStatusIndex >= 0
+                                    ? currentStatusIndex / (STATUS_ORDER.length - 1)
+                                    : 0
+                            }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        />
 
-                        <div className="space-y-8">
+                        <div className="space-y-5">
                             {STATUS_ORDER.map((statusKey, index) => {
                                 const config = { ...STATUS[statusKey] };
 
@@ -40,35 +61,51 @@ export default function Timeline({ order, currentStatusIndex }: TimelineProps) {
                                         config.description = 'Please stay at your pinned location.';
                                     }
                                 }
-
                                 const Icon = config.icon;
                                 const isActive = index <= currentStatusIndex;
                                 const isCurrent = index === currentStatusIndex;
 
                                 return (
-                                    <div key={statusKey} className="relative flex items-start gap-5">
+                                    <motion.div
+                                        key={statusKey}
+                                        initial={{ opacity: 0, y: 4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.03, duration: 0.2 }}
+                                        className="relative flex items-start gap-3.5"
+                                    >
                                         <div
-                                            className={`relative z-10 w-10 h-10 rounded-md flex items-center justify-center transition-colors ${isActive ? config.bgColor : 'bg-neutral-50'
-                                                }`}
+                                            className={`relative z-10 w-8 h-8 rounded-md flex items-center justify-center border transition-colors duration-200 ${
+                                                isCurrent 
+                                                    ? 'bg-orange-500 border-orange-500 text-white' 
+                                                    : isActive 
+                                                    ? 'bg-secondary border-border text-foreground' 
+                                                    : 'bg-background border-border/60 text-secondary-foreground/40'
+                                            }`}
                                         >
-                                            <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-neutral-300'}`} strokeWidth={isCurrent ? 3 : 2} />
+                                            <Icon
+                                                className="w-3.5 h-3.5"
+                                                strokeWidth={2}
+                                            />
                                         </div>
-
-                                        <div className="flex-1 pt-1.5 min-w-0">
-                                            <h3
-                                                className={`text-xs font-bold uppercase tracking-widest transition-colors ${isActive ? 'text-neutral-900' : 'text-neutral-300'
-                                                    }`}
-                                            >
+                                        <div className="flex-1 pt-0.5 min-w-0">
+                                            <h3 className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
+                                                isCurrent 
+                                                    ? 'text-orange-500' 
+                                                    : isActive 
+                                                    ? 'text-foreground' 
+                                                    : 'text-secondary-foreground/40'
+                                            }`}>
                                                 {config.label}
                                             </h3>
-                                            <p
-                                                className={`text-[11px] font-medium mt-0.5 leading-relaxed transition-colors ${isActive ? 'text-neutral-400' : 'text-neutral-200'
-                                                    }`}
-                                            >
+                                            <p className={`text-xs mt-0.5 leading-normal transition-colors duration-200 ${
+                                                isActive 
+                                                    ? 'text-secondary-foreground' 
+                                                    : 'text-secondary-foreground/30'
+                                            }`}>
                                                 {config.description}
                                             </p>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
@@ -76,5 +113,5 @@ export default function Timeline({ order, currentStatusIndex }: TimelineProps) {
                 )}
             </div>
         </div>
-    )
+    );
 }

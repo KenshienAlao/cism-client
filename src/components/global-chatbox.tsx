@@ -3,13 +3,14 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useChatThreads } from '@/hooks/use-chat';
 import { useGlobalChat } from '@/provider/chat-provider';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, X, Minimize2 } from 'lucide-react';
 import { ActiveChatView } from './chat/active-chat-view';
 import { InboxView } from './chat/inbox-view';
 import { usePathname } from 'next/navigation';
 
 import { useRef, useState, useEffect } from 'react';
 import { useDraggable } from '@/hooks/use-draggable';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function GlobalChatbox() {
     const { profile, isLoading: isAuthPending } = useAuth();
@@ -32,7 +33,6 @@ export function GlobalChatbox() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Disable background scroll when chat is open on mobile
     useEffect(() => {
         if (isOpen && isMobile) {
             document.body.style.overflow = 'hidden';
@@ -47,51 +47,106 @@ export function GlobalChatbox() {
     const hideOnRoutesChatbox = [
         "/login",
         "/register",
-    ]
+    ];
 
     if (isAuthPending || isThreadsPending || !profile || hideOnRoutesChatbox.includes(pathname)) return null;
 
+    const unreadCount = threads.filter(t => t.isUnread).length;
+    const hasUnread = unreadCount > 0;
+
     return (
         <>
-            {isOpen ? (
-                <div
-                    ref={windowRef}
-                    style={isMobile ? {} : windowDraggable.style}
-                    className="fixed inset-0 md:inset-auto md:bottom-0 md:right-6 z-110 w-full h-dvh md:w-[450px] md:h-[600px] md:max-h-[85vh] flex flex-col overflow-hidden border-0 md:border border-neutral-100 bg-white md:rounded-t-lg shadow-2xl animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-300 ease-out select-none"
-                >
-                    {/* Drag Handle for Window - only visible and usable on desktop */}
-                    <div
-                        onMouseDown={!isMobile ? windowDraggable.handleMouseDown as any : undefined}
-                        onTouchStart={!isMobile ? windowDraggable.handleTouchStart as any : undefined}
-                        className={`h-2 w-full flex items-center justify-center bg-neutral-50/50 transition-colors shrink-0 ${!isMobile ? 'cursor-grab active:cursor-grabbing hover:bg-neutral-100' : 'hidden md:flex'}`}
+            <AnimatePresence mode="wait">
+                {isOpen ? (
+                    <motion.div
+                        key="chat-window-wrapper"
+                        initial={{ opacity: 0, y: isMobile ? 20 : 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: isMobile ? 20 : 10 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-50 pointer-events-none"
                     >
-                        <div className="w-10 h-1 bg-neutral-200 rounded-full" />
-                    </div>
-                    {activeChat ? <ActiveChatView /> : <InboxView />}
-                </div>
-            ) : (
-                <div
-                    ref={buttonRef}
-                    style={buttonDraggable.style}
-                    onMouseDown={buttonDraggable.handleMouseDown as any}
-                    onTouchStart={buttonDraggable.handleTouchStart as any}
-                    className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-120 cursor-grab active:cursor-grabbing select-none"
-                >
-                    <button
-                        onClick={() => {
-                            if (!buttonDraggable.hasMoved) {
-                                toggleChat();
-                            }
-                        }}
-                        className="relative bg-orange-500 rounded-full text-white p-3.5 border-4 border-white shadow-xl transition-all duration-200 active:scale-95 pointer-events-auto"
+                        <div
+                            ref={windowRef}
+                            style={isMobile ? {} : windowDraggable.style}
+                            className="pointer-events-auto w-full h-dvh md:w-[400px] md:h-[580px] flex flex-col overflow-hidden border-0 md:border border-border bg-background md:rounded-lg text-foreground select-none shadow-2xl"
+                        >
+                            <div
+                                onMouseDown={!isMobile ? windowDraggable.handleMouseDown as any : undefined}
+                                onTouchStart={!isMobile ? windowDraggable.handleTouchStart as any : undefined}
+                                className={`h-9 px-3 w-full flex items-center justify-between bg-secondary border-b border-border shrink-0 ${
+                                    !isMobile ? 'cursor-grab active:cursor-grabbing' : ''
+                                }`}
+                            >
+                                <div className="flex items-center gap-1.5 text-xs text-secondary-foreground font-medium">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${hasUnread ? 'bg-orange-500' : 'bg-emerald-500'}`} />
+                                    Messages
+                                </div>
+                                
+                                {/* Window Actions */}
+                                <div className="flex items-center gap-1">
+                                    <button 
+                                        onClick={toggleChat}
+                                        className="p-1 rounded-md text-secondary-foreground hover:bg-background transition-colors"
+                                        title="Minimize"
+                                    >
+                                        <Minimize2 className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* View Container with structural view transitions */}
+                            <div className="flex-1 overflow-hidden relative bg-card text-card-foreground">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={activeChat ? `chat-${activeChat}` : 'inbox'}
+                                        initial={{ opacity: 0, x: activeChat ? 10 : -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: activeChat ? -10 : 10 }}
+                                        transition={{ duration: 0.12, ease: 'easeInOut' }}
+                                        className="w-full h-full flex flex-col"
+                                    >
+                                        {activeChat ? <ActiveChatView /> : <InboxView />}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="chat-trigger-wrapper"
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="fixed bottom-6 right-6 z-50 pointer-events-none"
                     >
-                        <MessageCircle className="w-6 h-6" />
-                        {threads.some(t => t.isUnread) && (
-                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white rounded-full animate-bounce"></span>
-                        )}
-                    </button>
-                </div>
-            )}
+                        <div
+                            ref={buttonRef}
+                            style={buttonDraggable.style}
+                            onMouseDown={buttonDraggable.handleMouseDown as any}
+                            onTouchStart={buttonDraggable.handleTouchStart as any}
+                            className="pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+                        >
+                            <button
+                                onClick={() => {
+                                    if (!buttonDraggable.hasMoved) {
+                                        toggleChat();
+                                    }
+                                }}
+                                className="relative bg-orange-500 hover:bg-orange-600 text-white p-3 border border-orange-600 rounded-lg transition-colors pointer-events-auto flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            >
+                                <MessageCircle className="w-5 h-5" />
+                                {hasUnread && (
+                                    <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-white text-orange-600 text-[10px] font-bold rounded-full flex items-center justify-center shadow-md border border-orange-100">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 }

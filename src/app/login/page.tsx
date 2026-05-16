@@ -1,6 +1,8 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import Loading from "@/components/ui/loading";
 import { initLoginForm, LoginRequest } from "@/model/auth.model";
@@ -11,11 +13,10 @@ import { Button } from "@/components/ui/button";
 import { LoginSchema } from "@/validation/auth.validation";
 
 export default function LoginPage() {
-  const { login, isLoggingIn, isLoading: isAuthLoading } = useAuth();
-
+  const { login, isLoggingIn, isLoading: isAuthLoading, profile } = useAuth();
   const [form, setForm] = useState<LoginRequest>(initLoginForm);
 
-  if (isAuthLoading) return <Loading />;
+  if (isAuthLoading || profile) return <Loading />;
 
   const handleChange = (field: keyof LoginRequest) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,16 +36,27 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-90">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{APP_NAME}</h1>
-          <p className="mt-1.5 text-sm text-neutral-500">Log in to your account</p>
+    <main className="fixed inset-0 z-9999 flex overflow-hidden items-center justify-center bg-background text-foreground px-4 py-6 sm:py-12 antialiased selection:bg-orange-500/20">
+      <motion.div 
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="w-full max-w-[360px] sm:max-w-[400px]"
+      >
+        {/* Header Section */}
+        <div className="mb-5 text-center">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+            {APP_NAME}
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-foreground/60">
+            Log in to your account
+          </p>
         </div>
 
-        <div className="meta-card rounded-[--radius]">
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <fieldset disabled={isLoggingIn} className="space-y-3">
+        {/* Form Card Container */}
+        <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
+          <form onSubmit={handleSubmit}>
+            <fieldset disabled={isLoggingIn} className="flex flex-col gap-3">
               <Input
                 type="email"
                 id="email"
@@ -67,26 +79,34 @@ export default function LoginPage() {
                 placeholder="Password"
               />
 
-              <div className="text-right">
-                <span className="cursor-pointer text-xs text-neutral-500 transition-colors hover:text-neutral-900">
+              <div className="flex justify-end mt-0.5">
+                <span className="cursor-pointer text-xs text-foreground/60 transition-colors hover:text-orange-500">
                   Forgot password?
                 </span>
               </div>
 
-              <Button type="submit" isLoading={isLoggingIn} className="w-full">
+              <Button 
+                type="submit" 
+                isLoading={isLoggingIn} 
+                className="w-full mt-1"
+              >
                 Log in
               </Button>
             </fieldset>
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-neutral-500">
+        {/* Footer Section */}
+        <p className="mt-4 text-center text-xs sm:text-sm text-foreground/60">
           Don&apos;t have an account?{" "}
-          <Link href={ROUTES.REGISTER} className="font-medium text-neutral-900 underline-offset-4 hover:underline">
+          <Link 
+            href={ROUTES.REGISTER} 
+            className="font-medium text-orange-500 hover:text-orange-600 transition-colors underline-offset-4 hover:underline"
+          >
             Create account
           </Link>
         </p>
-      </div>
+      </motion.div>
     </main>
   );
 }

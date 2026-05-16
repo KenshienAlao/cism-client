@@ -5,6 +5,7 @@ import { ProductCard } from "./productcard";
 import { SectionHeader } from "./sectionheader";
 import { EmptyState } from "./emptystate";
 import { LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 const INITIAL_COUNT = 5;
 const BATCH_SIZE = 5;
@@ -58,23 +59,22 @@ export function HorizontalScrollSection({
   const hasMore = visibleCount < items.length;
 
   return (
-    <section className="space-y-6">
-      {/* Header */}
-      <div className="px-1">
+    <section className="space-y-4">
         <SectionHeader 
           icon={icon} 
           title={title} 
           subtitle={subtitle} 
         />
-      </div>
 
       {items.length > 0 ? (
-        <div className="scroll-container relative">
-          <div className="flex overflow-x-auto gap-3 md:gap-5 pb-4 -mx-4 px-4 no-scrollbar scroll-smooth">
+        <div className="scroll-container relative -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar scroll-smooth snap-x snap-mandatory">
             {visibleItems.map((product, index) => (
-              <div 
+              <motion.div 
                 key={product.id} 
-                className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0"
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="w-[140px] sm:w-[170px] md:w-[190px] shrink-0 snap-start"
               >
                 <ProductCard
                   item={product as any}
@@ -82,27 +82,24 @@ export function HorizontalScrollSection({
                   stallImage={product.stallImage}
                   priority={priorityFirstItem && index === 0}
                 />
-              </div>
+              </motion.div>
             ))}
             
             {hasMore && (
-              <div ref={sentinelRef} className="flex gap-3 md:gap-5">
-                <div className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0">
+              <div ref={sentinelRef} className="flex gap-3 shrink-0">
+                <div className="w-[140px] sm:w-[170px] md:w-[190px] shrink-0">
                   <SkeletonCard />
                 </div>
-                <div className="w-[140px] xs:w-[160px] md:w-[200px] shrink-0">
+                <div className="w-[140px] sm:w-[170px] md:w-[190px] shrink-0">
                   <SkeletonCard />
                 </div>
               </div>
             )}
-            
-            {/* Visual Spacer for scroll-end */}
-            <div className="w-4 shrink-0" />
+            <div className="w-1 shrink-0" />
           </div>
         </div>
       ) : (
-        /* Minimalist Empty State with subtle border */
-        <div className="border border-border rounded-lg bg-card/50 py-10">
+        <div className="border border-border rounded-lg bg-card py-8 px-4 flex items-center justify-center text-center">
           <EmptyState 
             icon={emptyIcon} 
             title={emptyTitle} 
@@ -116,16 +113,14 @@ export function HorizontalScrollSection({
 
 function SkeletonCard() {
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden h-full">
-      <div className="aspect-square bg-secondary animate-pulse" />
-      <div className="p-3 space-y-3">
-        <div className="space-y-2">
-          <div className="h-2 bg-secondary rounded w-3/4 animate-pulse" />
-          <div className="h-2 bg-secondary/60 rounded w-1/2 animate-pulse" />
+    <div className="bg-card border border-border rounded-lg overflow-hidden h-full flex flex-col">
+      <div className="aspect-square bg-secondary/70" />
+      <div className="p-3 flex-1 flex flex-col justify-between space-y-3">
+        <div className="space-y-1.5">
+          <div className="h-3 bg-secondary rounded w-11/12" />
+          <div className="h-2.5 bg-secondary/50 rounded w-7/12" />
         </div>
-        <div className="pt-1">
-          <div className="h-3 bg-secondary rounded w-1/4 animate-pulse" />
-        </div>
+        <div className="h-3 bg-secondary rounded w-5/12" />
       </div>
     </div>
   );

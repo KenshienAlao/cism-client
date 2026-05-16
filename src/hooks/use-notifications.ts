@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const DISMISSED_KEY = 'cism_dismissed_notifications';
 
-const NOTIF_STATUSES = ['PENDING', 'PREPARING', 'READY', 'CANCELLED'];
+const NOTIF_STATUSES = ['PENDING', 'PREPARING', 'READY', 'COMPLETED', 'CANCELLED'];
 
 function getNotifContent(status: string, stallName: string, cancelledBy?: string) {
     switch (status.toUpperCase()) {
@@ -14,6 +14,11 @@ function getNotifContent(status: string, stallName: string, cancelledBy?: string
             return {
                 title: 'Order Ready!',
                 message: `Your order from ${stallName} is ready for pickup!`,
+            };
+        case 'COMPLETED':
+            return {
+                title: 'Order Completed',
+                message: `Your order from ${stallName} has been completed!`,
             };
         case 'CANCELLED':
             return {
@@ -35,9 +40,17 @@ function getNotifContent(status: string, stallName: string, cancelledBy?: string
     }
 }
 
-export function useNotifications() {
+export function useNotifications(options?: { refetchInterval?: number | false; staleTime?: number }) {
     const { useMyOrders } = useOrder();
-    const { data: orders, isLoading } = useMyOrders();
+
+    const syncOptions = {
+        refetchInterval: 1000 * 30,
+        refetchOnWindowFocus: true,
+        staleTime: 1000 * 10,
+        ...options
+    };
+
+    const { data: orders, isLoading, isFetching } = useMyOrders(syncOptions);
     const queryClient = useQueryClient();
 
     const { data: dismissedIds = [] } = useQuery<string[]>({
@@ -58,7 +71,7 @@ export function useNotifications() {
     const clearAll = () => {
         const allIds = [
             ...(orders?.filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
-                .map(o => `order-${o.id}`) || [])
+                .map(o => `order-${o.id}-${o.status}`) || [])
         ];
         localStorage.setItem(DISMISSED_KEY, JSON.stringify(allIds));
         queryClient.setQueryData(['dismissed_notifications'], allIds);
@@ -71,7 +84,7 @@ export function useNotifications() {
             .map(o => {
                 const { title, message } = getNotifContent(o.status, o.stallName, o.cancelledBy);
                 return {
-                    id: `order-${o.id}`,
+                    id: `order-${o.id}-${o.status}`,
                     type: 'ORDER',
                     title,
                     message,
@@ -86,6 +99,7 @@ export function useNotifications() {
     return {
         notifications,
         isLoading,
+        isFetching,
         dismissNotification,
         clearAll,
         count: notifications.length

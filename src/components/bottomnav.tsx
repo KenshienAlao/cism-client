@@ -193,7 +193,7 @@ export function BottomNav() {
                 </div>
 
                 {/* Nav Items */}
-                <nav className="flex-1 flex flex-col gap-1 p-3 overflow-y-auto">
+                <nav className="flex-1 flex flex-col gap-1 p-3 overflow-y-auto overflow-x-hidden">
                     {navItems.map((item, index) => {
                         const isActive = pathname === item.href;
                         const Icon = item.icon;

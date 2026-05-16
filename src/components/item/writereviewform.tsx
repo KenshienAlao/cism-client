@@ -53,104 +53,99 @@ export function WriteReviewForm({
     };
 
     return (
-        <section className="py-2">
-            <div className="w-full">
-                <header className="mb-4">
-                    <h3 className="text-sm font-medium text-foreground mb-0.5">Share your thoughts</h3>
-                    <p className="text-xs text-secondary-foreground/70">Your review helps other customers make better choices.</p>
-                </header>
+        <div className="w-full">
+            <header className="mb-3">
+                <h3 className="text-sm font-medium text-foreground tracking-tight">Share your feedback</h3>
+            </header>
 
-                <div className="space-y-4">
-                    {/* Star Rating */}
-                    <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                            <button
-                                key={s}
-                                type="button"
-                                onClick={() => setStar(s)}
-                                className="transition-transform active:scale-95 p-0.5 focus:outline-none rounded-md focus:ring-1 focus:ring-ring"
-                            >
-                                <Star
-                                    className={`w-5 h-5 transition-colors ${
-                                        s <= star
-                                            ? 'text-orange-500 fill-orange-500'
-                                            : 'text-secondary-foreground/30 hover:text-orange-500/50'
-                                    }`}
-                                    strokeWidth={1.5}
-                                />
-                            </button>
-                        ))}
-                        {star > 0 && (
-                            <span className="ml-1.5 text-xs font-semibold text-orange-500">{star}/5</span>
-                        )}
-                    </div>
+            <div className="gap-3 flex flex-col">
+                {/* Star Rating Section */}
+                <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                            key={s}
+                            type="button"
+                            onClick={() => setStar(s)}
+                            className="p-0.5 focus:outline-none focus:ring-1 focus:ring-ring rounded-md transition-colors"
+                        >
+                            <Star
+                                className={`w-5 h-5 transition-colors ${
+                                    s <= star
+                                        ? 'text-orange-500 fill-orange-500'
+                                        : 'text-secondary-foreground/30 hover:text-orange-500/50'
+                                }`}
+                                strokeWidth={1.5}
+                            />
+                        </button>
+                    ))}
+                    {star > 0 && (
+                        <span className="ml-2 text-xs font-medium text-orange-500">{star} / 5</span>
+                    )}
+                </div>
 
-                    {/* Input Area */}
-                    <div className="space-y-3">
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder="How was the quality? Did it meet your expectations?"
-                            className="w-full bg-input border border-border rounded-md p-3 text-sm placeholder:text-secondary-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring transition-all min-h-[100px] resize-none"
+                {/* Textarea Input Container */}
+                <div className="gap-3 flex flex-col">
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Optional comments regarding preparation or quality..."
+                        className="w-full bg-input border border-border rounded-md p-3 text-xs placeholder:text-secondary-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring min-h-[80px] md:min-h-[100px] resize-none"
+                    />
+
+                    {/* Image Attachment Section */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            accept="image/*"
+                            className="hidden"
                         />
 
-                        {/* Image Upload */}
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
-
-                            {!imagePreview ? (
+                        {!imagePreview ? (
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
+                            >
+                                <Camera className="w-3.5 h-3.5" />
+                                <span>Add Photo</span>
+                            </button>
+                        ) : (
+                            <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-background group">
+                                <Image
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    fill
+                                    className="object-cover"
+                                    sizes="56px"
+                                />
                                 <button
                                     type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md bg-background text-foreground hover:bg-secondary transition-colors text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
+                                    onClick={removeImage}
+                                    className="absolute top-1 right-1 bg-background border border-border text-foreground p-0.5 rounded-md transition-colors hover:bg-destructive hover:text-white"
                                 >
-                                    <Camera className="w-3.5 h-3.5 text-secondary-foreground/70" />
-                                    <span>Add Photo</span>
+                                    <X className="w-3 h-3" />
                                 </button>
-                            ) : (
-                                <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border bg-background">
-                                    <Image
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        fill
-                                        className="object-cover"
-                                        sizes="64px"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={removeImage}
-                                        className="absolute top-1 right-1 bg-foreground/80 text-background p-1 rounded-md hover:bg-foreground transition-colors"
-                                    >
-                                        <X className="w-2.5 h-2.5" />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Submit */}
-                    <div className="flex items-center justify-between gap-3 pt-1">
-                        <p className="text-[10px] text-secondary-foreground/60 max-w-[220px] leading-normal">
-                            Reviews are public and include your account name.
-                        </p>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={star === 0 || !comment.trim() || createReviewMutation.isPending}
-                            className="bg-orange-500 text-white hover:bg-orange-600 px-5 h-9 rounded-md transition-all text-xs font-medium shadow-none disabled:bg-secondary disabled:text-secondary-foreground/40"
-                        >
-                            {createReviewMutation.isPending ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : 'Post Review'}
-                        </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
+
+                {/* Submit Row */}
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-border mt-1">
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={star === 0 || !comment.trim() || createReviewMutation.isPending}
+                        className="bg-orange-500 text-white hover:bg-orange-600 px-4 h-8 rounded-md transition-all text-xs font-medium focus:ring-1 focus:ring-ring disabled:bg-secondary disabled:text-secondary-foreground/40 shrink-0 flex items-center justify-center min-w-[90px]"
+                    >
+                        {createReviewMutation.isPending ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
+                        ) : null}
+                        {createReviewMutation.isPending ? 'Posting...' : 'Post Review'}
+                    </Button>
+                </div>
             </div>
-        </section>
+        </div>
     );
 }

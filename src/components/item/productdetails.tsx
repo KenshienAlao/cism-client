@@ -9,6 +9,7 @@ import { ItemVariation } from '@/model/item.model';
 import { Avatar } from '../ui/avatar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export function ProductDetails({ itemDetails }: { itemDetails: any }) {
     const { cartItems, addToCart, isMutating } = useCart();
@@ -60,9 +61,14 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-start">
-            {/* Image Section */}
-            <div className="relative aspect-square bg-secondary border border-border overflow-hidden rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 items-start">
+            {/* Product Media Section */}
+            <motion.div 
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="relative aspect-square w-full max-w-md mx-auto md:max-w-none md:mx-0 bg-secondary border border-border overflow-hidden rounded-md flex items-center justify-center"
+            >
                 {displayImage ? (
                     <Image 
                         src={displayImage} 
@@ -73,9 +79,9 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                         sizes="(max-width: 768px) 100vw, 40vw"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                        <UtensilsCrossed className="w-8 h-8 text-secondary-foreground/40" />
-                    </div>
+                    <span className="text-[15px] font-medium text-muted-foreground uppercase tracking-widest text-center leading-tight">
+                        No<br/>Image
+                    </span>
                 )}
                 
                 {/* Rating */}
@@ -83,79 +89,85 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                     <Star className="w-3 h-3 fill-orange-500 text-orange-500" />
                     <span>{itemDetails.rating.toFixed(1)}</span>
                 </div>
-            </div>
+            </motion.div>
 
-            {/* Content Section */}
+            {/* Product Details Section */}
             <div className="flex flex-col pt-1 md:pt-0">
-                {/* Category tag */}
-                <span className="text-[10px] tracking-wider uppercase font-semibold text-orange-500 mb-1">
+                <span className="text-xs font-medium text-orange-500 mb-1">
                     {itemDetails.category}
                 </span>
 
-                <h1 className="text-xl md:text-2xl font-medium text-foreground tracking-tight mb-1.5">
+                <h1 className="text-md font-medium text-foreground tracking-tight mb-1.5">
                     {itemDetails.name}
                 </h1>
 
-                {/* Seller Info */}
-                <Link href={`/stall?name=${itemDetails.stallName}`} className="flex items-center gap-1.5 mb-5 group w-fit">
+                {/* Short vendor route context */}
+                <Link href={`/stall?name=${itemDetails.stallName}`} className="flex items-center gap-1.5 mb-3 w-fit">
                     <Avatar
                         src={itemDetails.stallImage}
                         name={itemDetails.stallName}
                         size="sm"
-                        className="h-4 w-4 opacity-80 group-hover:opacity-100 transition-opacity"
+                        className="h-4 w-4 rounded-md"
                     />
-                    <span className="text-xs text-secondary-foreground/80 group-hover:text-orange-500 flex items-center transition-colors">
+                    <span className="text-xs text-secondary-foreground hover:text-orange-500 flex items-center transition-colors">
                         {itemDetails.stallName}
                         <ChevronRight className="w-3 h-3 ml-0.5 opacity-60" />
                     </span>
                 </Link>
 
                 {/* Price Display */}
-                <div className="mb-5 flex items-baseline gap-2">
-                    <span className="text-2xl font-semibold tracking-tight text-foreground">
-                        ₱ {displayPrice.toFixed(2)}
+                <div className="mb-4 flex items-baseline gap-2">
+                    <span className="text-base md:text-lg font-semibold tracking-tight text-foreground">
+                        ₱{displayPrice.toFixed(2)}
                     </span>
-                    {variations.length > 0 && !selectedVariation && (
-                        <span className="text-[11px] text-secondary-foreground/60 uppercase tracking-tight italic">Starting price</span>
-                    )}
                 </div>
 
-                {/* Variations Options Selector */}
+                {/* Option Menu Layout */}
                 {variations.length > 0 && (
-                    <div className="mb-5 space-y-2">
-                        <label className="text-[10px] uppercase font-bold text-secondary-foreground/60 tracking-wider">Select Option</label>
-                        <div className="flex flex-wrap gap-2">
-                            {variations.map((v) => (
-                                <button
-                                    key={v.id}
-                                    onClick={() => setSelectedVariation(v)}
-                                    className={`px-3 py-1.5 text-xs font-medium border rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-ring ${
-                                        selectedVariation?.id === v.id
-                                        ? 'border-orange-500 bg-accent text-accent-foreground'
-                                        : 'border-border bg-card text-secondary-foreground/90 hover:border-secondary-foreground/30'
-                                    }`}
-                                >
-                                    {v.name}
-                                </button>
-                            ))}
+                    <div className="mb-4 gap-2 flex flex-col">
+                        <label className="text-[10px] uppercase font-bold text-secondary-foreground tracking-wider">Select Option</label>
+                        <div className="flex flex-wrap gap-1.5">
+                            {variations.map((v) => {
+                                const isSelected = selectedVariation?.id === v.id;
+                                return (
+                                    <button
+                                        key={v.id}
+                                        onClick={() => setSelectedVariation(v)}
+                                        className={`relative px-2.5 py-1.5 text-xs font-medium border rounded-md transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-ring ${
+                                            isSelected
+                                            ? 'border-orange-500 bg-accent text-accent-foreground'
+                                            : 'border-border bg-card text-secondary-foreground hover:border-secondary-foreground/40'
+                                        }`}
+                                    >
+                                        <span className="relative z-10">{v.name}</span>
+                                        {isSelected && (
+                                            <motion.span 
+                                                layoutId="activeVariationIndicator"
+                                                className="absolute inset-0 border border-orange-500 rounded-md pointer-events-none"
+                                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                            />
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
 
-                {/* Row */}
-                <div className="grid grid-cols-2 gap-3 py-4 border-y border-border mb-5">
-                    <div className="flex items-center gap-2.5">
-                        <Package className="w-4 h-4 text-secondary-foreground/60" />
-                        <div>
-                            <p className="text-[10px] uppercase text-secondary-foreground/50 font-bold leading-none mb-0.5">Stocks</p>
-                            <p className="text-sm font-medium text-foreground">{displayStock}</p>
+                {/* Cart & Quantity Section */}
+                <div className="grid grid-cols-2 gap-3 py-2.5 border-y border-border mb-4">
+                    <div className="flex items-center gap-2">
+                        <Package className="w-3.5 h-3.5 text-secondary-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase text-secondary-foreground font-bold leading-none mb-0.5">Stocks</span>
+                            <span className="text-xs font-medium text-foreground">{displayStock}</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2.5">
-                        <MessageSquare className="w-4 h-4 text-secondary-foreground/60" />
-                        <div>
-                            <p className="text-[10px] uppercase text-secondary-foreground/50 font-bold leading-none mb-0.5">Reviews</p>
-                            <p className="text-sm font-medium text-foreground">{itemDetails.reviewCount}</p>
+                    <div className="flex items-center gap-2">
+                        <MessageSquare className="w-3.5 h-3.5 text-secondary-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase text-secondary-foreground font-bold leading-none mb-0.5">Reviews</span>
+                            <span className="text-xs font-medium text-foreground">{itemDetails.reviewCount}</span>
                         </div>
                     </div>
                 </div>
@@ -166,12 +178,12 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                         variant="outline"
                         onClick={handleAddToCart}
                         disabled={displayStock === 0 || isAtLimit || isMutating}
-                        className="h-10 border-border bg-background text-foreground hover:bg-secondary rounded-md transition-colors flex items-center justify-center gap-2 text-sm"
+                        className="h-9 border border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-500 hover:bg-orange-500/20 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-medium focus:ring-1 focus:ring-orange-500/50"
                     >
-                        {isMutating ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : (
+                        {isMutating ? <Loader2 className="animate-spin h-3 w-3" /> : (
                             <>
                                 <ShoppingCart className="w-3.5 h-3.5" />
-                                {displayStock === 0 ? 'Sold Out' : isAtLimit ? 'Max' : 'Add to Cart'}
+                                {displayStock === 0 ? 'Sold Out' : isAtLimit ? 'Max Limit' : 'Add to Cart'}
                             </>
                         )}
                     </Button>
@@ -179,9 +191,9 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                     <Button
                         onClick={handleBuyNow}
                         disabled={displayStock === 0 || isAtLimit || isMutating}
-                        className="h-10 bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.99] focus:ring-1 focus:ring-ring rounded-md transition-all text-sm font-medium"
+                        className="h-9 bg-orange-500 text-white hover:bg-orange-600 active:scale-[0.98] focus:ring-1 focus:ring-orange-500/50 rounded-md transition-all text-xs font-medium shadow-sm"
                     >
-                        Buy now
+                        Buy Now
                     </Button>
                 </div>
             </div>

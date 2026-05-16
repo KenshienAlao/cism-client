@@ -2,20 +2,43 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo } from 'react';
+import { motion } from "framer-motion";
 import { useItem } from "@/hooks/use-item";
+import { useAuth } from "@/hooks/use-auth";
 import { ProductCard } from "@/components/productcard";
-import { Inbox, ArrowLeft } from "lucide-react";
+import { Inbox } from "lucide-react";
 import Loading from "@/components/ui/loading";
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.03
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+        opacity: 1,
+        transition: { duration: 0.2, ease: "easeOut" } as const
+    }
+};
+
 function ItemSearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get('q') || '';
+    const { profile, isLoading: isAuthLoading } = useAuth();
     const { items, isLoading } = useItem();
-
+    
     const allFlattenedItems = useMemo(() => {
+        if (!items) return [];
         return items.flatMap(stall => {
             return stall.items.map(item => {
-                const itemReviews = stall.reviews.filter(r => r.itemId === item.id);
+                const itemReviews = stall.reviews.filter(r => r.itemId === item.id || r.stall_item_id === item.id);
                 const avgRating = itemReviews.length > 0
                     ? itemReviews.reduce((acc, r) => acc + r.star, 0) / itemReviews.length
                     : 0;
@@ -60,52 +83,69 @@ function ItemSearchContent() {
         );
     }, [allFlattenedItems, query]);
 
-    if (isLoading) return <Loading />;
+    if (isAuthLoading || (isLoading && !allFlattenedItems.length)) return <Loading />;
 
     return (
-        <div className="min-h-screen bg-neutral-50 flex flex-col font-sans pb-32">
-            <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8 md:py-16">
-                <div className="mb-10 md:mb-16">
-                    <span className="text-[9px] font-bold text-orange-500 uppercase tracking-[0.2em] block mb-1">Search Results</span>
+        <div className="min-h-screen bg-background text-foreground flex flex-col font-sans antialiased pb-16">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:py-10">
+                {/* Header Section */}
+                <div className="mb-6 md:mb-8 border-b border-border pb-4 md:pb-5">
+                    <span className="text-xs font-medium text-orange-500 uppercase tracking-wider block mb-1">
+                        Search Results
+                    </span>
                     <div className="flex items-baseline justify-between gap-4">
-                        <h1 className="text-xl md:text-3xl font-bold text-neutral-900 uppercase tracking-tight truncate">
+                        <h1 className="text-xl md:text-2xl font-bold tracking-tight truncate">
                             {query || "Discovery"}
                         </h1>
-                        <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest shrink-0">
-                            {filteredItems.length} items
+                        <span className="text-xs text-secondary-foreground/60 shrink-0 font-medium">
+                            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
                         </span>
                     </div>
-                    <div className="h-0.5 w-12 bg-orange-500 mt-5" />
                 </div>
 
+                {/* Content Grid / Empty State */}
                 {filteredItems.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                    <motion.div 
+                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
                         {filteredItems.map(({ item, stallImage }) => (
-                            <div key={item.id} className="w-full">
+                            <motion.div 
+                                key={item.id} 
+                                className="w-full bg-card text-card-foreground border border-border rounded-lg overflow-hidden transition-colors"
+                                variants={itemVariants}
+                            >
                                 <ProductCard
                                     item={item as any}
                                     image={item.image as string}
                                     stallImage={stallImage}
                                 />
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="py-24 flex flex-col items-center text-center bg-white border border-neutral-100 rounded-md px-6">
-                        <div className="w-12 h-12 bg-neutral-50 rounded-md flex items-center justify-center border border-neutral-100 mb-5">
-                            <Inbox className="w-5 h-5 text-neutral-200" />
+                    <motion.div 
+                        className="py-16 md:py-24 flex flex-col items-center text-center bg-card border border-border rounded-lg p-5 max-w-md mx-auto"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <div className="w-10 h-10 bg-secondary text-secondary-foreground rounded-md flex items-center justify-center border border-border mb-4">
+                            <Inbox className="w-5 h-5 opacity-70" />
                         </div>
-                        <h2 className="text-xs font-bold text-neutral-900 uppercase tracking-widest mb-1">No results</h2>
-                        <p className="text-[10px] font-medium text-neutral-400 max-w-[200px] leading-relaxed mb-8">
-                            We couldn't find any items matching "{query}"
+                        <h2 className="text-sm font-semibold tracking-tight mb-1">No results found</h2>
+                        <p className="text-xs text-secondary-foreground/70 max-w-[240px] leading-normal mb-5">
+                            We couldn't find matches for &ldquo;{query}&rdquo;. Check spelling or try another term.
                         </p>
                         <button
                             onClick={() => router.push('/')}
-                            className="text-[10px] font-bold text-orange-500 uppercase tracking-widest active:text-orange-600 transition-colors"
+                            className="inline-flex items-center justify-center h-9 px-4 rounded-md text-xs font-medium bg-secondary text-secondary-foreground border border-border hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background active:scale-[0.98]"
                         >
                             Return to feed
                         </button>
-                    </div>
+                    </motion.div>
                 )}
             </main>
         </div>
