@@ -10,6 +10,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { NO_NAV_ROUTES } from '@/config/app.config';
 import { isPathInRoutes } from '@/lib/utils/route';
 import Image from 'next/image';
+import { useSidebar } from '@/context/sidebar.context';
+
 
 interface SearchResult {
     id: string;
@@ -28,6 +30,7 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
     const [isFocused, setIsFocused] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
     const [mounted, setMounted] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +40,17 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
     const { profile } = useAuth();
     const { items: stalls = [] } = useItem();
     const allItems = useEnrichedItems(stalls);
+    const { isCollapsed } = useSidebar();
 
     useEffect(() => { setMounted(true); }, []);
     useEffect(() => { setQuery(searchParams.get('q') || ''); }, [searchParams]);
+    useEffect(() => {
+        const check = () => setIsDesktop(window.innerWidth >= 768);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, []);
+
 
     const calculateScore = useCallback((text: string, search: string) => {
         if (!text || !search) return 0;
@@ -105,8 +116,11 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
     if (isNoNavRoute) return null;
 
     return (
-        <header className="sticky top-0 z-50 h-14 border-b border-border bg-background flex items-center">
-            <div className="max-w-5xl mx-auto w-full px-4 flex items-center gap-4">
+        <header
+            className="sticky top-0 z-40 h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center transition-[padding] duration-300 ease-in-out"
+            style={{ paddingLeft: (mounted && isDesktop && !isNoNavRoute) ? (isCollapsed ? 72 : 256) : undefined }}
+        >
+            <div className="flex-1 w-full px-4 flex items-center gap-4">
                 {!isHome && (
                     <button 
                         onClick={() => router.back()} 

@@ -27,6 +27,8 @@ import { Suspense } from "react";
 import { ThemeProvider } from "@/provider/theme-provider";
 import { ContentWrapper } from "@/components/layout/content-wrapper";
 
+import { SidebarProvider } from "@/context/sidebar.context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,14 +57,16 @@ export default function RootLayout({
         <QueryProvider>
           <ThemeProvider>
             <ConfirmationProvider>
-              <Suspense>
-                <SearchBar />
-              </Suspense>
-              <ContentWrapper>
-                {children}
-              </ContentWrapper>
-              <BottomNav />
-              <Confirmation />
+              <SidebarProvider>
+                <Suspense>
+                  <SearchBar />
+                </Suspense>
+                <ContentWrapper>
+                  {children}
+                </ContentWrapper>
+                <BottomNav />
+                <Confirmation />
+              </SidebarProvider>
             </ConfirmationProvider>
           </ThemeProvider>
         </QueryProvider>
