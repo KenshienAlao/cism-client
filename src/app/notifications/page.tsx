@@ -36,12 +36,6 @@ export default function NotificationsPage() {
             <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4 md:px-5">
                     <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <Bell className="h-4 w-4 text-foreground" />
-                            {notifications?.length > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-sm bg-orange-500" />
-                            )}
-                        </div>
                         <h1 className="text-base font-medium tracking-tight">Notifications</h1>
                     </div>
                     

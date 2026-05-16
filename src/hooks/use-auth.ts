@@ -52,17 +52,19 @@ export function useAuth(): UseAuthReturn {
     refetchInterval: 1000 * 60 * 15,
   });
 
-  useEffect(() => {
-     if (!isFetched) return;
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
-    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+  const isAuthLoading = isLoading || (!profile && !isPublicRoute) || (!!profile && isPublicRoute);
+
+  useEffect(() => {
+    if (!isFetched) return;
 
     if (!profile && !isPublicRoute) {
       router.replace(ROUTES.LOGIN);
     } else if (profile && isPublicRoute) {
       router.replace(ROUTES.HOME);
     }
-  }, [isFetched, profile, pathname, router]);
+  }, [isFetched, profile, isPublicRoute, router]);
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginRequest) => await authService.login(data),
@@ -240,7 +242,7 @@ export function useAuth(): UseAuthReturn {
 
   return {
     profile,
-    isLoading,
+    isLoading: isAuthLoading,
     isFetching,
     isLoggingIn: loginMutation.isPending,
     login: (data: LoginRequest) => loginMutation.mutate(data),

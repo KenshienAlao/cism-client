@@ -161,7 +161,7 @@ export default function CartPage() {
                                                     alt={item.name} 
                                                     fill
                                                     className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
-                                                    sizes="48px"
+                                                    sizes="64px"
                                                 />
                                             ) : (
                                                 <span className="text-[8px] font-medium text-muted-foreground uppercase tracking-widest text-center leading-tight">
@@ -170,60 +170,63 @@ export default function CartPage() {
                                             )}
                                         </div>
 
-                                        {/* Core Row */}
-                                        <div className="flex-1 min-w-0 space-y-1">
-                                            <div className="flex justify-between items-start gap-2">
+                                        {/* Content Area */}
+                                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+                                            {/* Info */}
+                                            <div className="flex-1 min-w-0 space-y-1">
                                                 <h2 className="text-sm font-medium truncate text-foreground">{item.name}</h2>
-                                                <span className="text-sm font-medium text-foreground shrink-0">
+                                                
+                                                <p className="text-xs text-secondary-foreground">
+                                                    ${item.price.toFixed(2)} {item.variationName ? `| ${item.variationName}` : ''}
+                                                </p>
+
+                                                {hasStockIssue && (
+                                                    <p className="text-xs text-orange-500 flex items-center gap-1 font-medium">
+                                                        <AlertCircle className="w-3 h-3" /> Exceeds available stock ({maxStock})
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Actions & Price */}
+                                            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 shrink-0 mt-1 sm:mt-0">
+                                                <span className="text-sm font-medium text-foreground whitespace-nowrap">
                                                     ${(item.price * item.quantity).toFixed(2)}
                                                 </span>
+
+                                                <div className="flex items-center gap-2 sm:gap-3">
+                                                    {/* Step Increment Segment */}
+                                                    <div className="flex items-center border border-border bg-input rounded-md overflow-hidden">
+                                                        <motion.button
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => handleUpdateQuantity(item.id, -1)}
+                                                            disabled={item.quantity <= 1 || isMutating}
+                                                            className="p-1.5 text-secondary-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                                                        >
+                                                            <Minus className="w-3.5 h-3.5" />
+                                                        </motion.button>
+                                                        <span className="text-xs font-medium w-6 text-center select-none text-foreground">
+                                                            {item.quantity}
+                                                        </span>
+                                                        <motion.button
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => handleUpdateQuantity(item.id, 1)}
+                                                            disabled={item.quantity >= maxStock || isMutating}
+                                                            className="p-1.5 text-secondary-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                                                        >
+                                                            <Plus className="w-3.5 h-3.5" />
+                                                        </motion.button>
+                                                    </div>
+
+                                                    <motion.button
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={() => removeItem(item.id)}
+                                                        disabled={isMutating}
+                                                        className="p-2 text-secondary-foreground hover:text-orange-500 rounded-md transition-colors"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </motion.button>
+                                                </div>
                                             </div>
-                                            
-                                            <p className="text-xs text-secondary-foreground">
-                                                ${item.price.toFixed(2)} {item.variationName ? `| ${item.variationName}` : ''}
-                                            </p>
-
-                                            {hasStockIssue && (
-                                                <p className="text-xs text-orange-500 flex items-center gap-1 font-medium">
-                                                    <AlertCircle className="w-3 h-3" /> Exceeds available stock ({maxStock})
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Utilities */}
-                                        <div className="flex items-center gap-3 shrink-0">
-                                            {/* Step Increment Segment */}
-                                            <div className="flex items-center border border-border bg-input rounded-md overflow-hidden">
-                                                <motion.button
-                                                    whileTap={{ scale: 0.9 }}
-                                                    onClick={() => handleUpdateQuantity(item.id, -1)}
-                                                    disabled={item.quantity <= 1 || isMutating}
-                                                    className="p-1.5 text-secondary-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                                                >
-                                                    <Minus className="w-3.5 h-3.5" />
-                                                </motion.button>
-                                                <span className="text-xs font-medium w-6 text-center select-none text-foreground">
-                                                    {item.quantity}
-                                                </span>
-                                                <motion.button
-                                                    whileTap={{ scale: 0.9 }}
-                                                    onClick={() => handleUpdateQuantity(item.id, 1)}
-                                                    disabled={item.quantity >= maxStock || isMutating}
-                                                    className="p-1.5 text-secondary-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                                                >
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                </motion.button>
-                                            </div>
-
-                                            {/* Row*/}
-                                            <motion.button
-                                                whileTap={{ scale: 0.9 }}
-                                                onClick={() => removeItem(item.id)}
-                                                disabled={isMutating}
-                                                className="p-2 text-secondary-foreground hover:text-orange-500 rounded-md transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </motion.button>
                                         </div>
                                     </motion.div>
                                 );

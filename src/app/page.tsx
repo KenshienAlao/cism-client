@@ -32,7 +32,7 @@ const faderVariants = {
 function HomeContent() {
   const { isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
-  const { items: allFlattenedItems, isLoading, isFetching } = useEnrichedItems();
+  const { items: allFlattenedItems, isLoading } = useEnrichedItems();
   const search = searchParams.get('q') || "";
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
