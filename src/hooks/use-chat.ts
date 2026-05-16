@@ -58,13 +58,13 @@ export const useChatHistory = (stallId?: number, customerId?: number, conversati
             if (!stallId && !conversationId) return [];
             let url = `/api/v1/chat/stall/${stallId || 0}`;
             const params = new URLSearchParams();
-            if (customerId) params.append('customerId', customerId.toString());
+            if (finalCustomerId) params.append('customerId', finalCustomerId.toString());
             if (conversationId && conversationId !== 'undefined' && conversationId !== 'null') params.append('conversationId', conversationId);
             params.append('_t', Date.now().toString());
 
             const res = await apiClient.get<ChatMessage[]>(`${url}?${params.toString()}`);
             if (!res.success) throw new Error(res.message);
-            return res.data;
+            return res.data || [];
         },
         enabled: !!stallId || !!conversationId,
         refetchOnWindowFocus: true,
@@ -80,7 +80,7 @@ export const useChatThreads = () => {
         queryFn: async () => {
             const res = await apiClient.get<ChatThread[]>(`/api/v1/chat/threads?_t=${Date.now()}`);
             if (!res.success) throw new Error(res.message);
-            return res.data;
+            return res.data || [];
         },
         enabled: !!profile,
         refetchOnWindowFocus: true,
