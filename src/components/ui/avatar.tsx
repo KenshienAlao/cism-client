@@ -6,18 +6,19 @@ interface AvatarProps {
     src?: string | null;
     name?: string;
     className?: string;
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export function Avatar({ src, name, className = '', size = 'md' }: AvatarProps) {
     const initials = name?.trim().slice(0, 1).toUpperCase() || '?';
 
     const sizeMap = {
-        xs: 'w-3.5 h-3.5 text-[8px]',
+        xs: 'w-4 h-4 text-[8px]',
         sm: 'w-6 h-6 text-[10px]',
         md: 'w-8 h-8 text-xs',
         lg: 'w-10 h-10 text-sm',
-        xl: 'w-12 h-12 text-base'
+        xl: 'w-12 h-12 text-base',
+        '2xl': 'w-16 h-16 text-lg'
     };
 
     return (
@@ -45,10 +46,11 @@ export function Avatar({ src, name, className = '', size = 'md' }: AvatarProps) 
                     fill
                     className="object-cover"
                     sizes={
-                        size === 'xs' ? '14px' :
+                        size === 'xs' ? '16px' :
                         size === 'sm' ? '24px' :
                         size === 'md' ? '32px' :
-                        size === 'lg' ? '40px' : '48px'
+                        size === 'lg' ? '40px' :
+                        size === 'xl' ? '48px' : '64px'
                     }
                 />
             ) : (

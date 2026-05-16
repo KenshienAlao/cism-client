@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Order } from "@/model/order.model";
 
 interface OrderSummaryTrackProps {
@@ -22,11 +23,13 @@ export default function OrderSummaryTrack({ order }: OrderSummaryTrackProps) {
             <div className="divide-y divide-border/60">
                 {order.orderItems.map((item, index) => (
                     <div key={index} className="flex gap-3 items-center py-3 first:pt-3.5 last:pb-3.5">
-                        <div className="w-10 h-10 rounded-md bg-secondary shrink-0 overflow-hidden border border-border">
-                            <img 
-                                src={item.image} 
-                                alt={item.itemName} 
-                                className="w-full h-full object-cover select-none" 
+                        <div className="w-10 h-10 rounded-md bg-secondary shrink-0 overflow-hidden border border-border relative">
+                            <Image
+                                src={item.image}
+                                alt={item.itemName}
+                                fill
+                                className="object-cover select-none"
+                                sizes="40px"
                             />
                         </div>
                     

@@ -147,8 +147,8 @@ export function ActiveChatView() {
                                 <Avatar
                                     src={activeChat.customerImage || activeChat.stallImage}
                                     name={activeChat.customerName || activeChat.stallName}
-                                    size="md"
-                                    className="w-16 h-16 rounded-md border border-border"
+                                    size="2xl"
+                                    className="border border-border"
                                 />
                                 <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-card rounded-md
                                     ${isOnline ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`}>

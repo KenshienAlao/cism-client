@@ -1,5 +1,6 @@
 import { ChatMessage } from '@/hooks/use-chat';
 import { Avatar } from '@/components/ui/avatar';
+import Image from 'next/image';
 import { Check, Circle, Trash2, Ban, MoreVertical } from 'lucide-react';
 import { useRef, useState } from 'react';
 
@@ -72,7 +73,7 @@ export function MessageBubble({
                         {activeMessageMenu === msg.id && (
                             <div
                                 className={`
-                                    absolute z-[100] bg-white rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
+                                    absolute z-100 bg-background rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
                                     ${isMe ? 'right-0' : 'left-0'}
                                     ${menuDirection === 'up'
                                         ? 'bottom-full mb-1.5'
@@ -128,22 +129,27 @@ export function MessageBubble({
                             }
                         `}>
                             {isImage(msg.content) ? (
-                                <div className="p-0.5">
-                                    <img
-                                        src={msg.content}
-                                        alt="Media"
-                                        className="max-w-[240px] md:max-w-[320px] rounded-md object-cover transition-opacity cursor-pointer active:opacity-90"
-                                        onClick={() => window.open(msg.content, '_blank')}
-                                    />
+                                <div className="p-0.5 relative">
+                                    <div className="relative w-[240px] md:w-[320px] h-auto min-h-[100px]">
+                                        <Image
+                                            src={msg.content}
+                                            alt="Media"
+                                            width={320}
+                                            height={320}
+                                            className="rounded-md object-contain transition-opacity cursor-pointer active:opacity-90 w-full h-auto"
+                                            onClick={() => window.open(msg.content, '_blank')}
+                                            sizes="(max-width: 768px) 240px, 320px"
+                                        />
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="px-3.5 py-2 text-[12px] font-medium leading-relaxed break-words whitespace-pre-wrap tracking-wide">
+                                <div className="px-3.5 py-2 text-[12px] font-medium leading-relaxed wrap-break-word whitespace-pre-wrap tracking-wide">
                                     {msg.content}
                                 </div>
                             )}
                         </div>
 
-                        {/* Minimalist Floating Options Button */}
+                        {/* Floating Options Button */}
                         {msg.status !== 'sending' && (
                             <div
                                 className={`
@@ -163,7 +169,7 @@ export function MessageBubble({
                                 {activeMessageMenu === msg.id && (
                                     <div
                                         className={`
-                                            absolute z-[100] bg-white rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
+                                            absolute z-100 bg-background rounded-md shadow-sm border border-neutral-100 py-1 min-w-[120px]
                                             ${isMe ? 'right-0' : 'left-0'}
                                             ${menuDirection === 'up'
                                                 ? 'bottom-full mb-1.5'

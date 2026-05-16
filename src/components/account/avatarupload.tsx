@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { notifError } from "@/lib/toast";
 import { useRef, useState } from "react";
 import { Loader2, Camera, User } from "lucide-react";
+import Image from "next/image";
 
 export function AvatarUpload() {
     const { profile, uploadAvatar, isUploadingAvatar } = useAuth();
@@ -51,11 +52,16 @@ export function AvatarUpload() {
                     )}
                     
                     {avatarPreview || profile?.user?.avatar ? (
-                        <img
-                            src={avatarPreview ?? profile?.user?.avatar}
-                            alt="Profile"
-                            className="h-full w-full object-cover"
-                        />
+                        <div className="relative h-full w-full">
+                            <Image
+                                src={avatarPreview ?? profile?.user?.avatar ?? ""}
+                                alt="Profile"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 1024px) 64px, 80px"
+                                unoptimized={!!avatarPreview}
+                            />
+                        </div>
                     ) : (
                         <div className="flex items-center justify-center">
                             {initials ? (

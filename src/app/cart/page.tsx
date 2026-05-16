@@ -160,7 +160,7 @@ export default function CartPage() {
                                                     src={item.image} 
                                                     alt={item.name} 
                                                     fill
-                                                    className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
+                                                    className="object-cover mix-blend-multiply dark:mix-blend-normal"
                                                     sizes="64px"
                                                 />
                                             ) : (

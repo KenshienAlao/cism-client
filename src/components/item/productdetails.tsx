@@ -106,8 +106,8 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                     <Avatar
                         src={itemDetails.stallImage}
                         name={itemDetails.stallName}
-                        size="sm"
-                        className="h-4 w-4 rounded-md"
+                        size="xs"
+                        className="rounded-md"
                     />
                     <span className="text-xs text-secondary-foreground hover:text-orange-500 flex items-center transition-colors">
                         {itemDetails.stallName}
