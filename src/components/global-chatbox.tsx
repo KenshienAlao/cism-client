@@ -64,7 +64,7 @@ export function GlobalChatbox() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: isMobile ? 20 : 10 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-50 pointer-events-none"
+                        className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-100 pointer-events-none"
                     >
                         <div
                             ref={windowRef}
