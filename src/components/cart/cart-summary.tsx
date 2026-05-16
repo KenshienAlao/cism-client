@@ -16,8 +16,8 @@ interface CartSummaryProps {
 
 export function CartSummary({ cartSummary, isMutating, selectedIds, setStagedQuantities, handleSaveChanges, handleCheckout }: CartSummaryProps) {
     return (
-        <div className="fixed md:bottom-20 bottom-0 left-0 right-0 z-50 w-full bg-white border-t border-neutral-200">
-            <div className="max-w-4xl mx-auto w-full px-4 md:px-8 p-4 md:p-6 pb-20 md:pb-6 flex items-center justify-between gap-4 md:gap-6">
+        <div className="fixed md:bottom-28 bottom-16 left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-md border-t border-border transition-all duration-300">
+            <div className="max-w-4xl mx-auto w-full px-4 md:px-8 p-4 md:p-6 flex items-center justify-between gap-4 md:gap-6">
                 <div className="flex flex-col min-w-0">
                     <span className="text-[9px] md:text-xs font-bold text-neutral-400 uppercase tracking-[0.2em] mb-0.5 md:mb-1">
                         {cartSummary.count || 0} Items

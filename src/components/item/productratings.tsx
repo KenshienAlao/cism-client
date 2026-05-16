@@ -38,103 +38,108 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
     }, [reviews]);
 
     return (
-        <section className="py-12 border-t border-neutral-100">
-            <div className="max-w-4xl">
+        <section className="py-2">
+            <div className="w-full">
                 {/* Header Summary */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div className="flex flex-col gap-4 mb-6 pb-5 border-b border-border">
                     <div className="space-y-1">
-                        <h2 className="text-xl font-medium text-neutral-900 tracking-tight">Verified Reviews</h2>
-                        <div className="flex items-center gap-3">
+                        <h2 className="text-sm font-medium text-foreground tracking-tight">Verified Reviews</h2>
+                        <div className="flex items-center gap-2">
                             <div className="flex items-center gap-0.5">
                                 {[...Array(5)].map((_, i) => (
                                     <Star
                                         key={i}
-                                        className={`w-4 h-4 ${i < Math.round(Number(avgRating)) ? 'fill-orange-500 text-orange-500' : 'fill-neutral-100 text-neutral-100'}`}
+                                        className={`w-3.5 h-3.5 ${i < Math.round(Number(avgRating)) ? 'fill-orange-500 text-orange-500' : 'fill-secondary-foreground/20 text-secondary-foreground/20'}`}
                                         strokeWidth={1.5}
                                     />
                                 ))}
                             </div>
-                            <span className="text-sm text-neutral-500">
-                                Based on <span className="font-medium text-neutral-900">{reviews.length}</span> reviews
+                            <span className="text-xs text-secondary-foreground/70">
+                                Based on <span className="font-semibold text-foreground">{reviews.length}</span> reviews
                             </span>
                         </div>
                     </div>
 
-                    {/* Minimalist Filter Pills */}
-                    <div className="flex flex-wrap gap-2">
+                    {/* Filter */}
+                    <div className="flex flex-wrap gap-1.5">
                         {(['all', 'media', 5, 4, 3, 2, 1] as const).map((id) => (
                             <button
                                 key={id}
-                                onClick={() => setSelectedFilter(id)}
-                                className={`px-3 py-1.5 rounded text-[11px] font-medium transition-all border ${
+                                onClick={() => {
+                                    setSelectedFilter(id);
+                                    setShowAllReviews(false);
+                                }}
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors border focus:outline-none focus:ring-1 focus:ring-ring ${
                                     selectedFilter === id
-                                        ? 'bg-orange-500 border-orange-500 text-white shadow-sm'
-                                        : 'bg-white border-neutral-200 text-neutral-500 hover:border-neutral-300'
+                                        ? 'bg-accent border-orange-500 text-accent-foreground font-semibold'
+                                        : 'bg-card border-border text-secondary-foreground/80 hover:border-secondary-foreground/30'
                                 }`}
                             >
                                 {id === 'all' ? 'All' : id === 'media' ? 'Photos' : `${id} ★`}
-                                <span className={`ml-1.5 opacity-60`}>({counts[id]})</span>
+                                <span className="ml-1 opacity-60 text-[10px]">({counts[id]})</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
+                {/* Review Feed List */}
                 {filteredReviews.length > 0 ? (
-                    <div className="space-y-10">
+                    <div className="space-y-5 divide-y divide-border/60">
                         {(showAllReviews ? filteredReviews : filteredReviews.slice(0, 5)).map((review, index) => (
-                            <div key={review.id || index} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-8 group">
-                                {/* Left Side: User Meta */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-neutral-50 flex-shrink-0 relative overflow-hidden border border-neutral-100">
+                            <div key={review.id || index} className={`grid grid-cols-1 md:grid-cols-[150px_1fr] gap-3 items-start ${index > 0 ? 'pt-5' : ''}`}>
+                                
+                                {/* User Information */}
+                                <div className="space-y-1.5 md:sticky md:top-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-md bg-secondary shrink-0 relative overflow-hidden border border-border">
                                             {review.user?.avatar ? (
                                                 <Image
                                                     src={review.user.avatar as string}
                                                     alt={review.user.clientName || 'User'}
                                                     fill
                                                     className="object-cover"
-                                                    sizes="32px"
+                                                    sizes="28px"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-neutral-400 text-[10px] font-medium uppercase">
+                                                <div className="w-full h-full flex items-center justify-center text-secondary-foreground/40 text-[10px] font-bold uppercase">
                                                     {review.user?.clientName?.charAt(0) || 'U'}
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-medium text-neutral-900 truncate">
+                                        <div className="min-w-0 leading-tight">
+                                            <p className="text-xs font-medium text-foreground truncate">
                                                 {review.user?.clientName || "Anonymous Buyer"}
                                             </p>
-                                            <p className="text-[10px] text-neutral-400 uppercase tracking-tighter">
+                                            <p className="text-[9px] text-secondary-foreground/60 uppercase tracking-tight">
                                                 {formatDate(review.createdAt || review.create_at || review.createAt)}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-0.5 pl-0.5">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                className={`w-2.5 h-2.5 ${i < review.star ? 'fill-orange-500 text-orange-500' : 'fill-neutral-100 text-neutral-100'}`}
+                                                className={`w-2.5 h-2.5 ${i < review.star ? 'fill-orange-500 text-orange-500' : 'fill-secondary-foreground/15 text-secondary-foreground/15'}`}
                                                 strokeWidth={1}
                                             />
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Right Side: Comment & Media */}
-                                <div className="space-y-4">
-                                    <p className="text-sm text-neutral-600 leading-relaxed max-w-2xl">
+                                {/* Comments & Uploaded Media Content */}
+                                <div className="space-y-2.5 pl-0.5 md:pl-0">
+                                    <p className="text-xs text-secondary-foreground/90 leading-relaxed max-w-2xl">
                                         {review.comment}
                                     </p>
 
                                     {review.image && (
-                                        <div className="relative w-20 h-20 rounded border border-neutral-100 overflow-hidden bg-neutral-50 group-hover:border-neutral-200 transition-colors">
+                                        <div className="relative w-16 h-16 rounded-md border border-border overflow-hidden bg-secondary hover:border-secondary-foreground/30 transition-colors">
                                             <Image
                                                 src={review.image}
-                                                alt="Review"
+                                                alt="Review content media"
                                                 fill
                                                 className="object-cover"
-                                                sizes="80px"
+                                                sizes="64px"
                                             />
                                         </div>
                                     )}
@@ -143,11 +148,11 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
                         ))}
 
                         {filteredReviews.length > 5 && !showAllReviews && (
-                            <div className="pt-6">
+                            <div className="pt-5">
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowAllReviews(true)}
-                                    className="h-10 text-xs font-medium text-neutral-500 border-neutral-200 hover:text-orange-500 hover:border-orange-500 transition-all px-8 rounded"
+                                    className="h-9 text-xs font-medium text-secondary-foreground/80 border-border bg-background hover:bg-secondary hover:text-foreground transition-all px-5 rounded-md w-full sm:w-auto"
                                 >
                                     Read all {filteredReviews.length} reviews
                                 </Button>
@@ -155,9 +160,9 @@ export function ProductRatings({ reviews }: { reviews: Review[], category?: stri
                         )}
                     </div>
                 ) : (
-                    <div className="py-20 text-center border-2 border-dashed border-neutral-50 rounded-lg">
-                        <MessageSquare className="w-8 h-8 text-neutral-200 mx-auto mb-3" />
-                        <p className="text-xs text-neutral-400">No reviews found for this selection.</p>
+                    <div className="py-12 text-center border border-dashed border-border rounded-lg bg-card/40">
+                        <MessageSquare className="w-6 h-6 text-secondary-foreground/30 mx-auto mb-2" />
+                        <p className="text-xs text-secondary-foreground/70">No reviews found for this selection.</p>
                     </div>
                 )}
             </div>

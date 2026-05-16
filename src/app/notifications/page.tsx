@@ -19,7 +19,7 @@ export default function NotificationsPage() {
     if (isLoading) return <Loading />;
 
     return (
-        <div className="min-h-screen bg-neutral-50 pb-32">
+        <div className="min-h-screen bg-neutral-50 pb-10">
             {/* header */}
             <NotifHeader clearAll={clearAll} />
 

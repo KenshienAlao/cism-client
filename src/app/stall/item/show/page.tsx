@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from 'react';
 import { useItemDetail } from "@/hooks/use-item";
 import { useAuth } from "@/hooks/use-auth";
-import { ShoppingCart, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
+import { ShoppingCart, CheckCircle2 } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { ProductDetails } from "@/components/item/productdetails";
 import { WriteReviewForm } from "@/components/item/writereviewform";
@@ -25,17 +25,17 @@ function StallItemDetailContent() {
     if (isLoading) return <Loading />;
 
     if (!itemDetails) return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-16 h-16 bg-neutral-50 flex items-center justify-center mb-4 border border-neutral-100">
-                <ShoppingCart className="w-6 h-6 text-neutral-300" />
+        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 text-center">
+            <div className="w-11 h-11 bg-secondary flex items-center justify-center mb-3 border border-border rounded-md">
+                <ShoppingCart className="w-5 h-5 text-secondary-foreground/60" />
             </div>
-            <h1 className="text-xl font-medium text-neutral-900 mb-2">Item not found</h1>
-            <p className="text-sm text-neutral-500 mb-8 max-w-xs">
+            <h1 className="text-base font-medium mb-1">Item not found</h1>
+            <p className="text-sm text-secondary-foreground/80 mb-5 max-w-xs leading-normal">
                 This item may have been moved or is no longer available in {stallAccount}'s inventory.
             </p>
             <Button
                 onClick={() => router.push('/')}
-                className="h-11 px-6 bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 rounded-md transition-colors"
+                className="h-10 px-4 bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 active:scale-[0.98] focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-md transition-all duration-150"
             >
                 Return to Shop
             </Button>
@@ -47,41 +47,48 @@ function StallItemDetailContent() {
     );
 
     return (
-        <div className="min-h-screen bg-white text-neutral-900 antialiased">
-            <main className="max-w-7xl mx-auto px-4 py-6 md:py-12">
-                <div className="mb-20">
+        <div className="min-h-screen bg-background text-foreground antialiased transition-colors duration-150">
+            <main className="max-w-6xl mx-auto px-4 py-5 md:py-10 space-y-10 md:space-y-14">
+                
+                {/* Product */}
+                <div className="w-full">
                     <ProductDetails itemDetails={itemDetails} />
                 </div>
 
-                <hr className="border-neutral-100 mb-16" />
-
-                {/* Review Section */}
+                <hr className="border-border opacity-50" />
                 <div className="max-w-3xl">
-                    <section id="reviews" className="space-y-12">
-                        <header className="space-y-1">
-                            <h2 className="text-2xl font-medium tracking-tight">Customer Reviews</h2>
-                            <p className="text-sm text-neutral-500">Feedback from recent purchases.</p>
+                    <section id="reviews" className="space-y-8">
+                        <header className="space-y-1.5">
+                            <h2 className="text-lg font-medium tracking-tight">Customer Reviews</h2>
+                            <p className="text-xs text-muted-foreground">Feedback from recent purchases.</p>
                         </header>
                         
-                        <div className="grid gap-12">
+                        <div className="space-y-8">
                             {!hasReviewed ? (
-                                <div className="bg-neutral-50/50 p-6 border border-neutral-100 rounded-lg">
+                                <div className="bg-card p-6 border border-border rounded-xl shadow-sm">
                                     <WriteReviewForm
                                         stallId={itemDetails.stallId!}
                                         itemId={itemDetails.id!}
                                     />
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-3 bg-orange-50/50 p-4 border border-orange-100 rounded-lg text-orange-700">
-                                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                                    <p className="text-sm font-medium">You've already reviewed this item. Thank you for your feedback!</p>
+                                <div className="flex items-start gap-3 bg-accent/50 text-accent-foreground p-5 border border-primary/20 rounded-xl">
+                                    <CheckCircle2 className="w-5 h-5 shrink-0 text-primary" />
+                                    <div className="space-y-0.5">
+                                        <p className="text-sm font-semibold leading-none">Review Submitted</p>
+                                        <p className="text-xs opacity-80 leading-normal">
+                                            You've already reviewed this item. Thank you for helping others with your feedback!
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                             
-                            <ProductRatings
-                                reviews={itemDetails.reviews}
-                                category={itemDetails.category}
-                            />
+                            <div className="pt-4">
+                                <ProductRatings
+                                    reviews={itemDetails.reviews}
+                                    category={itemDetails.category}
+                                />
+                            </div>
                         </div>
                     </section>
                 </div>

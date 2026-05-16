@@ -115,7 +115,7 @@ export default function CartPage() {
     if (cartItems.length === 0) return <CartEmpty />
 
     return (
-        <div className="min-h-screen bg-neutral-50 pb-48">
+        <div className="min-h-screen bg-neutral-50 pb-10">
             {/* header */}
             <CartHeader cartItems={cartItems} selectedIds={selectedIds} setSelectedIds={setSelectedIds} />
 

@@ -68,7 +68,7 @@ export default function OrdersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-50 pb-32">
+        <div className="min-h-screen bg-neutral-50 pb-10">
             <header className="sticky top-0 z-40">
                 <Tabs
                     TABS={TABS}

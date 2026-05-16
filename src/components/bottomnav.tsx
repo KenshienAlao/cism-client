@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, ClipboardList, ShoppingCart, User, Bell } from 'lucide-react';
+import { Home, ClipboardList, ShoppingCart, User, Bell, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
@@ -47,7 +47,6 @@ export function BottomNav() {
                 });
                 break;
             case '/notifications':
-                // Notifications are derived from orders, so prefetch orders
                 queryClient.prefetchQuery({
                     queryKey: MY_ORDERS_QUERY_KEY,
                     queryFn: () => orderService.getMyOrders().then(res => res.data),
@@ -71,44 +70,91 @@ export function BottomNav() {
         { icon: User, label: 'Me', href: '/account' },
     ];
 
-
     const hideOnRoutes = ['/login', '/register'];
     if (hideOnRoutes.includes(pathname)) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-neutral-100 pb-safe">
-            <nav className="max-w-md mx-auto h-16 md:h-18 flex items-center justify-around px-2">
-                {navItems.map((item: any) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
+        <>
+            {/* Mobile Bottom Navigation */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border pb-safe">
+                <nav className="h-14 flex items-center justify-around px-2">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        const Icon = item.icon;
+                        const count = item.isCart ? cartCount : item.isOrders ? activeOrdersCount : item.isActivity ? notifCount : 0;
 
-                    const count = item.isCart ? cartCount : item.isOrders ? activeOrdersCount : item.isActivity ? notifCount : 0;
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                onMouseEnter={() => handlePrefetch(item.href)}
+                                className={`flex-1 h-full flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                                    isActive ? 'text-orange-500' : 'text-foreground hover:bg-accent'
+                                }`}
+                            >
+                                <div className="relative p-1">
+                                    <Icon className="w-5 h-5" strokeWidth={2} />
+                                    {count > 0 && (
+                                        <span className="absolute top-0 right-0 flex h-3.5 min-w-[14px] px-0.5 items-center justify-center rounded-md bg-orange-500 text-[8px] font-medium text-white border border-background">
+                                            {count}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-medium tracking-wide">
+                                    {item.label}
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
 
-                    return (
-                        <Link
-                            key={item.label}
-                            href={item.href}
-                            onMouseEnter={() => handlePrefetch(item.href)}
-                            className="flex-1 h-full flex flex-col items-center justify-center gap-1 group active:opacity-70 transition-opacity"
-                        >
-                            <div className="relative">
-                                <Icon 
-                                    className={`w-5 h-5 ${isActive ? 'text-orange-500' : 'text-neutral-400'}`} 
-                                    strokeWidth={isActive ? 2.5 : 2} 
-                                />
+            {/* Desktop Side Navigation */}
+            <div className="hidden md:flex fixed top-0 left-0 bottom-0 w-64 z-50 flex-col bg-background border-r border-border p-4 gap-4">
+                {/* Header section */}
+                <div className="flex items-center h-10 px-3">
+                    <button 
+                        type="button"
+                        className="p-1.5 rounded-md text-foreground hover:bg-accent transition-colors"
+                        aria-label="Toggle Menu"
+                    >
+                        <Menu className="w-5 h-5" strokeWidth={2} />
+                    </button>
+                </div>
+
+                <nav className="flex flex-col gap-2">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        const Icon = item.icon;
+                        const count = item.isCart ? cartCount : item.isOrders ? activeOrdersCount : item.isActivity ? notifCount : 0;
+
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                onMouseEnter={() => handlePrefetch(item.href)}
+                                className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                                    isActive 
+                                        ? 'bg-accent text-orange-500 font-medium' 
+                                        : 'text-foreground hover:bg-accent'
+                                }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-orange-500' : 'text-foreground'}`} strokeWidth={2} />
+                                    <span className="text-sm">{item.label}</span>
+                                </div>
                                 {count > 0 && (
-                                    <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white border-2 border-white">
+                                    <span className={`flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-md text-xs font-medium ${
+                                        isActive ? 'bg-orange-500 text-white' : 'bg-input text-foreground'
+                                    }`}>
                                         {count}
                                     </span>
                                 )}
-                            </div>
-                            <span className={`text-[9px] font-bold uppercase tracking-tight ${isActive ? 'text-orange-500' : 'text-neutral-400'}`}>
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </nav>
-        </div>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+        </>
     );
 }

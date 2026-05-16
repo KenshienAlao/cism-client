@@ -25,6 +25,7 @@ import { SearchBar } from "@/components/searchbar";
 import { BottomNav } from "@/components/bottomnav";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/provider/theme-provider";
+import { ContentWrapper } from "@/components/layout/content-wrapper";
 
 export default function RootLayout({
   children,
@@ -57,7 +58,9 @@ export default function RootLayout({
               <Suspense>
                 <SearchBar />
               </Suspense>
-              {children}
+              <ContentWrapper>
+                {children}
+              </ContentWrapper>
               <BottomNav />
               <Confirmation />
             </ConfirmationProvider>

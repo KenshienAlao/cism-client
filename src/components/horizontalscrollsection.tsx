@@ -59,7 +59,7 @@ export function HorizontalScrollSection({
 
   return (
     <section className="space-y-6">
-      {/* Header - Balanced for both mobile and desktop */}
+      {/* Header */}
       <div className="px-1">
         <SectionHeader 
           icon={icon} 
@@ -69,7 +69,7 @@ export function HorizontalScrollSection({
       </div>
 
       {items.length > 0 ? (
-        <div className="scroll-container relative group">
+        <div className="scroll-container relative">
           <div className="flex overflow-x-auto gap-3 md:gap-5 pb-4 -mx-4 px-4 no-scrollbar scroll-smooth">
             {visibleItems.map((product, index) => (
               <div 

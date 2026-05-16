@@ -20,7 +20,7 @@ export default function AccountPage() {
     return (
         <main className="min-h-screen bg-background text-foreground antialiased selection:bg-accent selection:text-accent-foreground transition-colors duration-200">
             <div className="mx-auto max-w-5xl px-4 py-8 md:py-12 lg:py-16">
-                
+
                 {/* Header Section: Identity */}
                 <header className="mb-8 flex items-center justify-between border-b border-border pb-6">
                     <button
