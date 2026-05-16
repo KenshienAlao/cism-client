@@ -247,20 +247,6 @@ export function BottomNav() {
                                     >
                                         {item.label}
                                     </motion.span>
-
-                                    {/* Badge in expanded mode */}
-                                    {count > 0 && (
-                                        <motion.span
-                                            variants={badgeVariants}
-                                            animate={isCollapsed ? 'collapsed' : 'expanded'}
-                                            initial={false}
-                                            className={`ml-auto flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full text-[10px] font-bold z-10 ${
-                                                isActive ? 'bg-orange-500 text-white' : 'bg-secondary text-foreground'
-                                            }`}
-                                        >
-                                            {count > 9 ? '9+' : count}
-                                        </motion.span>
-                                    )}
                                 </Link>
 
                                 {/* Tooltip when collapsed */}

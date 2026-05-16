@@ -84,7 +84,6 @@ export function useItem(): UseItemReturn {
           return stall;
         });
         queryClient.setQueryData(ITEM_QUERY_KEY, updatedItems);
-        notifSuccess("Review posted!");
       }
 
       return { previousItems };

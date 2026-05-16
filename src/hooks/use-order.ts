@@ -164,7 +164,7 @@ export function useOrder() {
             return { previousOrders };
         },
         onSuccess: () => {
-            notifSuccess('Order received!');
+            // notifSuccess('Order received!');
         },
         onError: (error: any, _, context) => {
             if (context?.previousOrders) {

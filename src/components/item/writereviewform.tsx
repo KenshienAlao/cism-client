@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Star, Camera, X, Loader2 } from 'lucide-react';
 import { createReviewSchema } from "@/validation/item.validation";
-import { notifError } from "@/lib/toast";
+import { notifError, notifSuccess } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { useItem } from '@/hooks/use-item';
 import Image from 'next/image';
@@ -45,7 +45,13 @@ export function WriteReviewForm({
             return;
         }
 
-        createReviewMutation.mutate(payload);
+        createReviewMutation.mutate(payload, {
+            onSuccess: (res: any) => {
+                if (res.success) {
+                    notifSuccess("Review posted! Thank you.");
+                }
+            }
+        });
         
         setStar(0);
         setComment("");

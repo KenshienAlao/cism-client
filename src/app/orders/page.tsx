@@ -31,7 +31,7 @@ const cardVariants = {
 };
 
 export default function OrdersPage() {
-    const { profile, isLoading: isAuthLoading } = useAuth();
+    const { isLoading: isAuthLoading } = useAuth();
     const { useMyOrders, receiveOrder, deleteOrder, cancelOrder, handleDeleteOrder } = useOrder();
     const { createReview } = useItem();
     const queryClient = useQueryClient();
@@ -98,7 +98,7 @@ export default function OrdersPage() {
         setSelectedOrder(null);
 
         try {
-            await Promise.all(selectedOrder.orderItems.map((item: any) =>
+            const results = await Promise.all(selectedOrder.orderItems.map((item: any) =>
                 createReview({
                     itemId: item.itemId || item.id,
                     stallId: selectedOrder.stallId,
@@ -107,8 +107,16 @@ export default function OrdersPage() {
                     image: data.imageFile
                 })
             ));
+
+            const hasSuccess = results.some(res => res.success);
+            const allAlreadyExist = results.every(res => !res.success && res.message?.toLowerCase().includes('already'));
+
             await deleteOrder.mutateAsync(selectedOrder.id);
-            notifSuccess('Review submitted! Thank you.');
+            
+            if (hasSuccess) {
+                notifSuccess('Review submitted! Thank you.');
+            } else if (!allAlreadyExist) {
+            }
         } catch (error) {
             if (prevOrders) queryClient.setQueryData(MY_ORDERS_QUERY_KEY, prevOrders);
             setSelectedOrder(selectedOrder);
