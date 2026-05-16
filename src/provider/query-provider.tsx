@@ -25,7 +25,7 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       const p = createSyncStoragePersister({
         storage: window.localStorage,
-        key: 'CISM_CLIENT_OFFLINE_CACHE',
+        key: 'CISM_OFFLINE_CACHE_V1',
       });
       setPersister(p);
     }
