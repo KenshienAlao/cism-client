@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { Toaster } from "react-hot-toast";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import "./globals.css";
 
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       
       <body className="min-h-full flex flex-col font-sans transition-colors duration-300 overflow-x-hidden">
+        <SpeedInsights />
         <QueryProvider>
           <ThemeProvider>
             <ConfirmationProvider>
