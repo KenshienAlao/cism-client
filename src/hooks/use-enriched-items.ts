@@ -44,6 +44,7 @@ export function useEnrichedItems() {
 
     return {
         items,
+        stalls,
         isLoading,
         isFetching,
         refetch

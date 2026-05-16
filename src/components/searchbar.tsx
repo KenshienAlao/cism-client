@@ -11,6 +11,7 @@ import { NO_NAV_ROUTES } from '@/config/app.config';
 import { isPathInRoutes } from '@/lib/utils/route';
 import Image from 'next/image';
 import { useSidebar } from '@/context/sidebar.context';
+import { ItemResponse } from '@/model/product.model';
 
 
 interface SearchResult {
@@ -38,8 +39,7 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
     const isNoNavRoute = useMemo(() => isPathInRoutes(pathname, NO_NAV_ROUTES as unknown as string[]), [pathname]);
     const isHome = pathname === '/';
     const { profile, isLoading: isAuthLoading } = useAuth();
-    const { items: stalls = [], isFetching } = useItem();
-    const allItems = useEnrichedItems(stalls);
+    const { items: allItems = [], stalls = [], isFetching } = useEnrichedItems();
     const { isCollapsed } = useSidebar();
 
     useEffect(() => { setMounted(true); }, []);
@@ -69,7 +69,7 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
             id: String(stall.id), name: stall.name, type: 'stall' as const,
             score: calculateScore(stall.name, s), metadata: stall
         })).filter(r => r.score > 0);
-        const productResults: SearchResult[] = allItems.map(item => ({
+        const productResults: SearchResult[] = allItems.map((item: ItemResponse) => ({
             id: String(item.id), name: item.name, type: 'product' as const,
             score: calculateScore(item.name, s) * 1.1, metadata: item
         })).filter(r => r.score > 0);
