@@ -69,7 +69,7 @@ export const useChatHistory = (stallId?: number, customerId?: number, conversati
         enabled: !!stallId || !!conversationId,
         refetchOnWindowFocus: true,
         refetchInterval: 1000 * 10,
-        staleTime: 30_000,
+        staleTime: 0,
     });
 };
 

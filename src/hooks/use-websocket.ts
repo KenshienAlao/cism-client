@@ -222,13 +222,15 @@ export function useWebSocket() {
                             (t: any) => t.stallId === chat.stallId && t.customerId === chat.customerId
                         );
 
+                        const existingThread = threadIdx >= 0 ? updated[threadIdx] : null;
+
                         const threadData = {
                             stallId: chat.stallId,
-                            stallName: chat.senderName,
-                            stallImage: null,
+                            stallName: existingThread?.stallName || (chat.sentByStall ? chat.senderName : (chat.stallName || 'Stall')),
+                            stallImage: existingThread?.stallImage || null,
                             customerId: chat.customerId,
-                            customerName: chat.customerName,
-                            customerImage: null,
+                            customerName: existingThread?.customerName || (chat.sentByStall ? (chat.customerName || 'You') : chat.senderName),
+                            customerImage: existingThread?.customerImage || null,
                             lastMessage: chat.content,
                             lastMessageAt: chat.createdAt,
                             isUnread: chat.sentByStall,
