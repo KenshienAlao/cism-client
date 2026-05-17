@@ -137,8 +137,29 @@ export function useWebSocket() {
 
                     notifSuccess(getToastMessage(order));
                 });
-                client.subscribe('/topic/inventory', () => {
+                client.subscribe('/topic/inventory', (message) => {
                     queryClient.invalidateQueries({ queryKey: ITEM_QUERY_KEY });
+                    try {
+                        const update = JSON.parse(message.body);
+                        const preorders = queryClient.getQueryData<any[]>(['preorders']) || [];
+                        const match = preorders.find(p => 
+                            Number(p.itemId) === Number(update.itemId) && 
+                            (p.variationId ? Number(p.variationId) === Number(update.variationId) : !update.variationId)
+                        );
+                        
+                        if (match) {
+                            const newStock = Number(update.newStock) || 0;
+                            if (newStock > 0) {
+                                const nameWithVar = match.variationName ? `${match.itemName} (${match.variationName})` : match.itemName;
+                                notifSuccess(`"${nameWithVar}" from ${match.stallName} has been restocked (Stocks: ${newStock})! Click notifications to buy now.`);
+                                queryClient.invalidateQueries({ queryKey: ['preorders'] });
+                                queryClient.invalidateQueries({ queryKey: ['preorders-success'] });
+                                queryClient.invalidateQueries({ queryKey: ['dismissed_notifications'] });
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing inventory update:', e);
+                    }
                 });
                 client.subscribe('/topic/presence', (message) => {
                     const presence = JSON.parse(message.body);
@@ -146,7 +167,6 @@ export function useWebSocket() {
                     queryClient.invalidateQueries({ queryKey: ['presence'], exact: false });
                 });
 
-                // Chat Subscription
                 client.subscribe('/user/queue/chat', (message) => {
                     const chat = JSON.parse(message.body);
 

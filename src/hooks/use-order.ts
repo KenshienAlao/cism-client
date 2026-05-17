@@ -18,24 +18,21 @@ export function useOrder() {
     const addOrder = useMutation({
         mutationFn: (request: OrderRequest) => orderService.addOrder(request),
         onMutate: async () => {
-            // Cancel outgoing queries
             await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
             await queryClient.cancelQueries({ queryKey: MY_ORDERS_QUERY_KEY });
 
-            // Snapshot previous data
             const previousCart = queryClient.getQueryData<any[]>(CART_QUERY_KEY);
             const previousOrders = queryClient.getQueryData<Order[]>(MY_ORDERS_QUERY_KEY);
 
-            // Optimistically clear cart
             queryClient.setQueryData(CART_QUERY_KEY, []);
 
             return { previousCart, previousOrders };
         },
         onSuccess: (response) => {
             if (response.success) {
-                // Keep the success response data in cache
                 queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
                 queryClient.invalidateQueries({ queryKey: MY_ORDERS_QUERY_KEY });
+                queryClient.invalidateQueries({ queryKey: ['preorders'] });
             }
         },
         onError: (error: any, _, context) => {

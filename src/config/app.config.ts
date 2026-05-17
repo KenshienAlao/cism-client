@@ -43,6 +43,12 @@ export const API_ENDPOINTS = {
     UPDATE: "/api/customer/cart/update-cart-item",
     DELETE: "/api/customer/cart/delete-cart-item",
     DELETE_ALL: "/api/customer/cart/delete-all-cart",
+  },
+  PREORDER: {
+    GET_ALL: "/api/customer/preorder/my-preorders",
+    GET_ALL_SUCCESS: "/api/customer/preorder/my-preorders-success",
+    ADD: "/api/customer/preorder/add",
+    DELETE: "/api/customer/preorder/delete",
   }
 } as const;
 

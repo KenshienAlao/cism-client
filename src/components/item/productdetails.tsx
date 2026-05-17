@@ -1,6 +1,6 @@
 'use client';
 
-import { UtensilsCrossed, Star, Package, MessageSquare, ShoppingCart, Loader2, ChevronRight } from 'lucide-react';
+import { UtensilsCrossed, Star, Package, MessageSquare, ShoppingCart, Loader2, ChevronRight, Bell } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
@@ -10,11 +10,15 @@ import { Avatar } from '../ui/avatar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { usePreorder } from '@/hooks/use-preorder';
+import { notifSuccess } from '@/lib/toast';
 
 export function ProductDetails({ itemDetails }: { itemDetails: any }) {
     const { cartItems, addToCart, isMutating } = useCart();
     const variations = useMemo(() => itemDetails.variations as ItemVariation[] || [], [itemDetails.variations]);
     const router = useRouter();
+
+    const { isPreordered, addPreorder, removePreorder } = usePreorder();
 
     const [selectedVariation, setSelectedVariation] = useState<ItemVariation | null>(null);
 
@@ -39,6 +43,39 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
         (selectedVariation ? Number(i.variationId) === Number(selectedVariation.id) : !i.variationId)
     );
     const isAtLimit = cartItem && cartItem.quantity >= displayStock;
+
+    const [isPreorderLoading, setIsPreorderLoading] = useState(false);
+
+    const isPreorderedItem = isPreordered(Number(itemDetails.id), selectedVariation ? Number(selectedVariation.id) : null);
+
+    const handlePreorderToggle = async () => {
+        setIsPreorderLoading(true);
+        const itemId = Number(itemDetails.id);
+        const variationId = selectedVariation ? Number(selectedVariation.id) : null;
+        try {
+            if (isPreorderedItem) {
+                await removePreorder(itemId, variationId);
+                notifSuccess('Pre-order subscription cancelled.');
+            } else {
+                await addPreorder({
+                    itemId,
+                    itemName: itemDetails.name,
+                    price: displayPrice,
+                    variationId,
+                    variationName: selectedVariation ? selectedVariation.name : null,
+                    stallId: Number(itemDetails.stallId),
+                    stallName: itemDetails.stallName,
+                    initialStock: displayStock,
+                    quantity: 1
+                });
+                notifSuccess('Pre-order registered! We will notify you when this item restocks.');
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsPreorderLoading(false);
+        }
+    };
 
     const handleAddToCart = async () => {
         await addToCart({
@@ -178,7 +215,7 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                         variant="outline"
                         onClick={handleAddToCart}
                         disabled={displayStock === 0 || isAtLimit || isMutating}
-                        className="h-9 border border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-500 hover:bg-orange-500/20 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-medium focus:ring-1 focus:ring-orange-500/50"
+                        className="h-9 border border-accent/50 bg-orange-500/10 text-orange-600 dark:text-orange-500 hover:bg-orange-500/20 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-medium focus:ring-1 focus:ring-orange-500/50"
                     >
                         {isMutating ? <Loader2 className="animate-spin h-3 w-3" /> : (
                             <>
@@ -196,6 +233,46 @@ export function ProductDetails({ itemDetails }: { itemDetails: any }) {
                         Buy Now
                     </Button>
                 </div>
+
+                {/* Pre-order Section */}
+                {displayStock === 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-4 p-4 rounded-xl border border-background bg-background dark:bg-background shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300"
+                    >
+                        <div className="flex items-start gap-3 w-full sm:w-auto">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                                <Bell className="h-4 w-4 shrink-0" />
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                    {isPreorderedItem ? 'Pre-ordered' : 'Item Sold Out!'}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground mt-0.5 leading-normal">
+                                    {isPreorderedItem ? 'You will be notified when the item is restocked.' : 'Pre-order now to get notified when restocked.'}
+                                </span>
+                            </div>
+                        </div>
+                        <Button
+                            onClick={handlePreorderToggle}
+                            disabled={isPreorderLoading}
+                            className={`h-9 px-4 text-xs font-medium rounded-lg shrink-0 w-full sm:w-auto border transition-all duration-200 ${
+                                isPreorderedItem 
+                                    ? 'bg-background text-foreground border-border hover:bg-background/90' 
+                                    : 'bg-background text-foreground border-transparent hover:bg-background/90'
+                            }`}
+                        >
+                            {isPreorderLoading ? (
+                                <Loader2 className="animate-spin h-3.5 w-3.5" />
+                            ) : isPreorderedItem ? (
+                                'Cancel'
+                            ) : (
+                                'Pre-order Now'
+                            )}
+                        </Button>
+                    </motion.div>
+                )}
             </div>
         </div>
     );

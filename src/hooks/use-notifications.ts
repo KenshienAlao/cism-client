@@ -3,6 +3,8 @@
 import { useOrder } from '@/hooks/use-order';
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { usePreorder } from '@/hooks/use-preorder';
+import { useItem } from '@/hooks/use-item';
 
 const DISMISSED_KEY = 'cism_dismissed_notifications';
 
@@ -42,6 +44,8 @@ function getNotifContent(status: string, stallName: string, cancelledBy?: string
 
 export function useNotifications(options?: { refetchInterval?: number | false; staleTime?: number }) {
     const { useMyOrders } = useOrder();
+    const { preordersSuccess, removePreorder } = usePreorder();
+    const { items: allItems } = useItem();
 
     const syncOptions = {
         refetchInterval: 1000 * 30,
@@ -50,7 +54,7 @@ export function useNotifications(options?: { refetchInterval?: number | false; s
         ...options
     };
 
-    const { data: orders, isLoading, isFetching } = useMyOrders(syncOptions);
+    const { data: orders, isLoading: isOrdersLoading, isFetching: isOrdersFetching } = useMyOrders(syncOptions);
     const queryClient = useQueryClient();
 
     const { data: dismissedIds = [] } = useQuery<string[]>({
@@ -68,38 +72,83 @@ export function useNotifications(options?: { refetchInterval?: number | false; s
         queryClient.setQueryData(['dismissed_notifications'], next);
     };
 
+    const preorderNotifs = useMemo(() => {
+        console.log("preorderNotifs calc starting, preordersSuccess:", preordersSuccess, "allItems:", allItems);
+        if (!allItems || allItems.length === 0) return [];
+        
+        const list: any[] = [];
+        
+        preordersSuccess.forEach(pre => {
+            const stall = allItems.find(s => Number(s.id) === Number(pre.stallId));
+            if (!stall) return;
+            const item = stall.items.find(i => Number(i.id) === Number(pre.itemId));
+            if (!item) return;
+            
+            let currentStock = 0;
+            if (pre.variationId) {
+                const variation = item.variations?.find(v => Number(v.id) === Number(pre.variationId));
+                currentStock = variation ? (Number(variation.stock) || Number((variation as any).stocks) || 0) : 0;
+            } else {
+                currentStock = Number(item.stocks) || 0;
+            }
+            
+            const displayStock = currentStock > 0 ? currentStock : 5;
+            const nameWithVar = pre.variationName ? `${pre.itemName} (${pre.variationName})` : pre.itemName;
+            const notifId = `preorder-${pre.id}-${pre.itemId}-${pre.variationId || 'none'}-restocked`;
+            
+            list.push({
+                id: notifId,
+                type: 'preorder',
+                title: 'Item Restocked!',
+                message: `Great news! "${nameWithVar}" from ${pre.stallName} has been restocked (Stocks: ${displayStock}). Click here to see details!`,
+                time: pre.createdAt,
+                link: `/stall/item/show?id=${pre.itemId}`,
+                status: 'RESTOCKED'
+            });
+        });
+        
+        return list;
+    }, [allItems, preordersSuccess]);
+
+    const notifications = useMemo(() => {
+        const orderNotifs = orders
+            ? orders
+                .filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
+                .map(o => {
+                    const { title, message } = getNotifContent(o.status, o.stallName, o.cancelledBy);
+                    return {
+                        id: `order-${o.id}-${o.status}`,
+                        type: 'order',
+                        title,
+                        message,
+                        time: o.createdAt,
+                        link: `/orders/${o.id}/track`,
+                        status: o.status
+                    };
+                })
+            : [];
+
+        return [...orderNotifs, ...preorderNotifs]
+            .filter(n => !dismissedIds.includes(n.id))
+            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    }, [orders, preorderNotifs, dismissedIds]);
+
     const clearAll = () => {
-        const allIds = [
-            ...(orders?.filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
-                .map(o => `order-${o.id}-${o.status}`) || [])
-        ];
+        const orderIds = orders?.filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
+            .map(o => `order-${o.id}-${o.status}`) || [];
+            
+        const preorderIds = preordersSuccess.map(pre => `preorder-${pre.id}-${pre.itemId}-${pre.variationId || 'none'}-restocked`);
+            
+        const allIds = Array.from(new Set([...dismissedIds, ...orderIds, ...preorderIds]));
+        
         localStorage.setItem(DISMISSED_KEY, JSON.stringify(allIds));
         queryClient.setQueryData(['dismissed_notifications'], allIds);
     };
 
-    const notifications = useMemo(() => {
-        if (!orders) return [];
-        return orders
-            .filter(o => NOTIF_STATUSES.includes(o.status.toUpperCase()))
-            .map(o => {
-                const { title, message } = getNotifContent(o.status, o.stallName, o.cancelledBy);
-                return {
-                    id: `order-${o.id}-${o.status}`,
-                    type: 'ORDER',
-                    title,
-                    message,
-                    time: o.createdAt,
-                    link: `/orders/${o.id}/track`,
-                    status: o.status
-                };
-            })
-            .filter(n => !dismissedIds.includes(n.id));
-    }, [orders, dismissedIds]);
-
     return {
         notifications,
-        isLoading,
-        isFetching,
+        isLoading: isOrdersLoading,
+        isFetching: isOrdersFetching,
         dismissNotification,
         clearAll,
         count: notifications.length

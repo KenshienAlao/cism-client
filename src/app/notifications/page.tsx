@@ -20,10 +20,11 @@ interface NotificationItem {
 }
 
 export default function NotificationsPage() {
+    const router = useRouter();
     const { isLoading: isAuthLoading } = useAuth();
     const { notifications, isLoading, dismissNotification, clearAll } = useNotifications({
-        refetchInterval: 30000,
-        staleTime: 1000 * 60,
+        refetchInterval: 1000 * 10,
+        staleTime: 1000 * 5,
     });
 
     const grouped = useMemo(() => groupByTime(notifications), [notifications]);
@@ -85,13 +86,23 @@ export default function NotificationsPage() {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, x: -8 }}
                                                     transition={{ duration: 0.18, ease: 'easeOut' }}
-                                                    className="group relative flex items-start gap-3 p-4 transition-colors bg-accent/40"
+                                                    className="group relative flex items-start gap-3 p-4 transition-colors bg-accent/40 hover:bg-accent/60 cursor-pointer"
+                                                    onClick={() => {
+                                                        if (notification.type === 'preorder') {
+                                                            dismissNotification(notification.id);
+                                                        }
+                                                        if (notification.link) {
+                                                            router.push(notification.link);
+                                                        }
+                                                    }}
                                                 >
                                                     <div className="absolute top-0 bottom-0 left-0 w-[3px] bg-orange-500" />
 
                                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground border border-border">
                                                         {notification.type === 'order' ? (
                                                             <ShoppingBag className="h-4 w-4" />
+                                                        ) : notification.type === 'preorder' ? (
+                                                            <Bell className="h-4 w-4 text-orange-500" />
                                                         ) : (
                                                             <Clock className="h-4 w-4" />
                                                         )}
