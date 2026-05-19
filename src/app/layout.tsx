@@ -18,6 +18,7 @@ import { SearchBar } from "@/components/searchbar";
 import { BottomNav } from "@/components/bottomnav";
 import { ContentWrapper } from "@/components/layout/content-wrapper";
 import Confirmation from "@/components/confirmation";
+import { NetworkBanner } from "@/components/network-banner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -56,6 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ConfirmationProvider>
               <SidebarProvider defaultCollapsed={defaultCollapsed}>
                 
+                <NetworkBanner />
                 <Suspense fallback={null}>
                   <SearchBar />
                 </Suspense>

@@ -12,15 +12,15 @@ import { apiClient } from '@/config/api.config';
 import { formatDate } from '@/lib/utils/formatDate';
 
 function ThreadItem({ thread, profile, openChat }: { thread: any, profile: any, openChat: (chat: any) => void }) {
-    const isCustomer = thread.customerId === profile?.user?.id;
+    const isCustomer = Number(thread.customerId) === Number(profile?.user?.id);
     const name = isCustomer ? thread.stallName : thread.customerName;
     const image = isCustomer ? thread.stallImage : thread.customerImage;
 
     const { data: presence } = useQuery<any>({
-        queryKey: ['presence', isCustomer ? thread.stallId : thread.customerId, isCustomer ? 'STALL' : 'CLIENT'],
+        queryKey: ['presence', Number(isCustomer ? thread.stallId : thread.customerId), isCustomer ? 'STALL' : 'CLIENT'],
         queryFn: async () => {
             const type = isCustomer ? 'STALL' : 'CLIENT';
-            const id = isCustomer ? thread.stallId : thread.customerId;
+            const id = Number(isCustomer ? thread.stallId : thread.customerId);
             const res = await apiClient.get<any>(`/api/v1/chat/presence/${type}/${id}`);
             return res.data;
         },
@@ -79,7 +79,7 @@ export function InboxView() {
     );
 
     const filteredThreads = threads.filter(t => {
-        const name = t.customerId === profile?.user?.id ? t.stallName : t.customerName;
+        const name = Number(t.customerId) === Number(profile?.user?.id) ? t.stallName : t.customerName;
         return name.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
@@ -135,7 +135,12 @@ export function InboxView() {
                                             }}
                                             className="w-full flex items-center gap-3 p-4 bg-card border-b border-border hover:bg-secondary/50 active:bg-secondary transition-colors text-left focus:outline-none"
                                         >
-                                            <Avatar src={stall.image} name={stall.name} size="md" className="shrink-0 rounded-md" />
+                                            <div className="relative shrink-0">
+                                                <Avatar src={stall.image} name={stall.name} size="md" className="rounded-md" />
+                                                {stall.status && (
+                                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-card rounded-md" />
+                                                )}
+                                            </div>
                                             <div className="flex-1 overflow-hidden">
                                                 <h4 className="text-sm font-semibold text-card-foreground truncate">{stall.name}</h4>
                                                 <p className="text-xs text-muted-foreground truncate">Start conversation</p>

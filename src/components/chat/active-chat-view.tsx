@@ -20,7 +20,7 @@ export function ActiveChatView() {
 
     // Fetch Presence Status
     const { data: presence } = useQuery<any>({
-        queryKey: ['presence', activeChat?.stallId, 'STALL'],
+        queryKey: ['presence', Number(activeChat?.stallId), 'STALL'],
         queryFn: async () => {
             const res = await apiClient.get<any>(`/api/v1/chat/presence/STALL/${activeChat?.stallId}`);
             return res.data;

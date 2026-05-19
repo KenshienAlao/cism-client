@@ -198,6 +198,31 @@ export function useWebSocket() {
                         return;
                     }
 
+                    if (chat.type === 'CONVERSATION_DELETED') {
+                        const baseKey = [...CHAT_QUERY_KEY, chat.stallId, chat.customerId];
+                        queryClient.setQueriesData<any[]>({ queryKey: baseKey }, () => []);
+
+                        const threadListKey = [...CHAT_QUERY_KEY, 'threads', profileId];
+                        queryClient.setQueryData<any[]>(threadListKey, (prev: any) => {
+                            if (!prev) return prev;
+                            return prev.filter((t: any) => 
+                                !(Number(t.stallId) === Number(chat.stallId) && Number(t.customerId) === Number(chat.customerId))
+                            );
+                        });
+
+                        const currentActiveChat = activeChatRef.current;
+                        const activeCustomerId = currentActiveChat?.customerId || profileId;
+                        const isCurrentlyViewing = isChatOpenRef.current && 
+                            currentActiveChat && 
+                            Number(currentActiveChat.stallId) === Number(chat.stallId) && 
+                            Number(activeCustomerId) === Number(chat.customerId);
+
+                        if (isCurrentlyViewing) {
+                            notifSuccess("Conversation was deleted");
+                        }
+                        return;
+                    }
+
                     // message logic
                     const baseKey = [...CHAT_QUERY_KEY, Number(chat.stallId), Number(chat.customerId)];
                     queryClient.setQueriesData<any[]>({ queryKey: baseKey }, (prev: any) => {

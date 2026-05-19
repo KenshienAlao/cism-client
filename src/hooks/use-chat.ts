@@ -84,7 +84,7 @@ export const useChatThreads = () => {
         },
         enabled: !!profile,
         refetchOnWindowFocus: true,
-        refetchInterval: 1000 * 30,
+        refetchInterval: 1000 * 5,
         staleTime: 30_000,
     });
 };

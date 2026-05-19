@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { ApiResponse } from "@/lib/api";
 import { API_ENDPOINTS } from "@/config/app.config";
+import { notifError } from "@/lib/toast";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -18,6 +19,7 @@ const instance = axios.create({
 
 let isRefreshing = false;
 let failedQueue: any[] = [];
+let lastNetworkErrorTime = 0;
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(prom => {
@@ -32,7 +34,9 @@ const processQueue = (error: any, token: string | null = null) => {
 
 instance.interceptors.response.use(
   (response) => {
-    // Return standard ApiResponse format
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("api-network-success"));
+    }
     const data = response.data;
     return {
       data: data?.data ?? data,
@@ -99,13 +103,22 @@ instance.interceptors.response.use(
     }
 
     // Default error handling
+    let errorMessage =
+      (error.response?.data as any)?.message ||
+      error.message ||
+      "Something went wrong";
+
+    if (error.code === "ERR_NETWORK" || errorMessage === "Network Error" || errorMessage.includes("ERR_CONNECTION_REFUSED")) {
+      errorMessage = "Server is currently unreachable. Reconnecting...";
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("api-network-error"));
+      }
+    }
+
     return {
       data: null,
       status: error.response?.status || 500,
-      message:
-        (error.response?.data as any)?.message ||
-        error.message ||
-        "Something went wrong",
+      message: errorMessage,
       success: false,
     } as any;
   }
