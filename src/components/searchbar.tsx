@@ -117,8 +117,11 @@ export function SearchBar({ placeholder = "Search items or vendors..." }) {
 
     return (
         <header
-            className="sticky top-0 z-100 h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center transition-[padding] duration-300 ease-in-out"
-            style={{ paddingLeft: (mounted && isDesktop && !isNoNavRoute) ? (isCollapsed ? 72 : 256) : undefined }}
+            className="sticky top-0 z-100 h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center transition-all duration-300 ease-in-out"
+            style={{ 
+                marginLeft: (mounted && isDesktop) ? (isCollapsed ? 72 : 256) : 0,
+                width: (mounted && isDesktop) ? `calc(100% - ${isCollapsed ? 72 : 256}px)` : '100%'
+            }}
         >
             <div className="flex-1 w-full px-4 flex items-center gap-4">
                 {!isHome && (
